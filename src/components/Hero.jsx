@@ -1,5 +1,5 @@
-import { useRef, useEffect, useState } from 'react';
-import { motion, useMotionValue, useSpring } from 'framer-motion';
+import { useRef, useState } from 'react';
+import { motion } from 'framer-motion';
 import { ArrowDown } from 'lucide-react';
 
 export default function Hero() {
@@ -21,11 +21,49 @@ export default function Hero() {
             onMouseMove={handleMouseMove}
             className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16"
         >
+            {/* Animated gradient blob for depth */}
+            <motion.div
+                className="absolute pointer-events-none w-[500px] h-[500px] rounded-full opacity-30"
+                style={{
+                    background:
+                        'radial-gradient(circle, rgba(0,229,255,0.25) 0%, rgba(0,229,255,0.05) 40%, transparent 70%)',
+                    filter: 'blur(80px)',
+                }}
+                animate={{
+                    x: [0, 80, -60, 40, 0],
+                    y: [0, -60, 40, -80, 0],
+                }}
+                transition={{
+                    duration: 12,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                }}
+            />
+
+            {/* Secondary blob */}
+            <motion.div
+                className="absolute pointer-events-none w-[350px] h-[350px] rounded-full opacity-20"
+                style={{
+                    background:
+                        'radial-gradient(circle, rgba(139,92,246,0.3) 0%, transparent 70%)',
+                    filter: 'blur(80px)',
+                }}
+                animate={{
+                    x: [0, -70, 50, -30, 0],
+                    y: [0, 50, -70, 30, 0],
+                }}
+                transition={{
+                    duration: 16,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                }}
+            />
+
             {/* Mouse-following radial gradient glow */}
             <div
                 className="absolute inset-0 pointer-events-none transition-all duration-300 ease-out"
                 style={{
-                    background: `radial-gradient(600px circle at ${glowPos.x}% ${glowPos.y}%, rgba(0,229,255,0.08), transparent 60%)`,
+                    background: `radial-gradient(600px circle at ${glowPos.x}% ${glowPos.y}%, rgba(0,229,255,0.07), transparent 60%)`,
                 }}
             />
 
@@ -55,9 +93,9 @@ export default function Hero() {
                     </motion.span>
 
                     <h1
-                        className="text-[clamp(2.5rem,8vw,7rem)] font-black leading-[0.9] tracking-[-0.04em] mb-8"
+                        className="text-[clamp(3rem,9vw,8rem)] font-black leading-none tracking-tighter mb-8"
                         style={{
-                            background: 'linear-gradient(135deg, #e4e4e7 0%, #71717a 100%)',
+                            background: 'linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%)',
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent',
                         }}
@@ -95,7 +133,7 @@ export default function Hero() {
                         </a>
                         <a
                             href="#contact"
-                            className="px-6 py-3 rounded-xl border border-border text-text-muted text-sm font-medium hover:border-accent/30 hover:text-accent transition-all duration-300"
+                            className="px-6 py-3 rounded-xl border border-white/10 text-text-muted text-sm font-medium hover:border-accent/30 hover:text-accent transition-all duration-300"
                         >
                             Contact Me
                         </a>

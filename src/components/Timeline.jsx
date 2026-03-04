@@ -1,9 +1,18 @@
 import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { GraduationCap, Briefcase, Award, Code2 } from 'lucide-react';
+import { GraduationCap, Briefcase, Award, Rocket } from 'lucide-react';
 import SectionHeading from './SectionHeading';
 
 const entries = [
+    {
+        icon: Rocket,
+        title: 'Rocket Innovation Studio',
+        subtitle: 'Incoming Software Engineer Intern',
+        date: 'Summer 2026',
+        description:
+            'Joining Rocket Innovation Studio as a Software Engineer Intern to build scalable products and contribute to innovative engineering initiatives.',
+        type: 'experience',
+    },
     {
         icon: GraduationCap,
         title: 'University of Toronto, St. George',
@@ -12,15 +21,6 @@ const entries = [
         description:
             'Computer Science Specialist program. Recognized on the Dean\'s List for academic excellence. Coursework includes advanced algorithms, systems programming, and software engineering.',
         type: 'education',
-    },
-    {
-        icon: Code2,
-        title: 'Full-Stack Developer',
-        subtitle: 'Freelance & Personal Projects',
-        date: '2024 – Present',
-        description:
-            'Building production-grade full-stack applications with the MERN stack. Focus on clean architecture, responsive design, and intuitive user experiences.',
-        type: 'experience',
     },
     {
         icon: Award,
@@ -33,11 +33,11 @@ const entries = [
     },
     {
         icon: Briefcase,
-        title: 'Open Source Contributor',
-        subtitle: 'Community',
-        date: '2023 – Present',
+        title: 'Full-Stack Developer',
+        subtitle: 'Freelance & Personal Projects',
+        date: '2024 – Present',
         description:
-            'Contributing to open-source projects and building tools that solve real problems for developers worldwide.',
+            'Building production-grade full-stack applications with the MERN stack. Focus on clean architecture, responsive design, and intuitive user experiences.',
         type: 'experience',
     },
 ];
@@ -48,25 +48,25 @@ export default function Timeline() {
         target: containerRef,
         offset: ['start 80%', 'end 60%'],
     });
-    const lineHeight = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
+    const lineScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
     return (
-        <section id="timeline" className="py-24 px-6">
-            <div className="max-w-4xl mx-auto">
+        <section id="timeline" className="py-32 w-full">
+            <div className="max-w-5xl mx-auto w-full">
                 <SectionHeading
                     label="Journey"
                     title="Experience & Education"
                     subtitle="Key milestones in my development as a software engineer."
                 />
 
-                <div ref={containerRef} className="relative">
+                <div ref={containerRef} className="relative w-full">
                     {/* Background line */}
-                    <div className="absolute left-6 md:left-1/2 md:-translate-x-px top-0 bottom-0 w-0.5 bg-border" />
+                    <div className="absolute left-6 md:left-1/2 md:-translate-x-px top-0 bottom-0 w-0.5 bg-white/[0.06]" />
 
-                    {/* Filling line */}
+                    {/* Filling line — scaleY driven by scroll */}
                     <motion.div
-                        className="absolute left-6 md:left-1/2 md:-translate-x-px top-0 w-0.5 bg-accent origin-top"
-                        style={{ height: lineHeight }}
+                        className="absolute left-6 md:left-1/2 md:-translate-x-px top-0 bottom-0 w-0.5 bg-accent origin-top"
+                        style={{ scaleY: lineScale }}
                     />
 
                     <div className="space-y-12">
@@ -77,7 +77,7 @@ export default function Timeline() {
                                     key={i}
                                     initial={{ opacity: 0, x: isLeft ? -30 : 30 }}
                                     whileInView={{ opacity: 1, x: 0 }}
-                                    viewport={{ once: true, margin: '-80px' }}
+                                    viewport={{ once: true, margin: '-100px' }}
                                     transition={{ duration: 0.6, delay: 0.1 }}
                                     className={`relative flex items-start gap-6 md:gap-0 ${isLeft ? 'md:flex-row' : 'md:flex-row-reverse'
                                         }`}
@@ -92,7 +92,7 @@ export default function Timeline() {
                                         className={`ml-14 md:ml-0 md:w-[calc(50%-2rem)] ${isLeft ? 'md:pr-12 md:text-right' : 'md:pl-12'
                                             }`}
                                     >
-                                        <div className="p-5 rounded-2xl border border-border bg-surface/60 backdrop-blur-sm hover:border-border-hover transition-colors duration-300">
+                                        <div className="p-5 rounded-2xl border border-white/[0.08] bg-surface/60 backdrop-blur-sm shadow-lg shadow-black/20 hover:border-white/20 hover:shadow-xl hover:shadow-accent/5 transition-all duration-300">
                                             <div
                                                 className={`flex items-center gap-3 mb-3 ${isLeft ? 'md:flex-row-reverse' : ''
                                                     }`}
@@ -110,7 +110,7 @@ export default function Timeline() {
                                             <p className="text-accent text-xs font-medium mb-2">
                                                 {entry.subtitle}
                                             </p>
-                                            <p className="text-text-dim text-sm leading-relaxed">
+                                            <p className="text-text-muted text-sm leading-relaxed">
                                                 {entry.description}
                                             </p>
                                         </div>

@@ -11,19 +11,21 @@ export default function App() {
             <Navbar />
             <main>
                 <Hero />
-                <SkillsGrid />
-                <Projects />
-                <Timeline />
-                <Terminal />
+                <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
+                    <SkillsGrid />
+                    <Projects />
+                    <Timeline />
+                    <Terminal />
+                </div>
             </main>
 
             {/* Footer */}
-            <footer className="border-t border-border py-8 px-6">
-                <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <footer className="mt-16 border-t border-white/[0.06] py-10 px-6">
+                <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-4 flex-wrap">
                     <span className="text-text-dim text-sm">
                         © {new Date().getFullYear()} Parthiv Paul. Built with React & Framer Motion.
                     </span>
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-6 flex-wrap">
                         <a
                             href="https://github.com/parthiv-2006"
                             target="_blank"

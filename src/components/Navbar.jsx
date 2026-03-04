@@ -48,7 +48,7 @@ export default function Navbar() {
                     ))}
                     <a
                         href="#contact"
-                        className="text-sm px-4 py-2 rounded-lg bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-all duration-200"
+                        className="text-sm px-8 py-2 rounded-lg bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-all duration-200"
                     >
                         Get in Touch
                     </a>

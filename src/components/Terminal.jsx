@@ -123,8 +123,8 @@ export default function Terminal() {
     };
 
     return (
-        <section id="contact" className="py-24 px-6">
-            <div className="max-w-3xl mx-auto">
+        <section id="contact" className="py-32 w-full">
+            <div className="max-w-3xl mx-auto w-full">
                 <SectionHeading
                     label="Connect"
                     title="Get in Touch"
@@ -180,7 +180,16 @@ export default function Terminal() {
                                 autoComplete="off"
                                 spellCheck={false}
                             />
-                            <div className="w-2 h-4 bg-accent animate-pulse" />
+                            <motion.span
+                                className="inline-block w-2 h-4 bg-accent"
+                                animate={{ opacity: [1, 1, 0, 0] }}
+                                transition={{
+                                    duration: 1,
+                                    repeat: Infinity,
+                                    ease: 'steps(1)',
+                                    times: [0, 0.5, 0.5, 1],
+                                }}
+                            />
                         </form>
                     </div>
                 </motion.div>

@@ -5,18 +5,18 @@ export default function SectionHeading({ label, title, subtitle }) {
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-50px' }}
+            viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.6 }}
-            className="mb-12"
+            className="mb-16"
         >
             {label && (
-                <span className="text-accent text-sm font-mono tracking-widest uppercase mb-3 block">
+                <span className="text-accent text-xs md:text-sm font-mono tracking-widest uppercase mb-4 block">
                     {label}
                 </span>
             )}
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-text">{title}</h2>
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-text">{title}</h2>
             {subtitle && (
-                <p className="mt-3 text-text-muted text-lg max-w-2xl">{subtitle}</p>
+                <p className="mt-4 text-text-muted text-lg max-w-2xl leading-relaxed">{subtitle}</p>
             )}
         </motion.div>
     );
