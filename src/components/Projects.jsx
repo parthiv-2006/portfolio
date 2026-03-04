@@ -39,23 +39,27 @@ const projects = [
     },
 ];
 
-const containerVariants = {
-    hidden: {},
-    visible: {
-        transition: { staggerChildren: 0.1 },
-    },
-};
-
+/* Each card slides in from the right with staggered spring bounce */
 const cardVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+    hidden: { opacity: 0, x: 80, filter: 'blur(4px)' },
+    visible: (i) => ({
+        opacity: 1,
+        x: 0,
+        filter: 'blur(0px)',
+        transition: {
+            type: 'spring',
+            stiffness: 100,
+            damping: 14,
+            delay: 0.15 + i * 0.12,
+        },
+    }),
 };
 
 export default function Projects() {
     const [selected, setSelected] = useState(null);
 
     return (
-        <section id="projects" className="py-32 w-full">
+        <section id="projects" className="w-full">
             <div className="w-full">
                 <SectionHeading
                     label="Work"
@@ -63,22 +67,24 @@ export default function Projects() {
                     subtitle="A selection of projects I've built — from gamified apps to full-stack platforms."
                 />
 
-                <motion.div
-                    variants={containerVariants}
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, margin: '-100px' }}
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                >
-                    {projects.map((project) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {projects.map((project, i) => (
                         <motion.div
                             key={project.id}
+                            custom={i}
                             variants={cardVariants}
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: true, margin: '-60px' }}
                             layoutId={`project-${project.id}`}
                             onClick={() => setSelected(project)}
+                            whileHover={{
+                                y: -6,
+                                transition: { type: 'spring', stiffness: 300, damping: 15 },
+                            }}
                             className="group relative rounded-2xl border border-white/[0.08] bg-surface/60 overflow-hidden cursor-pointer shadow-lg shadow-black/20 transition-all duration-300 hover:border-accent/40 hover:shadow-xl hover:shadow-accent/10 flex flex-col w-full h-full"
                         >
-                            {/* Image placeholder area — 60% height */}
+                            {/* Image placeholder area */}
                             <div className="relative h-56 overflow-hidden bg-surface-light">
                                 <div
                                     className={`absolute inset-0 bg-gradient-to-br ${project.gradient} transition-transform duration-500 group-hover:scale-105`}
@@ -98,7 +104,7 @@ export default function Projects() {
                                 </div>
                             </div>
 
-                            {/* Text + tech pills — 40% */}
+                            {/* Text + tech pills */}
                             <div className="p-5 flex-1 flex flex-col space-y-3">
                                 <p className="text-text-muted text-sm leading-relaxed line-clamp-3 mb-1">
                                     {project.tagline} — {project.description}
@@ -116,7 +122,7 @@ export default function Projects() {
                             </div>
                         </motion.div>
                     ))}
-                </motion.div>
+                </div>
             </div>
 
             {/* Expanded modal */}

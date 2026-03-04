@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
 import { TerminalIcon } from 'lucide-react';
 import SectionHeading from './SectionHeading';
 
@@ -47,24 +47,47 @@ const COMMANDS = {
     ],
 };
 
-const WELCOME_LINES = [
-    { type: 'system', text: "Welcome to Parthiv's terminal. Type 'help' for commands." },
-    { type: 'dim', text: '—' },
-];
+const WELCOME_TEXT = "Welcome to Parthiv's terminal. Type 'help' for commands.";
 
 export default function Terminal() {
-    const [lines, setLines] = useState(WELCOME_LINES);
+    const [lines, setLines] = useState([]);
     const [input, setInput] = useState('');
     const [history, setHistory] = useState([]);
     const [historyIndex, setHistoryIndex] = useState(-1);
+    const [booted, setBooted] = useState(false);
+    const [bootText, setBootText] = useState('');
     const inputRef = useRef(null);
     const scrollRef = useRef(null);
+    const terminalRef = useRef(null);
+    const isInView = useInView(terminalRef, { once: true, margin: '-100px' });
+
+    // Boot-up typing sequence
+    useEffect(() => {
+        if (!isInView || booted) return;
+
+        let charIndex = 0;
+        const interval = setInterval(() => {
+            if (charIndex <= WELCOME_TEXT.length) {
+                setBootText(WELCOME_TEXT.slice(0, charIndex));
+                charIndex++;
+            } else {
+                clearInterval(interval);
+                setLines([
+                    { type: 'system', text: WELCOME_TEXT },
+                    { type: 'dim', text: '—' },
+                ]);
+                setBooted(true);
+            }
+        }, 25);
+
+        return () => clearInterval(interval);
+    }, [isInView, booted]);
 
     useEffect(() => {
         if (scrollRef.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
-    }, [lines]);
+    }, [lines, bootText]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -77,7 +100,10 @@ export default function Terminal() {
         ];
 
         if (trimmed === 'clear') {
-            setLines(WELCOME_LINES);
+            setLines([
+                { type: 'system', text: WELCOME_TEXT },
+                { type: 'dim', text: '—' },
+            ]);
         } else if (COMMANDS[trimmed]) {
             setLines([...newLines, ...COMMANDS[trimmed]()]);
         } else {
@@ -123,8 +149,8 @@ export default function Terminal() {
     };
 
     return (
-        <section id="contact" className="py-32 w-full">
-            <div className="max-w-3xl mx-auto w-full">
+        <section id="contact" className="w-full">
+            <div className="max-w-3xl mx-auto w-full" ref={terminalRef}>
                 <SectionHeading
                     label="Connect"
                     title="Get in Touch"
@@ -136,7 +162,7 @@ export default function Terminal() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="rounded-2xl border border-border bg-surface/80 backdrop-blur-sm overflow-hidden shadow-2xl shadow-black/30"
+                    className={`rounded-2xl border border-border bg-surface/80 backdrop-blur-sm overflow-hidden shadow-2xl shadow-black/30 ${isInView && !booted ? 'glitch-enter' : ''}`}
                 >
                     {/* Title bar */}
                     <div className="flex items-center gap-2 px-4 py-3 bg-surface-light border-b border-border">
@@ -160,37 +186,58 @@ export default function Terminal() {
                         className="p-5 h-72 overflow-y-auto font-mono text-sm space-y-1"
                         onClick={() => inputRef.current?.focus()}
                     >
-                        {lines.map((line, i) => (
-                            <div key={i} className={lineColors[line.type] || 'text-text'}>
-                                {line.text}
+                        {/* Boot-up typing animation */}
+                        {!booted && bootText && (
+                            <div className="text-accent">
+                                {bootText}
+                                <motion.span
+                                    className="inline-block w-2 h-4 bg-accent ml-0.5 align-middle"
+                                    animate={{ opacity: [1, 0] }}
+                                    transition={{ duration: 0.5, repeat: Infinity, repeatType: 'reverse' }}
+                                />
                             </div>
+                        )}
+
+                        {/* Regular lines after boot */}
+                        {booted && lines.map((line, i) => (
+                            <motion.div
+                                key={i}
+                                initial={{ opacity: 0, x: -5 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 0.15, delay: i < 2 ? i * 0.05 : 0 }}
+                                className={lineColors[line.type] || 'text-text'}
+                            >
+                                {line.text}
+                            </motion.div>
                         ))}
 
-                        {/* Input line */}
-                        <form onSubmit={handleSubmit} className="flex items-center gap-2 mt-2">
-                            <span className="text-accent">$</span>
-                            <input
-                                ref={inputRef}
-                                type="text"
-                                value={input}
-                                onChange={(e) => setInput(e.target.value)}
-                                onKeyDown={handleKeyDown}
-                                className="flex-1 bg-transparent outline-none text-text caret-accent font-mono text-sm"
-                                placeholder="Type a command..."
-                                autoComplete="off"
-                                spellCheck={false}
-                            />
-                            <motion.span
-                                className="inline-block w-2 h-4 bg-accent"
-                                animate={{ opacity: [1, 1, 0, 0] }}
-                                transition={{
-                                    duration: 1,
-                                    repeat: Infinity,
-                                    ease: 'steps(1)',
-                                    times: [0, 0.5, 0.5, 1],
-                                }}
-                            />
-                        </form>
+                        {/* Input line - only show after boot */}
+                        {booted && (
+                            <form onSubmit={handleSubmit} className="flex items-center gap-2 mt-2">
+                                <span className="text-accent">$</span>
+                                <input
+                                    ref={inputRef}
+                                    type="text"
+                                    value={input}
+                                    onChange={(e) => setInput(e.target.value)}
+                                    onKeyDown={handleKeyDown}
+                                    className="flex-1 bg-transparent outline-none text-text caret-accent font-mono text-sm"
+                                    placeholder="Type a command..."
+                                    autoComplete="off"
+                                    spellCheck={false}
+                                />
+                                <motion.span
+                                    className="inline-block w-2 h-4 bg-accent"
+                                    animate={{ opacity: [1, 1, 0, 0] }}
+                                    transition={{
+                                        duration: 1,
+                                        repeat: Infinity,
+                                        ease: 'steps(1)',
+                                        times: [0, 0.5, 0.5, 1],
+                                    }}
+                                />
+                            </form>
+                        )}
                     </div>
                 </motion.div>
 
@@ -207,6 +254,7 @@ export default function Terminal() {
                             <button
                                 key={cmd}
                                 onClick={() => {
+                                    if (!booted) return;
                                     const newLines = [
                                         ...lines,
                                         { type: 'input', text: `$ ${cmd}` },

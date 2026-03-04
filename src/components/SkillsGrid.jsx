@@ -20,63 +20,73 @@ const skills = [
         span: 'md:col-span-2 lg:col-span-2 md:row-span-2',
         accent: true,
         large: true,
+        gridPos: 0, // diagonal order index
     },
     {
         name: 'Python',
         icon: BrainCircuit,
         desc: 'Scripting, automation, and data work.',
         span: '',
+        gridPos: 1,
     },
     {
         name: 'DSA',
         icon: Layers,
         desc: 'Advanced problem solving & competitive patterns.',
         span: '',
+        gridPos: 2,
     },
     {
         name: 'Node.js',
         icon: Hexagon,
         desc: 'Scalable server-side apps, event-driven architecture, and REST APIs.',
         span: 'md:col-span-2 lg:col-span-2',
+        gridPos: 3,
     },
     {
         name: 'Express',
         icon: Server,
         desc: 'Middleware, auth, and API routing.',
         span: '',
+        gridPos: 4,
     },
     {
         name: 'MongoDB',
         icon: Database,
         desc: 'NoSQL design and aggregation.',
         span: '',
+        gridPos: 5,
     },
     {
         name: 'Full Stack',
         icon: Globe,
         desc: 'End-to-end application development, deployment, and CI/CD.',
         span: 'md:col-span-2 lg:col-span-2',
+        gridPos: 6,
     },
     {
         name: 'Git & CI/CD',
         icon: GitBranch,
         desc: 'Version control, branching strategies, and automated pipelines.',
         span: 'md:col-span-2 lg:col-span-3',
+        gridPos: 7,
     },
 ];
 
+/* Diagonal cascade: items stagger by grid position with increasing delays */
 const containerVariants = {
     hidden: {},
     visible: {
         transition: {
-            staggerChildren: 0.06,
+            staggerChildren: 0.08,
+            delayChildren: 0.1,
         },
     },
 };
 
 export default function SkillsGrid() {
     return (
-        <section id="skills" className="py-32 w-full">
+        <section id="skills" className="w-full">
             <div className="w-full">
                 <SectionHeading
                     label="Toolkit"
@@ -88,7 +98,7 @@ export default function SkillsGrid() {
                     variants={containerVariants}
                     initial="hidden"
                     whileInView="visible"
-                    viewport={{ once: true, margin: '-100px' }}
+                    viewport={{ once: true, margin: '-80px' }}
                     className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                 >
                     {skills.map((skill) => (
@@ -117,7 +127,7 @@ export default function SkillsGrid() {
                                     <h3 className={`font-semibold text-text ${skill.large ? 'text-xl mb-2' : 'text-sm mb-1'}`}>
                                         {skill.name}
                                     </h3>
-                                    <p className={`text-text-dim leading-relaxed ${skill.large ? 'text-sm' : 'text-xs'}`}>
+                                    <p className={`text-text-muted leading-relaxed ${skill.large ? 'text-sm' : 'text-xs'}`}>
                                         {skill.desc}
                                     </p>
                                 </div>

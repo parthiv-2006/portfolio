@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import { GraduationCap, Briefcase, Award, Rocket } from 'lucide-react';
 import SectionHeading from './SectionHeading';
 
@@ -42,8 +42,27 @@ const entries = [
     },
 ];
 
+/* Clip-path reveal: card expands from the timeline dot outward */
+const cardVariants = {
+    hidden: (isLeft) => ({
+        opacity: 0,
+        clipPath: isLeft ? 'inset(0 0 0 100%)' : 'inset(0 100% 0 0)',
+    }),
+    visible: {
+        opacity: 1,
+        clipPath: 'inset(0 0 0 0)',
+        transition: {
+            duration: 0.6,
+            ease: [0.22, 1, 0.36, 1],
+            delay: 0.15,
+        },
+    },
+};
+
 export default function Timeline() {
     const containerRef = useRef(null);
+    const isInView = useInView(containerRef, { once: true, margin: '-100px' });
+
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: ['start 80%', 'end 60%'],
@@ -51,7 +70,7 @@ export default function Timeline() {
     const lineScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
     return (
-        <section id="timeline" className="py-32 w-full">
+        <section id="timeline" className="w-full">
             <div className="max-w-5xl mx-auto w-full">
                 <SectionHeading
                     label="Journey"
@@ -63,7 +82,7 @@ export default function Timeline() {
                     {/* Background line */}
                     <div className="absolute left-6 md:left-1/2 md:-translate-x-px top-0 bottom-0 w-0.5 bg-white/[0.06]" />
 
-                    {/* Filling line — scaleY driven by scroll */}
+                    {/* Typewriter line — draws itself downward */}
                     <motion.div
                         className="absolute left-6 md:left-1/2 md:-translate-x-px top-0 bottom-0 w-0.5 bg-accent origin-top"
                         style={{ scaleY: lineScale }}
@@ -73,22 +92,34 @@ export default function Timeline() {
                         {entries.map((entry, i) => {
                             const isLeft = i % 2 === 0;
                             return (
-                                <motion.div
+                                <div
                                     key={i}
-                                    initial={{ opacity: 0, x: isLeft ? -30 : 30 }}
-                                    whileInView={{ opacity: 1, x: 0 }}
-                                    viewport={{ once: true, margin: '-100px' }}
-                                    transition={{ duration: 0.6, delay: 0.1 }}
                                     className={`relative flex items-start gap-6 md:gap-0 ${isLeft ? 'md:flex-row' : 'md:flex-row-reverse'
                                         }`}
                                 >
                                     {/* Timeline node */}
                                     <div className="absolute left-6 md:left-1/2 -translate-x-1/2 z-10">
-                                        <div className="w-3 h-3 rounded-full bg-accent shadow-[0_0_12px_rgba(0,229,255,0.4)] ring-4 ring-bg" />
+                                        <motion.div
+                                            initial={{ scale: 0 }}
+                                            whileInView={{ scale: 1 }}
+                                            viewport={{ once: true }}
+                                            transition={{
+                                                type: 'spring',
+                                                stiffness: 300,
+                                                damping: 15,
+                                                delay: 0.1 + i * 0.1,
+                                            }}
+                                            className="w-3 h-3 rounded-full bg-accent shadow-[0_0_12px_rgba(0,229,255,0.4)] ring-4 ring-bg"
+                                        />
                                     </div>
 
-                                    {/* Content */}
-                                    <div
+                                    {/* Content — clip-path reveal from the timeline dot */}
+                                    <motion.div
+                                        custom={isLeft}
+                                        variants={cardVariants}
+                                        initial="hidden"
+                                        whileInView="visible"
+                                        viewport={{ once: true, margin: '-60px' }}
                                         className={`ml-14 md:ml-0 md:w-[calc(50%-2rem)] ${isLeft ? 'md:pr-12 md:text-right' : 'md:pl-12'
                                             }`}
                                     >
@@ -114,11 +145,11 @@ export default function Timeline() {
                                                 {entry.description}
                                             </p>
                                         </div>
-                                    </div>
+                                    </motion.div>
 
                                     {/* Spacer for other side */}
                                     <div className="hidden md:block md:w-[calc(50%-2rem)]" />
-                                </motion.div>
+                                </div>
                             );
                         })}
                     </div>

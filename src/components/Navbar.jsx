@@ -1,24 +1,42 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 
 const navLinks = [
-    { label: 'About', href: '#hero' },
-    { label: 'Skills', href: '#skills' },
-    { label: 'Projects', href: '#projects' },
-    { label: 'Experience', href: '#timeline' },
-    { label: 'Contact', href: '#contact' },
+    { label: 'About', href: '#hero', id: 'hero' },
+    { label: 'Skills', href: '#skills', id: 'skills' },
+    { label: 'Projects', href: '#projects', id: 'projects' },
+    { label: 'Experience', href: '#timeline', id: 'timeline' },
+    { label: 'Contact', href: '#contact', id: 'contact' },
 ];
 
-export default function Navbar() {
+export default function Navbar({ activeSection }) {
     const [scrolled, setScrolled] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
 
+    const { scrollYProgress } = useScroll();
+    const scaleX = useTransform(scrollYProgress, [0, 1], [0, 1]);
+
     useEffect(() => {
-        const onScroll = () => setScrolled(window.scrollY > 50);
-        window.addEventListener('scroll', onScroll);
-        return () => window.removeEventListener('scroll', onScroll);
+        const container = document.querySelector('.snap-container');
+        const target = container || window;
+        const onScroll = () => {
+            const scrollTop = container ? container.scrollTop : window.scrollY;
+            setScrolled(scrollTop > 50);
+        };
+        target.addEventListener('scroll', onScroll);
+        return () => target.removeEventListener('scroll', onScroll);
     }, []);
+
+    const handleNavClick = (e, href) => {
+        e.preventDefault();
+        const id = href.replace('#', '');
+        const el = document.getElementById(id);
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth' });
+        }
+        setMobileOpen(false);
+    };
 
     return (
         <motion.nav
@@ -26,28 +44,56 @@ export default function Navbar() {
             animate={{ y: 0 }}
             transition={{ type: 'spring', stiffness: 120, damping: 20 }}
             className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
-                    ? 'bg-surface/70 backdrop-blur-xl border-b border-border shadow-lg shadow-black/20'
-                    : 'bg-transparent'
+                ? 'bg-surface/70 backdrop-blur-xl border-b border-border shadow-lg shadow-black/20'
+                : 'bg-transparent'
                 }`}
         >
+            {/* Scroll progress bar */}
+            <motion.div
+                className="absolute bottom-0 left-0 right-0 h-[2px] bg-accent origin-left"
+                style={{ scaleX }}
+            />
+
             <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-                <a href="#hero" className="text-xl font-bold tracking-tighter text-accent">
+                <a
+                    href="#hero"
+                    onClick={(e) => handleNavClick(e, '#hero')}
+                    className="text-xl font-bold tracking-tighter text-accent"
+                >
                     PP<span className="text-text">.</span>
                 </a>
 
                 {/* Desktop links */}
                 <div className="hidden md:flex items-center gap-8">
-                    {navLinks.map((link) => (
-                        <a
-                            key={link.href}
-                            href={link.href}
-                            className="text-sm text-text-muted hover:text-accent transition-colors duration-200 tracking-wide"
-                        >
-                            {link.label}
-                        </a>
-                    ))}
+                    {navLinks.map((link) => {
+                        const isActive = activeSection === link.id;
+                        return (
+                            <a
+                                key={link.href}
+                                href={link.href}
+                                onClick={(e) => handleNavClick(e, link.href)}
+                                className={`relative text-sm tracking-wide transition-colors duration-200 ${isActive ? 'text-accent' : 'text-text-muted hover:text-accent'
+                                    }`}
+                            >
+                                {link.label}
+                                {/* Animated active indicator */}
+                                {isActive && (
+                                    <motion.div
+                                        layoutId="nav-indicator"
+                                        className="absolute -bottom-1 left-0 right-0 h-0.5 bg-accent rounded-full"
+                                        transition={{
+                                            type: 'spring',
+                                            stiffness: 300,
+                                            damping: 25,
+                                        }}
+                                    />
+                                )}
+                            </a>
+                        );
+                    })}
                     <a
                         href="#contact"
+                        onClick={(e) => handleNavClick(e, '#contact')}
                         className="text-sm px-8 py-2 rounded-lg bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-all duration-200"
                     >
                         Get in Touch
@@ -77,8 +123,9 @@ export default function Navbar() {
                             <a
                                 key={link.href}
                                 href={link.href}
-                                onClick={() => setMobileOpen(false)}
-                                className="text-sm text-text-muted hover:text-accent transition-colors"
+                                onClick={(e) => handleNavClick(e, link.href)}
+                                className={`text-sm transition-colors ${activeSection === link.id ? 'text-accent' : 'text-text-muted hover:text-accent'
+                                    }`}
                             >
                                 {link.label}
                             </a>
