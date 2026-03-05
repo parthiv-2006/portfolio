@@ -16,10 +16,10 @@ export default function Hero() {
         <section
             id="hero"
             ref={containerRef}
-            className="relative min-h-screen flex items-end overflow-hidden snap-section"
+            className="relative min-h-screen flex items-center justify-center overflow-hidden snap-section"
         >
             <motion.div
-                className="relative z-10 w-full max-w-7xl mx-auto px-6 pb-[12vh]"
+                className="relative z-10 w-full max-w-5xl mx-auto px-6 text-center"
                 style={{ y: contentY, opacity: contentOpacity }}
             >
                 {/* Name */}
@@ -44,8 +44,8 @@ export default function Hero() {
                     initial={{ scaleX: 0 }}
                     animate={{ scaleX: 1 }}
                     transition={{ duration: 0.8, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                    className="w-24 h-px bg-accent mb-8"
-                    style={{ transformOrigin: 'left' }}
+                    className="w-24 h-px bg-accent mb-8 mx-auto"
+                    style={{ transformOrigin: 'center' }}
                 />
 
                 {/* Role line with blinking cursor */}
@@ -63,7 +63,7 @@ export default function Hero() {
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.8 }}
-                    className="text-text-muted text-base md:text-lg max-w-lg leading-relaxed mb-10"
+                    className="text-text-muted text-base md:text-lg max-w-lg mx-auto leading-relaxed mb-10"
                 >
                     I care about performance, clean APIs, and interfaces
                     that don't get in the way.

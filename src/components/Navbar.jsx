@@ -41,8 +41,8 @@ export default function Navbar({ activeSection }) {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled
-                    ? 'border-b border-white/[0.06]'
-                    : 'border-b border-transparent'
+                ? 'border-b border-white/[0.06]'
+                : 'border-b border-transparent'
                 }`}
             style={{ backgroundColor: scrolled ? 'rgba(17,17,16,0.85)' : 'transparent' }}
         >
@@ -53,7 +53,7 @@ export default function Navbar({ activeSection }) {
                     className="font-display text-lg text-text hover:text-accent transition-colors duration-300"
                     style={{ fontStyle: 'italic' }}
                 >
-                    parthiv
+                    Parthiv Paul
                 </a>
 
                 {/* Desktop links */}
@@ -66,8 +66,8 @@ export default function Navbar({ activeSection }) {
                                 href={link.href}
                                 onClick={(e) => handleNavClick(e, link.href)}
                                 className={`text-[11px] tracking-[0.15em] uppercase transition-all duration-300 ${isActive
-                                        ? 'text-text'
-                                        : 'text-text-dim hover:text-text-muted'
+                                    ? 'text-text'
+                                    : 'text-text-dim hover:text-text-muted'
                                     }`}
                             >
                                 {link.label}
@@ -107,8 +107,8 @@ export default function Navbar({ activeSection }) {
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: i * 0.05 }}
                                     className={`text-[11px] tracking-[0.15em] uppercase transition-colors ${activeSection === link.id
-                                            ? 'text-text'
-                                            : 'text-text-dim hover:text-text-muted'
+                                        ? 'text-text'
+                                        : 'text-text-dim hover:text-text-muted'
                                         }`}
                                 >
                                     {link.label}
