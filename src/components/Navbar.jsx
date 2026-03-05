@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 
 const navLinks = [
@@ -13,9 +13,6 @@ const navLinks = [
 export default function Navbar({ activeSection }) {
     const [scrolled, setScrolled] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
-
-    const { scrollYProgress } = useScroll();
-    const scaleX = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
     useEffect(() => {
         const container = document.querySelector('.snap-container');
@@ -40,27 +37,23 @@ export default function Navbar({ activeSection }) {
 
     return (
         <motion.nav
-            initial={{ y: -80 }}
-            animate={{ y: 0 }}
-            transition={{ type: 'spring', stiffness: 120, damping: 20 }}
-            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
-                ? 'bg-surface/70 backdrop-blur-xl border-b border-border shadow-lg shadow-black/20'
-                : 'bg-transparent'
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled
+                    ? 'border-b border-white/[0.06]'
+                    : 'border-b border-transparent'
                 }`}
+            style={{ backgroundColor: scrolled ? 'rgba(17,17,16,0.85)' : 'transparent' }}
         >
-            {/* Scroll progress bar */}
-            <motion.div
-                className="absolute bottom-0 left-0 right-0 h-[2px] bg-accent origin-left"
-                style={{ scaleX }}
-            />
-
-            <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
                 <a
                     href="#hero"
                     onClick={(e) => handleNavClick(e, '#hero')}
-                    className="text-xl font-bold tracking-tighter text-accent"
+                    className="font-display text-lg text-text hover:text-accent transition-colors duration-300"
+                    style={{ fontStyle: 'italic' }}
                 >
-                    PP<span className="text-text">.</span>
+                    parthiv
                 </a>
 
                 {/* Desktop links */}
@@ -72,32 +65,15 @@ export default function Navbar({ activeSection }) {
                                 key={link.href}
                                 href={link.href}
                                 onClick={(e) => handleNavClick(e, link.href)}
-                                className={`relative text-sm tracking-wide transition-colors duration-200 ${isActive ? 'text-accent' : 'text-text-muted hover:text-accent'
+                                className={`text-[11px] tracking-[0.15em] uppercase transition-all duration-300 ${isActive
+                                        ? 'text-text'
+                                        : 'text-text-dim hover:text-text-muted'
                                     }`}
                             >
                                 {link.label}
-                                {/* Animated active indicator */}
-                                {isActive && (
-                                    <motion.div
-                                        layoutId="nav-indicator"
-                                        className="absolute -bottom-1 left-0 right-0 h-0.5 bg-accent rounded-full"
-                                        transition={{
-                                            type: 'spring',
-                                            stiffness: 300,
-                                            damping: 25,
-                                        }}
-                                    />
-                                )}
                             </a>
                         );
                     })}
-                    <a
-                        href="#contact"
-                        onClick={(e) => handleNavClick(e, '#contact')}
-                        className="text-sm px-8 py-2 rounded-lg bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-all duration-200"
-                    >
-                        Get in Touch
-                    </a>
                 </div>
 
                 {/* Mobile toggle */}
@@ -106,33 +82,42 @@ export default function Navbar({ activeSection }) {
                     className="md:hidden text-text-muted hover:text-accent transition-colors"
                     aria-label="Toggle menu"
                 >
-                    {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+                    {mobileOpen ? <X size={20} /> : <Menu size={20} />}
                 </button>
             </div>
 
             {/* Mobile menu */}
-            {mobileOpen && (
-                <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="md:hidden bg-surface/95 backdrop-blur-xl border-b border-border"
-                >
-                    <div className="px-6 py-4 flex flex-col gap-4">
-                        {navLinks.map((link) => (
-                            <a
-                                key={link.href}
-                                href={link.href}
-                                onClick={(e) => handleNavClick(e, link.href)}
-                                className={`text-sm transition-colors ${activeSection === link.id ? 'text-accent' : 'text-text-muted hover:text-accent'
-                                    }`}
-                            >
-                                {link.label}
-                            </a>
-                        ))}
-                    </div>
-                </motion.div>
-            )}
+            <AnimatePresence>
+                {mobileOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                        className="md:hidden overflow-hidden border-b border-white/[0.06]"
+                        style={{ backgroundColor: 'rgba(17,17,16,0.95)' }}
+                    >
+                        <div className="px-6 py-6 flex flex-col gap-5">
+                            {navLinks.map((link, i) => (
+                                <motion.a
+                                    key={link.href}
+                                    href={link.href}
+                                    onClick={(e) => handleNavClick(e, link.href)}
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: i * 0.05 }}
+                                    className={`text-[11px] tracking-[0.15em] uppercase transition-colors ${activeSection === link.id
+                                            ? 'text-text'
+                                            : 'text-text-dim hover:text-text-muted'
+                                        }`}
+                                >
+                                    {link.label}
+                                </motion.a>
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </motion.nav>
     );
 }

@@ -1,19 +1,20 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg: #0a0a0f;
-  --color-surface: #12121a;
-  --color-surface-light: #1a1a2e;
+  --color-bg: #111110;
+  --color-surface: #1a1917;
+  --color-surface-light: #242320;
   --color-border: #ffffff0d;
   --color-border-hover: #ffffff1a;
-  --color-accent: #00e5ff;
-  --color-accent-dim: #00e5ff33;
-  --color-accent-glow: #00e5ff22;
-  --color-text: #e4e4e7;
-  --color-text-muted: #71717a;
-  --color-text-dim: #52525b;
+  --color-accent: #E2A04E;
+  --color-accent-dim: #E2A04E33;
+  --color-accent-glow: #E2A04E22;
+  --color-text: #E8E4DE;
+  --color-text-muted: #8A8578;
+  --color-text-dim: #5C584E;
   --font-sans: "Inter", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", monospace;
+  --font-display: "Instrument Serif", "Georgia", serif;
 }
 
 @layer base {
@@ -69,6 +70,45 @@
     scroll-snap-align: start;
     min-height: 100vh;
   }
+}
+
+/* ── Editorial animations ── */
+
+/* Horizontal rule grow from left */
+@keyframes rule-grow {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.rule-grow {
+  transform-origin: left;
+  animation: rule-grow 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Blinking cursor for the role line */
+@keyframes cursor-blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+.cursor-blink::after {
+  content: "▎";
+  display: inline-block;
+  color: var(--color-accent);
+  animation: cursor-blink 1s step-end infinite;
+  margin-left: 2px;
 }
 
 /* Glitch scan-line effect for Terminal */

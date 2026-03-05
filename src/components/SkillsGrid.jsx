@@ -1,88 +1,24 @@
 import { motion } from 'framer-motion';
-import {
-    Database,
-    Server,
-    Code2,
-    Hexagon,
-    BrainCircuit,
-    Layers,
-    Globe,
-    GitBranch,
-} from 'lucide-react';
 import SectionHeading from './SectionHeading';
-import BentoItem from './BentoItem';
 
-const skills = [
+const skillGroups = [
     {
-        name: 'React / MERN Stack',
-        icon: Code2,
-        desc: 'Component-driven UIs with hooks, context, and state management. Full MERN pipeline from database to deploy.',
-        span: 'md:col-span-2 lg:col-span-2 md:row-span-2',
-        accent: true,
-        large: true,
-        gridPos: 0, // diagonal order index
+        category: 'Languages',
+        items: ['Python', 'JavaScript', 'TypeScript', 'Java', 'C'],
     },
     {
-        name: 'Python',
-        icon: BrainCircuit,
-        desc: 'Scripting, automation, and data work.',
-        span: '',
-        gridPos: 1,
+        category: 'Frameworks',
+        items: ['React', 'Node.js', 'Express', 'Next.js'],
     },
     {
-        name: 'DSA',
-        icon: Layers,
-        desc: 'Advanced problem solving & competitive patterns.',
-        span: '',
-        gridPos: 2,
+        category: 'Data',
+        items: ['MongoDB', 'PostgreSQL', 'Firebase'],
     },
     {
-        name: 'Node.js',
-        icon: Hexagon,
-        desc: 'Scalable server-side apps, event-driven architecture, and REST APIs.',
-        span: 'md:col-span-2 lg:col-span-2',
-        gridPos: 3,
-    },
-    {
-        name: 'Express',
-        icon: Server,
-        desc: 'Middleware, auth, and API routing.',
-        span: '',
-        gridPos: 4,
-    },
-    {
-        name: 'MongoDB',
-        icon: Database,
-        desc: 'NoSQL design and aggregation.',
-        span: '',
-        gridPos: 5,
-    },
-    {
-        name: 'Full Stack',
-        icon: Globe,
-        desc: 'End-to-end application development, deployment, and CI/CD.',
-        span: 'md:col-span-2 lg:col-span-2',
-        gridPos: 6,
-    },
-    {
-        name: 'Git & CI/CD',
-        icon: GitBranch,
-        desc: 'Version control, branching strategies, and automated pipelines.',
-        span: 'md:col-span-2 lg:col-span-3',
-        gridPos: 7,
+        category: 'Tools',
+        items: ['Git', 'Docker', 'Linux', 'CI/CD'],
     },
 ];
-
-/* Diagonal cascade: items stagger by grid position with increasing delays */
-const containerVariants = {
-    hidden: {},
-    visible: {
-        transition: {
-            staggerChildren: 0.08,
-            delayChildren: 0.1,
-        },
-    },
-};
 
 export default function SkillsGrid() {
     return (
@@ -91,50 +27,38 @@ export default function SkillsGrid() {
                 <SectionHeading
                     label="Toolkit"
                     title="Skills & Technologies"
-                    subtitle="The core technologies I use to build robust, scalable applications."
                 />
 
-                <motion.div
-                    variants={containerVariants}
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, margin: '-80px' }}
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                >
-                    {skills.map((skill) => (
-                        <BentoItem
-                            key={skill.name}
-                            className={`${skill.span} w-full h-full ${skill.accent ? 'border-l-2 border-l-accent/60' : ''}`}
-                            delay={0}
-                            isStaggerChild
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-16 gap-y-10">
+                    {skillGroups.map((group, groupIndex) => (
+                        <motion.div
+                            key={group.category}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, margin: '-60px' }}
+                            transition={{
+                                duration: 0.5,
+                                delay: groupIndex * 0.1,
+                                ease: [0.22, 1, 0.36, 1],
+                            }}
                         >
-                            <div className={`flex ${skill.large ? 'flex-col gap-5 h-full' : 'items-start gap-4'}`}>
-                                <div className="relative">
-                                    <div
-                                        className={`shrink-0 ${skill.large ? 'p-4' : 'p-2.5'} rounded-xl ${skill.accent
-                                            ? 'bg-accent/10 text-accent'
-                                            : 'bg-surface-light text-text-muted'
-                                            }`}
+                            <h3 className="font-mono text-accent text-xs tracking-[0.15em] uppercase mb-4">
+                                {group.category}
+                            </h3>
+                            <ul className="space-y-2">
+                                {group.items.map((item) => (
+                                    <li
+                                        key={item}
+                                        className="text-text text-[15px] leading-relaxed flex items-center gap-2"
                                     >
-                                        <skill.icon size={skill.large ? 32 : 20} />
-                                    </div>
-                                    {/* Glow behind hero card icon */}
-                                    {skill.accent && (
-                                        <div className="absolute inset-0 bg-accent/20 rounded-xl blur-xl -z-10" />
-                                    )}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <h3 className={`font-semibold text-text ${skill.large ? 'text-xl mb-2' : 'text-sm mb-1'}`}>
-                                        {skill.name}
-                                    </h3>
-                                    <p className={`text-text-muted leading-relaxed ${skill.large ? 'text-sm' : 'text-xs'}`}>
-                                        {skill.desc}
-                                    </p>
-                                </div>
-                            </div>
-                        </BentoItem>
+                                        <span className="w-1 h-1 rounded-full bg-text-dim shrink-0" />
+                                        {item}
+                                    </li>
+                                ))}
+                            </ul>
+                        </motion.div>
                     ))}
-                </motion.div>
+                </div>
             </div>
         </section>
     );
