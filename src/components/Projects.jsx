@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ExternalLink, Github, X, Gamepad2, Apple, Trophy } from 'lucide-react';
+import { ExternalLink, Github, X, ArrowUpRight } from 'lucide-react';
 import SectionHeading from './SectionHeading';
 
 const projects = [
@@ -11,9 +11,8 @@ const projects = [
         description:
             'A full-stack gamified habit-tracking application that transforms daily routines into engaging quests. Users create habits, earn XP, level up their character avatar, and compete on leaderboards — making self-improvement feel like playing an RPG.',
         tech: ['React', 'Node.js', 'Express', 'MongoDB', 'Framer Motion', 'JWT Auth'],
-        gradient: 'from-purple-500/40 to-cyan-500/40',
-        accentColor: '#a855f7',
-        icon: Gamepad2,
+        year: '2025',
+        role: 'Full-Stack',
     },
     {
         id: 'macromatch',
@@ -22,9 +21,8 @@ const projects = [
         description:
             'An intelligent nutrition platform that helps users track macronutrients, plan meals, and reach dietary goals. Features AI-powered meal suggestions based on user preferences and fitness objectives.',
         tech: ['React', 'Python', 'Flask', 'PostgreSQL', 'REST API', 'Chart.js'],
-        gradient: 'from-emerald-500/40 to-blue-500/40',
-        accentColor: '#10b981',
-        icon: Apple,
+        year: '2025',
+        role: 'Full-Stack',
     },
     {
         id: 'uofthacks',
@@ -33,24 +31,20 @@ const projects = [
         description:
             'A hackathon project built in 36 hours at UofTHacks. Rapid prototyping of an innovative solution addressing real-world challenges with a team of talented engineers.',
         tech: ['React', 'Node.js', 'Socket.io', 'MongoDB', 'Tailwind CSS'],
-        gradient: 'from-orange-500/40 to-rose-500/40',
-        accentColor: '#f97316',
-        icon: Trophy,
+        year: '2025',
+        role: 'Frontend Lead',
     },
 ];
 
-/* Each card slides in from the right with staggered spring bounce */
 const cardVariants = {
-    hidden: { opacity: 0, x: 80, filter: 'blur(4px)' },
+    hidden: { opacity: 0, y: 30 },
     visible: (i) => ({
         opacity: 1,
-        x: 0,
-        filter: 'blur(0px)',
+        y: 0,
         transition: {
-            type: 'spring',
-            stiffness: 100,
-            damping: 14,
-            delay: 0.15 + i * 0.12,
+            duration: 0.6,
+            delay: 0.1 + i * 0.12,
+            ease: [0.22, 1, 0.36, 1],
         },
     }),
 };
@@ -64,10 +58,9 @@ export default function Projects() {
                 <SectionHeading
                     label="Work"
                     title="Featured Projects"
-                    subtitle="A selection of projects I've built — from gamified apps to full-stack platforms."
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="space-y-4">
                     {projects.map((project, i) => (
                         <motion.div
                             key={project.id}
@@ -75,57 +68,61 @@ export default function Projects() {
                             variants={cardVariants}
                             initial="hidden"
                             whileInView="visible"
-                            viewport={{ once: true, margin: '-60px' }}
-                            layoutId={`project-${project.id}`}
+                            viewport={{ once: true, margin: '-40px' }}
                             onClick={() => setSelected(project)}
-                            whileHover={{
-                                y: -6,
-                                transition: { type: 'spring', stiffness: 300, damping: 15 },
-                            }}
-                            className="group relative rounded-2xl border border-white/[0.08] bg-surface/60 overflow-hidden cursor-pointer shadow-lg shadow-black/20 transition-all duration-300 hover:border-accent/40 hover:shadow-xl hover:shadow-accent/10 flex flex-col w-full h-full"
+                            className="group relative rounded-xl border border-white/[0.06] bg-surface/40 overflow-hidden cursor-pointer transition-all duration-400 hover:border-accent/30 hover:bg-surface"
                         >
-                            {/* Image placeholder area */}
-                            <div className="relative h-56 overflow-hidden bg-surface-light">
-                                <div
-                                    className={`absolute inset-0 bg-gradient-to-br ${project.gradient} transition-transform duration-500 group-hover:scale-105`}
-                                />
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <project.icon
-                                        size={56}
-                                        className="text-white/40 group-hover:text-white/60 transition-colors duration-300"
-                                        strokeWidth={1.5}
-                                    />
+                            <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-0 p-5 md:p-6">
+                                {/* Left: number + title */}
+                                <div className="flex items-baseline gap-4 md:w-[280px] shrink-0">
+                                    <span className="font-mono text-text-dim text-xs tabular-nums">
+                                        {String(i + 1).padStart(2, '0')}
+                                    </span>
+                                    <div>
+                                        <h3 className="text-lg font-semibold text-text tracking-tight group-hover:text-accent transition-colors duration-300">
+                                            {project.title}
+                                        </h3>
+                                        <p className="text-text-dim text-xs mt-0.5">{project.tagline}</p>
+                                    </div>
                                 </div>
-                                <div className="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent opacity-60" />
-                                <div className="absolute bottom-4 left-5 right-5">
-                                    <h3 className="text-xl font-bold tracking-tight text-text">
-                                        {project.title}
-                                    </h3>
-                                </div>
-                            </div>
 
-                            {/* Text + tech pills */}
-                            <div className="p-5 flex-1 flex flex-col space-y-3">
-                                <p className="text-text-muted text-sm leading-relaxed line-clamp-3 mb-1">
-                                    {project.tagline} — {project.description}
-                                </p>
-                                <div className="flex flex-wrap gap-1.5 mt-auto">
-                                    {project.tech.map((t) => (
+                                {/* Center: tech stack */}
+                                <div className="flex flex-wrap gap-1.5 flex-1 md:px-6">
+                                    {project.tech.slice(0, 4).map((t) => (
                                         <span
                                             key={t}
-                                            className="px-2.5 py-1 text-[11px] rounded-md bg-surface-light text-text-muted font-mono border border-white/[0.06]"
+                                            className="px-2.5 py-1 text-[11px] rounded-md bg-surface-light/60 text-text-dim font-mono border border-white/[0.04] transition-colors duration-300 group-hover:text-text-muted group-hover:border-white/[0.08]"
                                         >
                                             {t}
                                         </span>
                                     ))}
+                                    {project.tech.length > 4 && (
+                                        <span className="px-2.5 py-1 text-[11px] rounded-md text-text-dim font-mono">
+                                            +{project.tech.length - 4}
+                                        </span>
+                                    )}
+                                </div>
+
+                                {/* Right: year + arrow */}
+                                <div className="flex items-center gap-4 md:ml-auto shrink-0">
+                                    <span className="font-mono text-text-dim text-xs hidden sm:block">
+                                        {project.year}
+                                    </span>
+                                    <ArrowUpRight
+                                        size={16}
+                                        className="text-text-dim group-hover:text-accent transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                                    />
                                 </div>
                             </div>
+
+                            {/* Bottom border accent on hover */}
+                            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                         </motion.div>
                     ))}
                 </div>
             </div>
 
-            {/* Expanded modal */}
+            {/* Expanded detail modal */}
             <AnimatePresence>
                 {selected && (
                     <>
@@ -133,50 +130,55 @@ export default function Projects() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
+                            transition={{ duration: 0.2 }}
                             onClick={() => setSelected(null)}
                             className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
                         />
                         <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
                             <motion.div
-                                layoutId={`project-${selected.id}`}
+                                initial={{ opacity: 0, y: 20, scale: 0.97 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                                 className="relative w-full max-w-lg rounded-2xl border border-white/[0.08] bg-surface overflow-hidden shadow-2xl shadow-black/40"
                             >
-                                {/* Gradient header */}
-                                <div className="relative h-48 overflow-hidden">
-                                    <div
-                                        className={`absolute inset-0 bg-gradient-to-br ${selected.gradient}`}
-                                    />
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <selected.icon size={64} className="text-white/25" strokeWidth={1.5} />
-                                    </div>
-                                    <button
-                                        onClick={() => setSelected(null)}
-                                        className="absolute top-4 right-4 p-2 rounded-xl bg-black/30 backdrop-blur text-white/70 hover:text-white transition-colors"
-                                    >
-                                        <X size={18} />
-                                    </button>
-                                    <div className="absolute bottom-5 left-6">
-                                        <h3 className="text-3xl font-bold tracking-tight text-text">
+                                {/* Header */}
+                                <div className="p-6 pb-0 flex items-start justify-between">
+                                    <div>
+                                        <p className="font-mono text-accent text-xs tracking-wide mb-2">
+                                            {selected.role} · {selected.year}
+                                        </p>
+                                        <h3 className="text-2xl font-bold tracking-tight text-text">
                                             {selected.title}
                                         </h3>
                                         <p className="text-text-muted text-sm mt-1">{selected.tagline}</p>
                                     </div>
+                                    <button
+                                        onClick={() => setSelected(null)}
+                                        className="p-2 rounded-lg text-text-dim hover:text-text hover:bg-surface-light transition-colors"
+                                        aria-label="Close"
+                                    >
+                                        <X size={18} />
+                                    </button>
                                 </div>
 
+                                {/* Divider */}
+                                <div className="mx-6 my-5 h-px bg-white/[0.06]" />
+
                                 {/* Body */}
-                                <div className="p-6">
+                                <div className="px-6 pb-6">
                                     <p className="text-text-muted text-sm leading-relaxed mb-6">
                                         {selected.description}
                                     </p>
 
-                                    <h4 className="text-xs font-mono text-text-dim uppercase tracking-widest mb-3">
+                                    <h4 className="text-[10px] font-mono text-text-dim uppercase tracking-[0.15em] mb-3">
                                         Tech Stack
                                     </h4>
                                     <div className="flex flex-wrap gap-2 mb-6">
                                         {selected.tech.map((t) => (
                                             <span
                                                 key={t}
-                                                className="px-3 py-1 text-xs rounded-lg bg-surface-light text-text-muted font-mono border border-white/[0.08]"
+                                                className="px-3 py-1.5 text-xs rounded-lg bg-surface-light text-text-muted font-mono border border-white/[0.06]"
                                             >
                                                 {t}
                                             </span>
@@ -184,12 +186,18 @@ export default function Projects() {
                                     </div>
 
                                     <div className="flex gap-3">
-                                        <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-accent/10 text-accent text-sm font-medium border border-accent/20 hover:bg-accent/20 transition-colors">
-                                            <Github size={16} /> Source
-                                        </button>
-                                        <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-light text-text-muted text-sm font-medium border border-white/[0.08] hover:border-white/20 transition-colors">
-                                            <ExternalLink size={16} /> Live Demo
-                                        </button>
+                                        <a
+                                            href="#"
+                                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-accent/10 text-accent text-sm font-medium border border-accent/20 hover:bg-accent/20 transition-colors"
+                                        >
+                                            <Github size={15} /> Source
+                                        </a>
+                                        <a
+                                            href="#"
+                                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-light text-text-muted text-sm font-medium border border-white/[0.06] hover:border-white/[0.15] hover:text-text transition-colors"
+                                        >
+                                            <ExternalLink size={15} /> Live Demo
+                                        </a>
                                     </div>
                                 </div>
                             </motion.div>
