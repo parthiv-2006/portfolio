@@ -5,42 +5,42 @@ import Projects from './components/Projects';
 import Timeline from './components/Timeline';
 import Terminal from './components/Terminal';
 import ScrollProgress from './components/ScrollProgress';
+import SectionDivider from './components/SectionDivider';
 import useActiveSection from './hooks/useActiveSection';
 
 export default function App() {
     const { activeSection } = useActiveSection();
 
     return (
-        <div className="snap-container min-h-screen bg-bg text-text">
+        <div className="min-h-screen bg-bg text-text">
             <Navbar activeSection={activeSection} />
             <ScrollProgress activeSection={activeSection} />
 
             <main>
-                {/* Each section is full-viewport with scroll-snap */}
                 <Hero />
 
-                <div className="snap-section">
-                    <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-16 lg:py-0 flex flex-col justify-center min-h-screen">
-                        <SkillsGrid />
-                    </div>
+                <SectionDivider variant="line" label="what I work with" />
+
+                <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-16">
+                    <SkillsGrid />
                 </div>
 
-                <div className="snap-section">
-                    <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-16 lg:py-0 flex flex-col justify-center min-h-screen">
-                        <Projects />
-                    </div>
+                <SectionDivider variant="code" label="selected work" />
+
+                <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-16">
+                    <Projects />
                 </div>
 
-                <div className="snap-section">
-                    <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-16 lg:py-0 flex flex-col justify-center min-h-screen">
-                        <Timeline />
-                    </div>
+                <SectionDivider variant="dots" />
+
+                <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-16">
+                    <Timeline />
                 </div>
 
-                <div className="snap-section">
-                    <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-16 lg:py-0 flex flex-col justify-center min-h-screen">
-                        <Terminal />
-                    </div>
+                <SectionDivider variant="code" label="let's connect" />
+
+                <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-16">
+                    <Terminal />
                 </div>
             </main>
 

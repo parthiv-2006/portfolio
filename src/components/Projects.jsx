@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ExternalLink, Github, X, ArrowUpRight } from 'lucide-react';
 import SectionHeading from './SectionHeading';
@@ -13,6 +13,7 @@ const projects = [
         tech: ['React', 'Node.js', 'Express', 'MongoDB', 'Framer Motion', 'JWT Auth'],
         year: '2025',
         role: 'Full-Stack',
+        image: '/projects/anima.png',
     },
     {
         id: 'macromatch',
@@ -23,6 +24,7 @@ const projects = [
         tech: ['React', 'Python', 'Flask', 'PostgreSQL', 'REST API', 'Chart.js'],
         year: '2025',
         role: 'Full-Stack',
+        image: '/projects/macromatch.png',
     },
     {
         id: 'uofthacks',
@@ -33,6 +35,7 @@ const projects = [
         tech: ['React', 'Node.js', 'Socket.io', 'MongoDB', 'Tailwind CSS'],
         year: '2025',
         role: 'Frontend Lead',
+        image: '/projects/uofthacks.png',
     },
 ];
 
@@ -49,8 +52,27 @@ const cardVariants = {
     }),
 };
 
+/* ── Cursor-following image preview ── */
+function useImagePreview() {
+    const [active, setActive] = useState(null);
+    const [pos, setPos] = useState({ x: 0, y: 0 });
+    const containerRef = useRef(null);
+
+    const handleMouseMove = (e) => {
+        if (!containerRef.current) return;
+        const rect = containerRef.current.getBoundingClientRect();
+        setPos({
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top,
+        });
+    };
+
+    return { active, setActive, pos, handleMouseMove, containerRef };
+}
+
 export default function Projects() {
     const [selected, setSelected] = useState(null);
+    const { active, setActive, pos, handleMouseMove, containerRef } = useImagePreview();
 
     return (
         <section id="projects" className="w-full">
@@ -60,7 +82,37 @@ export default function Projects() {
                     title="Featured Projects"
                 />
 
-                <div className="space-y-4">
+                <div
+                    ref={containerRef}
+                    onMouseMove={handleMouseMove}
+                    className="relative space-y-4"
+                >
+                    {/* Floating image preview — follows cursor */}
+                    <AnimatePresence>
+                        {active && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.85 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.9 }}
+                                transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                                className="hidden md:block absolute z-30 pointer-events-none"
+                                style={{
+                                    left: pos.x + 20,
+                                    top: pos.y - 100,
+                                }}
+                            >
+                                <div className="w-[320px] h-[200px] rounded-xl overflow-hidden border border-white/[0.1] shadow-2xl shadow-black/50">
+                                    <img
+                                        src={active}
+                                        alt="Project preview"
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Project rows */}
                     {projects.map((project, i) => (
                         <motion.div
                             key={project.id}
@@ -70,6 +122,8 @@ export default function Projects() {
                             whileInView="visible"
                             viewport={{ once: true, margin: '-40px' }}
                             onClick={() => setSelected(project)}
+                            onMouseEnter={() => setActive(project.image)}
+                            onMouseLeave={() => setActive(null)}
                             className="group relative rounded-xl border border-white/[0.06] bg-surface/40 overflow-hidden cursor-pointer transition-all duration-400 hover:border-accent/30 hover:bg-surface"
                         >
                             <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-0 p-5 md:p-6">
@@ -142,24 +196,36 @@ export default function Projects() {
                                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                                 className="relative w-full max-w-lg rounded-2xl border border-white/[0.08] bg-surface overflow-hidden shadow-2xl shadow-black/40"
                             >
-                                {/* Header */}
-                                <div className="p-6 pb-0 flex items-start justify-between">
-                                    <div>
-                                        <p className="font-mono text-accent text-xs tracking-wide mb-2">
-                                            {selected.role} · {selected.year}
-                                        </p>
-                                        <h3 className="text-2xl font-bold tracking-tight text-text">
-                                            {selected.title}
-                                        </h3>
-                                        <p className="text-text-muted text-sm mt-1">{selected.tagline}</p>
+                                {/* Project image */}
+                                <div className="w-full h-48 overflow-hidden">
+                                    <img
+                                        src={selected.image}
+                                        alt={selected.title}
+                                        className="w-full h-full object-cover"
+                                    />
+                                    <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-t from-surface via-surface/40 to-transparent" />
+                                </div>
+
+                                {/* Header overlaid on gradient */}
+                                <div className="px-6 -mt-12 relative z-10">
+                                    <div className="flex items-start justify-between">
+                                        <div>
+                                            <p className="font-mono text-accent text-xs tracking-wide mb-2">
+                                                {selected.role} · {selected.year}
+                                            </p>
+                                            <h3 className="text-2xl font-bold tracking-tight text-text">
+                                                {selected.title}
+                                            </h3>
+                                            <p className="text-text-muted text-sm mt-1">{selected.tagline}</p>
+                                        </div>
+                                        <button
+                                            onClick={() => setSelected(null)}
+                                            className="p-2 rounded-lg text-text-dim hover:text-text hover:bg-surface-light transition-colors"
+                                            aria-label="Close"
+                                        >
+                                            <X size={18} />
+                                        </button>
                                     </div>
-                                    <button
-                                        onClick={() => setSelected(null)}
-                                        className="p-2 rounded-lg text-text-dim hover:text-text hover:bg-surface-light transition-colors"
-                                        aria-label="Close"
-                                    >
-                                        <X size={18} />
-                                    </button>
                                 </div>
 
                                 {/* Divider */}
