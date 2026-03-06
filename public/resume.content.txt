@@ -1,0 +1,51 @@
+Parthiv Paul
+647-781-6235 |parthiv.paul@mail.utoronto.ca |linkedin.com/in/parthiv-paul |github.com/parthiv-2006
+Education
+University of Toronto St.  George                                                                                Toronto, ON
+Bachelor of Computer Science, Specialist Co-op Program (    CGPA: 3.70/4.00 )               Sept 2024 – Apr 2028
+Relevant Coursework:  Data Structures & Analysis, Software Design, Systems Programming,
+Computer Organization, Theory of Computation, Linear Algebra
+Experience
+AI and Automation Extern                                                                              May 2025 – Aug 2025
+Outamation                                                                                      Remote
+–   Automated high-volume document classification by engineering  NLP and Computer Vision pipelines
+(PyMuPDF, OCR), reducing manual data entry workload by  40%.
+–    Enhanced internal knowledge retrieval accuracy by  25% by optimizing a Retrieval-Augmented Generation
+(RAG) system with LlamaIndex and custom vector embeddings.
+Software QA Tester                                                                                         June 2024 – Nov 2024
+Chester-Hill Solutions                                                                              Remote
+–   Decreased regression testing time by  60% by developing automated scripts for  50+ critical user flows , ensuring
+stability across multiple environments.
+–    Accelerated bug resolution by  15% through detailed API response analysis  and root cause documentation,
+enabling faster hotfix deployments.
+Frontend Developer                                                                                        May 2023 – Sept 2023
+Ontario Liberal Party                                                                          Toronto, ON
+–   Improved page load speeds by  20% for 1,000+ monthly users by architecting efficient React components and
+optimizing Redux state management flows.
+–    Increased mobile engagement metrics by  30% by refactoring legacy CSS into modular  Sass architectures and
+enforcing WCAG 2.1 compliance.
+Projects
+Palate (UofTHacks 2026) |Next.js, TypeScript, MongoDB, Gemini AI, WebAuthn
+–   Mitigated credential vulnerabilities by implementing  passkey-first authentication using WebAuthn and
+cryptographic standards, replacing traditional passwords.
+–    Synchronized real-time lobby states for concurrent users by leveraging  Next.js Server Actions and optimistic
+UI updates , ensuring sub-100ms latency.
+–    Integrated Google Gemini AI  to analyze user behavior patterns and generate personalized restaurant
+recommendations via a feedback loop.
+MacroMatch |React, Node.js, Express, MongoDB, Linear Programming
+–   Optimized meal generation logic using the  Simplex Algorithm (Linear Programming)  to solve macronutrient
+constraint systems in under  200ms.
+–    Orchestrated a robust CI/CD pipeline via Vercel/Render for automated deployments and implemented
+JWT-based session management for secure user data access.
+Anima (Evo-Habit) |React, Vite, Zustand, Framer Motion, MongoDB
+–   Decoupled frontend logic using a  Monorepo architecture, leveraging Zustand for atomic state management to
+handle complex game loops.
+–    Increased user retention by designing fluid, 60fps animations with  Framer Motion and Lottie.
+Technical Skills
+Languages:  Python, Java, TypeScript, JavaScript (ES6+), SQL, HTML5, CSS
+Frameworks:  Next.js, React, Node.js, Express.js, MongoDB, TailwindCSS, Redux, Zustand
+Dev Tools & Concepts :  Git, GitHub, Docker, WebAuthn, REST APIs, Agile/Scrum, CI/CD, WCAG, PyMuPDF
+Awards
+University of Toronto Dean’s List (2024-2025)   |J.S. Mclean Scholarship (UofT)
+2nd Place - National Waterloo SAF Financial Literacy Competition (2023)
+----------------Page (0) Break----------------

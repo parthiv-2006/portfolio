@@ -29,6 +29,7 @@
     "@vitejs/plugin-react": "^5.1.4",
     "framer-motion": "^12.34.5",
     "lucide-react": "^0.576.0",
+    "pdf-parse": "^2.4.5",
     "tailwindcss": "^4.2.1",
     "vite": "^7.3.1"
   }

@@ -10,42 +10,48 @@ import {
     SiNextdotjs,
     SiMongodb,
     SiPostgresql,
-    SiFirebase,
+    SiRedux,
+    SiTailwindcss,
     SiGit,
     SiDocker,
-    SiLinux,
     SiGithubactions,
+    SiWebauthn
 } from 'react-icons/si';
-import { FaJava } from 'react-icons/fa';
+import { FaJava, FaHtml5, FaCss3Alt } from 'react-icons/fa';
+import { VscDatabase } from 'react-icons/vsc';
 import SectionHeading from './SectionHeading';
 
 const skills = [
     // ── Languages ──
     { name: 'Python', icon: SiPython, category: 'Languages', core: true },
-    { name: 'JavaScript', icon: SiJavascript, category: 'Languages', core: false },
-    { name: 'TypeScript', icon: SiTypescript, category: 'Languages', core: false },
+    { name: 'JavaScript', icon: SiJavascript, category: 'Languages', core: true },
+    { name: 'TypeScript', icon: SiTypescript, category: 'Languages', core: true },
     { name: 'Java', icon: FaJava, category: 'Languages', core: false },
     { name: 'C/C++', icon: SiCplusplus, category: 'Languages', core: false },
+    { name: 'HTML', icon: FaHtml5, category: 'Languages', core: false },
+    { name: 'CSS', icon: FaCss3Alt, category: 'Languages', core: false },
+    { name: 'SQL', icon: VscDatabase, category: 'Languages', core: false },
 
     // ── Frameworks ──
+    { name: 'Next.js', icon: SiNextdotjs, category: 'Frameworks', core: true },
     { name: 'React', icon: SiReact, category: 'Frameworks', core: true },
     { name: 'Node.js', icon: SiNodedotjs, category: 'Frameworks', core: true },
-    { name: 'Express', icon: SiExpress, category: 'Frameworks', core: true },
-    { name: 'Next.js', icon: SiNextdotjs, category: 'Frameworks', core: false },
+    { name: 'Express.js', icon: SiExpress, category: 'Frameworks', core: false },
+    { name: 'MongoDB', icon: SiMongodb, category: 'Frameworks', core: true },
+    { name: 'Tailwind CSS', icon: SiTailwindcss, category: 'Frameworks', core: true },
+    { name: 'Redux', icon: SiRedux, category: 'Frameworks', core: false },
+    // Using a generic icon for Zustand as react-icons doesn't have one specifically usually
+    { name: 'Zustand', icon: SiReact, category: 'Frameworks', core: false },
 
-    // ── Data ──
-    { name: 'MongoDB', icon: SiMongodb, category: 'Data', core: true },
-    { name: 'PostgreSQL', icon: SiPostgresql, category: 'Data', core: false },
-    { name: 'Firebase', icon: SiFirebase, category: 'Data', core: false },
-
-    // ── Tools ──
-    { name: 'Git', icon: SiGit, category: 'Tools', core: false },
-    { name: 'Docker', icon: SiDocker, category: 'Tools', core: false },
-    { name: 'Linux', icon: SiLinux, category: 'Tools', core: false },
-    { name: 'CI/CD', icon: SiGithubactions, category: 'Tools', core: false },
+    // ── Dev Tools & Concepts ──
+    { name: 'Git/GitHub', icon: SiGit, category: 'Dev Tools & Concepts', core: true },
+    { name: 'Docker', icon: SiDocker, category: 'Dev Tools & Concepts', core: false },
+    { name: 'WebAuthn', icon: SiWebauthn, category: 'Dev Tools & Concepts', core: false },
+    { name: 'CI/CD', icon: SiGithubactions, category: 'Dev Tools & Concepts', core: true },
+    { name: 'REST APIs', icon: VscDatabase, category: 'Dev Tools & Concepts', core: true },
 ];
 
-const categories = ['Languages', 'Frameworks', 'Data', 'Tools'];
+const categories = ['Languages', 'Frameworks', 'Dev Tools & Concepts'];
 
 const containerVariants = {
     hidden: {},

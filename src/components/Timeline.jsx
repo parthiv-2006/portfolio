@@ -6,38 +6,38 @@ import SectionHeading from './SectionHeading';
 const entries = [
     {
         icon: Rocket,
-        title: 'Rocket Innovation Studio',
-        subtitle: 'Incoming Software Engineer Intern',
-        date: 'Summer 2026',
+        title: 'Outamation',
+        subtitle: 'AI and Automation Extern',
+        date: 'Summer 2025',
         description:
-            'Joining Rocket Innovation Studio as a Software Engineer Intern to build scalable products and contribute to innovative engineering initiatives.',
+            'Engineering NLP and Computer Vision pipelines to automate high-volume document classification. Optimizing Retrieval-Augmented Generation (RAG) systems with LlamaIndex and custom vector embeddings.',
         type: 'experience',
     },
     {
         icon: GraduationCap,
         title: 'University of Toronto, St. George',
-        subtitle: "Dean's List Scholar",
-        date: '2024 – 2025',
+        subtitle: "Computer Science Specialist Co-op",
+        date: '2024 – 2028',
         description:
-            'Computer Science Specialist program. Recognized on the Dean\'s List for academic excellence. Coursework includes advanced algorithms, systems programming, and software engineering.',
+            "Pursuing a Bachelor of Computer Science. Dean's List Scholar. Coursework includes Data Structures & Analysis, Software Design, Systems Programming, and Computer Organization.",
         type: 'education',
     },
     {
-        icon: Award,
-        title: 'UofTHacks Participant',
-        subtitle: 'Hackathon',
-        date: '2024',
+        icon: Briefcase,
+        title: 'Chester-Hill Solutions',
+        subtitle: 'Software QA Tester',
+        date: 'June 2024 – Nov 2024',
         description:
-            'Designed and developed an innovative solution in 36 hours. Collaborated with a cross-functional team under extreme time pressure.',
-        type: 'achievement',
+            'Developed automated scripts for critical user flows to decrease regression testing time. Accelerated bug resolution through detailed API response analysis and root cause documentation.',
+        type: 'experience',
     },
     {
-        icon: Briefcase,
-        title: 'Full-Stack Developer',
-        subtitle: 'Freelance & Personal Projects',
-        date: '2024 – Present',
+        icon: Award,
+        title: 'Ontario Liberal Party',
+        subtitle: 'Frontend Developer',
+        date: 'May 2023 – Sept 2023',
         description:
-            'Building production-grade full-stack applications with the MERN stack. Focus on clean architecture, responsive design, and intuitive user experiences.',
+            'Architected efficient React components and optimized Redux state management. Refactored legacy CSS into modular Sass architectures and enforced WCAG 2.1 compliance to increase engagement metrics.',
         type: 'experience',
     },
 ];
