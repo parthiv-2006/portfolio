@@ -1,9 +1,19 @@
-import { useRef } from 'react';
+import { useRef, useMemo } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Download } from 'lucide-react';
 
+/* ── Dynamic greeting based on visitor's local time ── */
+function getGreeting() {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) return { text: 'Good morning', emoji: '☀️' };
+    if (hour >= 12 && hour < 17) return { text: 'Good afternoon', emoji: '🌤' };
+    if (hour >= 17 && hour < 21) return { text: 'Good evening', emoji: '🌅' };
+    return { text: 'Late night coding?', emoji: '🌙' };
+}
+
 export default function Hero() {
     const containerRef = useRef(null);
+    const greeting = useMemo(() => getGreeting(), []);
 
     const { scrollYProgress } = useScroll({
         target: containerRef,
@@ -23,6 +33,16 @@ export default function Hero() {
                 className="relative z-10 w-full max-w-5xl mx-auto px-6 text-center"
                 style={{ y: contentY, opacity: contentOpacity }}
             >
+                {/* Dynamic time-of-day greeting */}
+                <motion.p
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                    className="font-mono text-text-dim text-sm tracking-[0.2em] uppercase mb-6"
+                >
+                    {greeting.text}
+                </motion.p>
+
                 {/* Name */}
                 <motion.h1
                     initial={{ opacity: 0, y: 40 }}

@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { TerminalIcon } from 'lucide-react';
+import { TerminalIcon, Compass } from 'lucide-react';
 import SectionHeading from './SectionHeading';
+import { createGameState, processCommand, getEntryMessage } from '../adventureEngine';
 
+/* ── Resume download helper ── */
 const downloadResume = () => {
     const link = document.createElement('a');
     link.href = '/resume.pdf';
@@ -12,6 +14,7 @@ const downloadResume = () => {
     document.body.removeChild(link);
 };
 
+/* ── Standard Terminal Commands ── */
 const COMMANDS = {
     help: () => [
         { type: 'system', text: 'Available commands:' },
@@ -21,6 +24,7 @@ const COMMANDS = {
         { type: 'info', text: '  resume              Download my resume' },
         { type: 'info', text: '  about               About me' },
         { type: 'info', text: '  skills              List skills' },
+        { type: 'info', text: '  explore             🗺️  Enter the Portfolio Realm' },
         { type: 'info', text: '  clear               Clear terminal' },
         { type: 'info', text: '  help                Show this menu' },
     ],
@@ -73,12 +77,17 @@ export default function Terminal() {
     const [historyIndex, setHistoryIndex] = useState(-1);
     const [booted, setBooted] = useState(false);
     const [bootText, setBootText] = useState('');
+
+    /* ── Adventure mode state ── */
+    const [adventureMode, setAdventureMode] = useState(false);
+    const [gameState, setGameState] = useState(null);
+
     const inputRef = useRef(null);
     const scrollRef = useRef(null);
     const terminalRef = useRef(null);
     const isInView = useInView(terminalRef, { once: true, margin: '-100px' });
 
-    // Boot-up typing sequence
+    /* ── Boot-up typing sequence ── */
     useEffect(() => {
         if (!isInView || booted) return;
 
@@ -100,17 +109,53 @@ export default function Terminal() {
         return () => clearInterval(interval);
     }, [isInView, booted]);
 
+    /* ── Auto-scroll on new content ── */
     useEffect(() => {
         if (scrollRef.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
     }, [lines, bootText]);
 
+    /* ── Enter adventure mode ── */
+    const enterAdventure = () => {
+        const state = createGameState();
+        setGameState(state);
+        setAdventureMode(true);
+
+        const entryLines = getEntryMessage();
+        setLines((prev) => [
+            ...prev,
+            { type: 'input', text: '$ explore' },
+            { type: 'dim', text: '' },
+            ...entryLines,
+        ]);
+    };
+
+    /* ── Handle command submission ── */
     const handleSubmit = (e) => {
         e.preventDefault();
         const trimmed = input.trim().toLowerCase();
         if (!trimmed) return;
 
+        /* ── Adventure Mode ── */
+        if (adventureMode && gameState) {
+            const inputLine = { type: 'input', text: `⚔ ${trimmed}` };
+            const { newState, output, shouldExit } = processCommand(gameState, trimmed);
+
+            setGameState(newState);
+            setLines((prev) => [...prev, inputLine, ...output]);
+
+            if (shouldExit) {
+                setAdventureMode(false);
+            }
+
+            setHistory((prev) => [...prev, trimmed]);
+            setHistoryIndex(-1);
+            setInput('');
+            return;
+        }
+
+        /* ── Normal Mode ── */
         const newLines = [
             ...lines,
             { type: 'input', text: `$ ${trimmed}` },
@@ -121,6 +166,8 @@ export default function Terminal() {
                 { type: 'system', text: WELCOME_TEXT },
                 { type: 'dim', text: '—' },
             ]);
+        } else if (trimmed === 'explore') {
+            enterAdventure();
         } else if (COMMANDS[trimmed]) {
             setLines([...newLines, ...COMMANDS[trimmed]()]);
         } else {
@@ -135,6 +182,7 @@ export default function Terminal() {
         setInput('');
     };
 
+    /* ── Arrow key history navigation ── */
     const handleKeyDown = (e) => {
         if (e.key === 'ArrowUp') {
             e.preventDefault();
@@ -165,6 +213,10 @@ export default function Terminal() {
         dim: 'text-text-dim',
     };
 
+    /* ── Title bar text ── */
+    const titleBarText = adventureMode ? 'parthiv@adventure ~ ⚔' : 'parthiv@portfolio ~ %';
+    const promptChar = adventureMode ? '⚔' : '$';
+
     return (
         <section id="contact" className="w-full">
             <div className="max-w-3xl mx-auto w-full" ref={terminalRef}>
@@ -179,19 +231,34 @@ export default function Terminal() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className={`rounded-2xl border border-border bg-surface/80 backdrop-blur-sm overflow-hidden shadow-2xl shadow-black/30 ${isInView && !booted ? 'glitch-enter' : ''}`}
+                    className={`rounded-2xl border overflow-hidden shadow-2xl shadow-black/30 transition-all duration-500 ${adventureMode
+                            ? 'border-emerald-500/30 bg-surface/80 backdrop-blur-sm'
+                            : 'border-border bg-surface/80 backdrop-blur-sm'
+                        } ${isInView && !booted ? 'glitch-enter' : ''}`}
                 >
                     {/* Title bar */}
-                    <div className="flex items-center gap-2 px-4 py-3 bg-surface-light border-b border-border">
+                    <div
+                        className={`flex items-center gap-2 px-4 py-3 border-b transition-all duration-500 ${adventureMode
+                                ? 'bg-emerald-950/40 border-emerald-500/20'
+                                : 'bg-surface-light border-border'
+                            }`}
+                    >
                         <div className="flex gap-1.5">
                             <div className="w-3 h-3 rounded-full bg-red-500/80" />
                             <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
                             <div className="w-3 h-3 rounded-full bg-green-500/80" />
                         </div>
                         <div className="flex-1 text-center">
-                            <span className="text-text-dim text-xs font-mono flex items-center justify-center gap-1.5">
-                                <TerminalIcon size={12} />
-                                parthiv@portfolio ~ %
+                            <span
+                                className={`text-xs font-mono flex items-center justify-center gap-1.5 transition-colors duration-500 ${adventureMode ? 'text-emerald-400' : 'text-text-dim'
+                                    }`}
+                            >
+                                {adventureMode ? (
+                                    <Compass size={12} className="animate-spin" style={{ animationDuration: '4s' }} />
+                                ) : (
+                                    <TerminalIcon size={12} />
+                                )}
+                                {titleBarText}
                             </span>
                         </div>
                         <div className="w-12" />
@@ -200,7 +267,7 @@ export default function Terminal() {
                     {/* Terminal content */}
                     <div
                         ref={scrollRef}
-                        className="p-5 h-72 overflow-y-auto font-mono text-sm space-y-1"
+                        className="p-5 h-80 overflow-y-auto font-mono text-sm space-y-1"
                         onClick={() => inputRef.current?.focus()}
                     >
                         {/* Boot-up typing animation */}
@@ -216,22 +283,26 @@ export default function Terminal() {
                         )}
 
                         {/* Regular lines after boot */}
-                        {booted && lines.map((line, i) => (
-                            <motion.div
-                                key={i}
-                                initial={{ opacity: 0, x: -5 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ duration: 0.15, delay: i < 2 ? i * 0.05 : 0 }}
-                                className={lineColors[line.type] || 'text-text'}
-                            >
-                                {line.text}
-                            </motion.div>
-                        ))}
+                        {booted &&
+                            lines.map((line, i) => (
+                                <motion.div
+                                    key={i}
+                                    initial={{ opacity: 0, x: -5 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ duration: 0.15, delay: i < 2 ? i * 0.05 : 0 }}
+                                    className={lineColors[line.type] || 'text-text'}
+                                    style={{ whiteSpace: 'pre-wrap' }}
+                                >
+                                    {line.text}
+                                </motion.div>
+                            ))}
 
-                        {/* Input line - only show after boot */}
+                        {/* Input line — only show after boot */}
                         {booted && (
                             <form onSubmit={handleSubmit} className="flex items-center gap-2 mt-2">
-                                <span className="text-accent">$</span>
+                                <span className={adventureMode ? 'text-emerald-400' : 'text-accent'}>
+                                    {promptChar}
+                                </span>
                                 <input
                                     ref={inputRef}
                                     type="text"
@@ -239,12 +310,17 @@ export default function Terminal() {
                                     onChange={(e) => setInput(e.target.value)}
                                     onKeyDown={handleKeyDown}
                                     className="flex-1 bg-transparent outline-none text-text caret-accent font-mono text-sm"
-                                    placeholder="Type a command..."
+                                    placeholder={
+                                        adventureMode
+                                            ? 'look, go, interact, take, map, help...'
+                                            : 'Type a command...'
+                                    }
                                     autoComplete="off"
                                     spellCheck={false}
                                 />
                                 <motion.span
-                                    className="inline-block w-2 h-4 bg-accent"
+                                    className={`inline-block w-2 h-4 ${adventureMode ? 'bg-emerald-400' : 'bg-accent'
+                                        }`}
                                     animate={{ opacity: [1, 1, 0, 0] }}
                                     transition={{
                                         duration: 1,
@@ -266,38 +342,67 @@ export default function Terminal() {
                     transition={{ delay: 0.3 }}
                     className="mt-6 flex flex-wrap justify-center gap-3"
                 >
-                    {['contact --email', 'contact --github', 'contact --linkedin'].map(
-                        (cmd) => (
+                    {!adventureMode && (
+                        <>
+                            {['contact --email', 'contact --github', 'contact --linkedin'].map(
+                                (cmd) => (
+                                    <button
+                                        key={cmd}
+                                        onClick={() => {
+                                            if (!booted) return;
+                                            const newLines = [
+                                                ...lines,
+                                                { type: 'input', text: `$ ${cmd}` },
+                                                ...COMMANDS[cmd](),
+                                            ];
+                                            setLines(newLines);
+                                        }}
+                                        className="px-3 py-1.5 rounded-lg bg-surface-light border border-border text-text-dim text-xs font-mono hover:border-accent/30 hover:text-accent transition-all duration-200"
+                                    >
+                                        {cmd}
+                                    </button>
+                                )
+                            )}
                             <button
-                                key={cmd}
                                 onClick={() => {
                                     if (!booted) return;
                                     const newLines = [
                                         ...lines,
-                                        { type: 'input', text: `$ ${cmd}` },
-                                        ...COMMANDS[cmd](),
+                                        { type: 'input', text: '$ resume' },
+                                        ...COMMANDS.resume(),
                                     ];
                                     setLines(newLines);
                                 }}
-                                className="px-3 py-1.5 rounded-lg bg-surface-light border border-border text-text-dim text-xs font-mono hover:border-accent/30 hover:text-accent transition-all duration-200"
+                                className="px-3 py-1.5 rounded-lg bg-accent/10 border border-accent/25 text-accent text-xs font-mono hover:bg-accent/20 hover:border-accent/40 transition-all duration-200"
                             >
-                                {cmd}
+                                resume
                             </button>
-                        )
+                        </>
                     )}
+
+                    {/* Explore / adventure button — always visible */}
                     <button
                         onClick={() => {
                             if (!booted) return;
-                            const newLines = [
-                                ...lines,
-                                { type: 'input', text: '$ resume' },
-                                ...COMMANDS.resume(),
-                            ];
-                            setLines(newLines);
+                            if (adventureMode) {
+                                // Already in adventure mode — run 'map'
+                                if (gameState) {
+                                    const inputLine = { type: 'input', text: '⚔ map' };
+                                    const { newState, output } = processCommand(gameState, 'map');
+                                    setGameState(newState);
+                                    setLines((prev) => [...prev, inputLine, ...output]);
+                                }
+                            } else {
+                                enterAdventure();
+                            }
                         }}
-                        className="px-3 py-1.5 rounded-lg bg-accent/10 border border-accent/25 text-accent text-xs font-mono hover:bg-accent/20 hover:border-accent/40 transition-all duration-200"
+                        className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all duration-300 flex items-center gap-1.5 ${adventureMode
+                                ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25 hover:border-emerald-500/50 shadow-[0_0_12px_rgba(16,185,129,0.15)]'
+                                : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/40'
+                            }`}
                     >
-                        resume
+                        <Compass size={12} />
+                        {adventureMode ? 'map' : 'explore'}
                     </button>
                 </motion.div>
             </div>

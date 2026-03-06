@@ -7,6 +7,7 @@ import Timeline from './components/Timeline';
 import Terminal from './components/Terminal';
 import ScrollProgress from './components/ScrollProgress';
 import SectionDivider from './components/SectionDivider';
+import CursorTrail from './components/CursorTrail';
 import useActiveSection from './hooks/useActiveSection';
 
 export default function App() {
@@ -14,6 +15,7 @@ export default function App() {
 
     return (
         <div className="min-h-screen bg-bg text-text">
+            <CursorTrail />
             <Navbar activeSection={activeSection} />
             <ScrollProgress activeSection={activeSection} />
 

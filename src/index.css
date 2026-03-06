@@ -58,6 +58,16 @@
   }
 }
 
+/* Hide native cursor on hover-capable devices (replaced by canvas cursor) */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+
+  *,
+  *::before,
+  *::after {
+    cursor: none !important;
+  }
+}
+
 /* Scroll-snap container */
 @media (min-width: 1024px) {
   .snap-container {
