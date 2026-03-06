@@ -21,10 +21,10 @@ import { useEffect, useRef, useCallback } from 'react';
  * lerped transitions (no sudden jumps), prefers-reduced-motion respected.
  */
 
-const PARTICLE_COUNT = 30;
-const PARTICLE_LIFETIME = 600;
-const SPAWN_RATE = 16;
-const TRAIL_MAX_RADIUS = 3;
+const PARTICLE_COUNT = 15;
+const PARTICLE_LIFETIME = 400;
+const SPAWN_RATE = 24;
+const TRAIL_MAX_RADIUS = 2;
 
 // Accent color matching the portfolio
 const ACCENT = { r: 226, g: 160, b: 78 };
@@ -60,11 +60,11 @@ export default function CursorTrail() {
     const getTargets = (state) => {
         switch (state) {
             case 'hover':
-                return { dotRadius: 2, ringRadius: 22, ringAlpha: 0.7, glowRadius: 30 };
+                return { dotRadius: 2, ringRadius: 18, ringAlpha: 0.4, glowRadius: 14 };
             case 'click':
-                return { dotRadius: 5, ringRadius: 12, ringAlpha: 1, glowRadius: 10 };
+                return { dotRadius: 4, ringRadius: 10, ringAlpha: 0.6, glowRadius: 6 };
             default:
-                return { dotRadius: 4, ringRadius: 0, ringAlpha: 0, glowRadius: 18 };
+                return { dotRadius: 3, ringRadius: 0, ringAlpha: 0, glowRadius: 10 };
         }
     };
 
@@ -111,7 +111,7 @@ export default function CursorTrail() {
         const targets = getTargets(stateRef.current);
 
         // Lerp speed — faster for click (snappy), slower for hover (smooth)
-        const speed = stateRef.current === 'click' ? 0.25 : 0.12;
+        const speed = stateRef.current === 'click' ? 0.2 : 0.1;
         anim.dotRadius = lerp(anim.dotRadius, targets.dotRadius, speed);
         anim.ringRadius = lerp(anim.ringRadius, targets.ringRadius, speed);
         anim.ringAlpha = lerp(anim.ringAlpha, targets.ringAlpha, speed);
@@ -139,7 +139,7 @@ export default function CursorTrail() {
 
             ctx.beginPath();
             ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(${ACCENT.r}, ${ACCENT.g}, ${ACCENT.b}, ${alpha * 0.5})`;
+            ctx.fillStyle = `rgba(${ACCENT.r}, ${ACCENT.g}, ${ACCENT.b}, ${alpha * 0.25})`;
             ctx.fill();
 
             alive.push(p);
@@ -153,7 +153,7 @@ export default function CursorTrail() {
             for (let i = 1; i < alive.length; i++) {
                 const progress = (now - alive[i].born) / PARTICLE_LIFETIME;
                 ctx.lineTo(alive[i].x, alive[i].y);
-                ctx.strokeStyle = `rgba(${ACCENT.r}, ${ACCENT.g}, ${ACCENT.b}, ${(1 - progress) * 0.15})`;
+                ctx.strokeStyle = `rgba(${ACCENT.r}, ${ACCENT.g}, ${ACCENT.b}, ${(1 - progress) * 0.08})`;
             }
             const { x: mx, y: my } = mouseRef.current;
             ctx.lineTo(mx, my);
@@ -170,12 +170,12 @@ export default function CursorTrail() {
 
             const progress = age / duration;
             const radius = r.maxRadius * progress;
-            const alpha = (1 - progress) * 0.6;
+            const alpha = (1 - progress) * 0.35;
 
             ctx.beginPath();
             ctx.arc(r.x, r.y, radius, 0, Math.PI * 2);
             ctx.strokeStyle = `rgba(${ACCENT.r}, ${ACCENT.g}, ${ACCENT.b}, ${alpha})`;
-            ctx.lineWidth = 2 * (1 - progress);
+            ctx.lineWidth = 1.5 * (1 - progress);
             ctx.stroke();
 
             aliveRipples.push(r);
@@ -188,7 +188,7 @@ export default function CursorTrail() {
 
             // Ambient glow
             const gradient = ctx.createRadialGradient(x, y, 0, x, y, anim.glowRadius);
-            gradient.addColorStop(0, `rgba(${ACCENT.r}, ${ACCENT.g}, ${ACCENT.b}, 0.12)`);
+            gradient.addColorStop(0, `rgba(${ACCENT.r}, ${ACCENT.g}, ${ACCENT.b}, 0.08)`);
             gradient.addColorStop(1, `rgba(${ACCENT.r}, ${ACCENT.g}, ${ACCENT.b}, 0)`);
             ctx.beginPath();
             ctx.arc(x, y, anim.glowRadius, 0, Math.PI * 2);
@@ -205,7 +205,7 @@ export default function CursorTrail() {
                 ctx.beginPath();
                 ctx.arc(0, 0, anim.ringRadius, 0, Math.PI * 2);
                 ctx.strokeStyle = `rgba(${ACCENT.r}, ${ACCENT.g}, ${ACCENT.b}, ${anim.ringAlpha})`;
-                ctx.lineWidth = 1.5;
+                ctx.lineWidth = 1;
                 ctx.setLineDash([4, 6]);
                 ctx.stroke();
                 ctx.setLineDash([]);
@@ -233,14 +233,14 @@ export default function CursorTrail() {
             // Core dot
             ctx.beginPath();
             ctx.arc(x, y, anim.dotRadius, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(${ACCENT.r}, ${ACCENT.g}, ${ACCENT.b}, 0.9)`;
+            ctx.fillStyle = `rgba(${ACCENT.r}, ${ACCENT.g}, ${ACCENT.b}, 0.75)`;
             ctx.fill();
 
             // White hot center
             if (anim.dotRadius > 1.5) {
                 ctx.beginPath();
                 ctx.arc(x, y, 1.5, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255, 255, 255, 0.8)`;
+                ctx.fillStyle = `rgba(255, 255, 255, 0.6)`;
                 ctx.fill();
             }
         }
