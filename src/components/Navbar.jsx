@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 
 const navLinks = [
-    { label: 'About', href: '#hero', id: 'hero' },
+    { label: 'About', href: '#about', id: 'about' },
     { label: 'Skills', href: '#skills', id: 'skills' },
     { label: 'Projects', href: '#projects', id: 'projects' },
     { label: 'Experience', href: '#timeline', id: 'timeline' },
@@ -118,14 +118,14 @@ export default function Navbar({ activeSection }) {
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.6, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
                 className={`fixed z-50 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${scrolled
-                        ? 'top-4 left-1/2 -translate-x-1/2 w-auto'
-                        : 'top-0 left-0 right-0 w-full'
+                    ? 'top-4 left-1/2 -translate-x-1/2 w-auto'
+                    : 'top-0 left-0 right-0 w-full'
                     }`}
             >
                 <div
                     className={`transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${scrolled
-                            ? 'bg-surface/80 backdrop-blur-xl border border-white/[0.08] rounded-full shadow-lg shadow-black/20 px-6 py-2.5'
-                            : 'bg-transparent px-6 py-4'
+                        ? 'bg-surface/80 backdrop-blur-xl border border-white/[0.08] rounded-full shadow-lg shadow-black/20 px-6 py-2.5'
+                        : 'bg-transparent px-6 py-4'
                         }`}
                 >
                     <div className={`flex items-center justify-between ${scrolled ? '' : 'max-w-7xl mx-auto'
@@ -135,8 +135,8 @@ export default function Navbar({ activeSection }) {
                             href="#hero"
                             onClick={(e) => handleNavClick(e, '#hero')}
                             className={`font-display text-text hover:text-accent transition-all duration-300 ${scrolled
-                                    ? 'text-sm w-0 opacity-0 overflow-hidden pointer-events-none'
-                                    : 'text-lg opacity-100'
+                                ? 'text-sm w-0 opacity-0 overflow-hidden pointer-events-none'
+                                : 'text-lg opacity-100'
                                 }`}
                             style={{ fontStyle: 'italic' }}
                         >
@@ -188,8 +188,8 @@ export default function Navbar({ activeSection }) {
                                 exit={{ opacity: 0, y: 10 }}
                                 transition={{ delay: i * 0.06, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
                                 className={`font-mono text-lg tracking-[0.15em] uppercase transition-colors ${activeSection === link.id
-                                        ? 'text-accent'
-                                        : 'text-text-dim hover:text-text'
+                                    ? 'text-accent'
+                                    : 'text-text-dim hover:text-text'
                                     }`}
                             >
                                 {link.label}

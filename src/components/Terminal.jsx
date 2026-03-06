@@ -3,12 +3,22 @@ import { motion, useInView } from 'framer-motion';
 import { TerminalIcon } from 'lucide-react';
 import SectionHeading from './SectionHeading';
 
+const downloadResume = () => {
+    const link = document.createElement('a');
+    link.href = '/resume.pdf';
+    link.download = 'Parthiv_Paul_Resume.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
+
 const COMMANDS = {
     help: () => [
         { type: 'system', text: 'Available commands:' },
         { type: 'info', text: '  contact --email     Show email address' },
         { type: 'info', text: '  contact --github    Show GitHub profile' },
         { type: 'info', text: '  contact --linkedin  Show LinkedIn profile' },
+        { type: 'info', text: '  resume              Download my resume' },
         { type: 'info', text: '  about               About me' },
         { type: 'info', text: '  skills              List skills' },
         { type: 'info', text: '  clear               Clear terminal' },
@@ -23,6 +33,13 @@ const COMMANDS = {
     'contact --linkedin': () => [
         { type: 'success', text: '🔗 linkedin.com/in/parthiv-paul' },
     ],
+    resume: () => {
+        downloadResume();
+        return [
+            { type: 'success', text: '📄 Downloading resume...' },
+            { type: 'info', text: '   → Parthiv_Paul_Resume.pdf' },
+        ];
+    },
     about: () => [
         {
             type: 'system',
@@ -268,6 +285,20 @@ export default function Terminal() {
                             </button>
                         )
                     )}
+                    <button
+                        onClick={() => {
+                            if (!booted) return;
+                            const newLines = [
+                                ...lines,
+                                { type: 'input', text: '$ resume' },
+                                ...COMMANDS.resume(),
+                            ];
+                            setLines(newLines);
+                        }}
+                        className="px-3 py-1.5 rounded-lg bg-accent/10 border border-accent/25 text-accent text-xs font-mono hover:bg-accent/20 hover:border-accent/40 transition-all duration-200"
+                    >
+                        resume
+                    </button>
                 </motion.div>
             </div>
         </section>

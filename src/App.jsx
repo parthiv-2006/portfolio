@@ -1,5 +1,6 @@
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
+import About from './components/About';
 import SkillsGrid from './components/SkillsGrid';
 import Projects from './components/Projects';
 import Timeline from './components/Timeline';
@@ -18,6 +19,12 @@ export default function App() {
 
             <main>
                 <Hero />
+
+                <SectionDivider variant="line" label="a bit about me" />
+
+                <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-16">
+                    <About />
+                </div>
 
                 <SectionDivider variant="line" label="what I work with" />
 

@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
+import { Download } from 'lucide-react';
 
 export default function Hero() {
     const containerRef = useRef(null);
@@ -69,23 +70,47 @@ export default function Hero() {
                     that don't get in the way.
                 </motion.p>
 
-                {/* Single CTA — text link, not a button */}
-                <motion.a
-                    href="#projects"
+                {/* CTAs row */}
+                <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.5, delay: 1.0 }}
-                    onClick={(e) => {
-                        e.preventDefault();
-                        document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' });
-                    }}
-                    className="inline-flex items-center gap-2 text-text-muted text-sm hover:text-accent transition-colors duration-300 group"
+                    className="flex items-center justify-center gap-5"
                 >
-                    See my work
-                    <span className="inline-block transition-transform duration-300 group-hover:translate-y-0.5">
-                        ↓
-                    </span>
-                </motion.a>
+                    {/* See my work — text link */}
+                    <a
+                        href="#projects"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                        className="inline-flex items-center gap-2 text-text-muted text-sm hover:text-accent transition-colors duration-300 group"
+                    >
+                        See my work
+                        <span className="inline-block transition-transform duration-300 group-hover:translate-y-0.5">
+                            ↓
+                        </span>
+                    </a>
+
+                    {/* Divider dot */}
+                    <span className="w-1 h-1 rounded-full bg-text-dim/50" />
+
+                    {/* Download Resume — creative pill button */}
+                    <a
+                        href="/resume.pdf"
+                        download="Parthiv_Paul_Resume.pdf"
+                        className="group/resume relative inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-medium text-accent border border-accent/25 bg-accent/[0.07] hover:bg-accent/15 hover:border-accent/40 transition-all duration-300 hover:shadow-[0_0_20px_rgba(226,160,78,0.15)]"
+                    >
+                        {/* Animated glow ring */}
+                        <span className="absolute inset-0 rounded-full border border-accent/10 animate-[pulse_3s_ease-in-out_infinite]" />
+
+                        <Download
+                            size={14}
+                            className="transition-transform duration-300 group-hover/resume:translate-y-0.5"
+                        />
+                        <span>Resume</span>
+                    </a>
+                </motion.div>
             </motion.div>
         </section>
     );

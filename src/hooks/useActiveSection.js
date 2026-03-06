@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 
-const SECTION_IDS = ['hero', 'skills', 'projects', 'timeline', 'contact'];
+const SECTION_IDS = ['hero', 'about', 'skills', 'projects', 'timeline', 'contact'];
 
 export default function useActiveSection() {
     const [activeSection, setActiveSection] = useState('hero');
