@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ExternalLink, Github, X, ArrowUpRight } from 'lucide-react';
+import { ExternalLink, Github, X, ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import SectionHeading from './SectionHeading';
 
 const projects = [
@@ -39,141 +39,329 @@ const projects = [
     },
 ];
 
-const cardVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: (i) => ({
+/* ── Derive unique tech tags from all projects ── */
+const allTechs = [...new Set(projects.flatMap((p) => p.tech))].sort();
+
+/* ── Slide animation variants (direction-aware) ── */
+const slideVariants = {
+    enter: (direction) => ({
+        x: direction > 0 ? 300 : -300,
+        opacity: 0,
+        scale: 0.96,
+    }),
+    center: {
+        x: 0,
         opacity: 1,
-        y: 0,
+        scale: 1,
         transition: {
-            duration: 0.6,
-            delay: 0.1 + i * 0.12,
+            duration: 0.5,
+            ease: [0.22, 1, 0.36, 1],
+        },
+    },
+    exit: (direction) => ({
+        x: direction > 0 ? -300 : 300,
+        opacity: 0,
+        scale: 0.96,
+        transition: {
+            duration: 0.4,
             ease: [0.22, 1, 0.36, 1],
         },
     }),
 };
 
-/* ── Cursor-following image preview ── */
-function useImagePreview() {
-    const [active, setActive] = useState(null);
-    const [pos, setPos] = useState({ x: 0, y: 0 });
-    const containerRef = useRef(null);
+/* ── Filter pill animation ── */
+const pillVariants = {
+    hidden: { opacity: 0, y: 8, scale: 0.9 },
+    visible: (i) => ({
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        transition: {
+            duration: 0.35,
+            delay: i * 0.03,
+            ease: [0.22, 1, 0.36, 1],
+        },
+    }),
+};
 
-    const handleMouseMove = (e) => {
-        if (!containerRef.current) return;
-        const rect = containerRef.current.getBoundingClientRect();
-        setPos({
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top,
-        });
-    };
-
-    return { active, setActive, pos, handleMouseMove, containerRef };
-}
+const AUTO_CYCLE_MS = 5000;
 
 export default function Projects() {
     const [selected, setSelected] = useState(null);
-    const { active, setActive, pos, handleMouseMove, containerRef } = useImagePreview();
+    const [activeFilter, setActiveFilter] = useState('All');
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [direction, setDirection] = useState(1);
+    const [isPaused, setIsPaused] = useState(false);
+    const intervalRef = useRef(null);
+
+    /* ── Filtered project list ── */
+    const filtered = useMemo(() => {
+        if (activeFilter === 'All') return projects;
+        return projects.filter((p) => p.tech.includes(activeFilter));
+    }, [activeFilter]);
+
+    /* ── Reset to slide 0 when filter changes ── */
+    useEffect(() => {
+        setDirection(1);
+        setCurrentIndex(0);
+    }, [activeFilter]);
+
+    /* ── Navigation helpers ── */
+    const goTo = useCallback(
+        (idx) => {
+            setDirection(idx > currentIndex ? 1 : -1);
+            setCurrentIndex(idx);
+        },
+        [currentIndex],
+    );
+
+    const goNext = useCallback(() => {
+        if (filtered.length <= 1) return;
+        setDirection(1);
+        setCurrentIndex((prev) => (prev + 1) % filtered.length);
+    }, [filtered.length]);
+
+    const goPrev = useCallback(() => {
+        if (filtered.length <= 1) return;
+        setDirection(-1);
+        setCurrentIndex((prev) => (prev - 1 + filtered.length) % filtered.length);
+    }, [filtered.length]);
+
+    /* ── Auto-cycle timer ── */
+    useEffect(() => {
+        if (isPaused || filtered.length <= 1) {
+            clearInterval(intervalRef.current);
+            return;
+        }
+        intervalRef.current = setInterval(goNext, AUTO_CYCLE_MS);
+        return () => clearInterval(intervalRef.current);
+    }, [isPaused, goNext, filtered.length]);
+
+    /* ── Clamp index if filter shortens the list ── */
+    useEffect(() => {
+        if (currentIndex >= filtered.length) {
+            setCurrentIndex(0);
+        }
+    }, [filtered.length, currentIndex]);
+
+    const currentProject = filtered[currentIndex];
 
     return (
         <section id="projects" className="w-full">
             <div className="w-full">
-                <SectionHeading
-                    label="Work"
-                    title="Featured Projects"
-                />
+                <SectionHeading label="Work" title="Featured Projects" />
 
-                <div
-                    ref={containerRef}
-                    onMouseMove={handleMouseMove}
-                    className="relative space-y-4"
-                >
-                    {/* Floating image preview — follows cursor */}
-                    <AnimatePresence>
-                        {active && (
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.85 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.9 }}
-                                transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                                className="hidden md:block absolute z-30 pointer-events-none"
-                                style={{
-                                    left: pos.x + 20,
-                                    top: pos.y - 100,
-                                }}
-                            >
-                                <div className="w-[320px] h-[200px] rounded-xl overflow-hidden border border-white/[0.1] shadow-2xl shadow-black/50">
-                                    <img
-                                        src={active}
-                                        alt="Project preview"
-                                        className="w-full h-full object-cover"
-                                    />
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-
-                    {/* Project rows */}
-                    {projects.map((project, i) => (
-                        <motion.div
-                            key={project.id}
-                            custom={i}
-                            variants={cardVariants}
+                {/* ── Filter pills ── */}
+                <div className="mb-8 -mt-2">
+                    <div className="flex gap-2 flex-wrap">
+                        <motion.button
+                            custom={0}
+                            variants={pillVariants}
                             initial="hidden"
                             whileInView="visible"
-                            viewport={{ once: true, margin: '-40px' }}
-                            onClick={() => setSelected(project)}
-                            onMouseEnter={() => setActive(project.image)}
-                            onMouseLeave={() => setActive(null)}
-                            className="group relative rounded-xl border border-white/[0.06] bg-surface/40 overflow-hidden cursor-pointer transition-all duration-400 hover:border-accent/30 hover:bg-surface"
+                            viewport={{ once: true }}
+                            onClick={() => setActiveFilter('All')}
+                            className={`px-4 py-1.5 text-xs font-mono rounded-full border transition-all duration-300 cursor-pointer ${activeFilter === 'All'
+                                    ? 'bg-accent/15 text-accent border-accent/30 shadow-[0_0_12px_rgba(226,160,78,0.15)]'
+                                    : 'bg-surface/40 text-text-dim border-white/[0.06] hover:border-white/[0.15] hover:text-text-muted'
+                                }`}
                         >
-                            <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-0 p-5 md:p-6">
-                                {/* Left: number + title */}
-                                <div className="flex items-baseline gap-4 md:w-[280px] shrink-0">
-                                    <span className="font-mono text-text-dim text-xs tabular-nums">
-                                        {String(i + 1).padStart(2, '0')}
-                                    </span>
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-text tracking-tight group-hover:text-accent transition-colors duration-300">
-                                            {project.title}
-                                        </h3>
-                                        <p className="text-text-dim text-xs mt-0.5">{project.tagline}</p>
-                                    </div>
-                                </div>
+                            All
+                        </motion.button>
 
-                                {/* Center: tech stack */}
-                                <div className="flex flex-wrap gap-1.5 flex-1 md:px-6">
-                                    {project.tech.slice(0, 4).map((t) => (
-                                        <span
-                                            key={t}
-                                            className="px-2.5 py-1 text-[11px] rounded-md bg-surface-light/60 text-text-dim font-mono border border-white/[0.04] transition-colors duration-300 group-hover:text-text-muted group-hover:border-white/[0.08]"
-                                        >
-                                            {t}
-                                        </span>
-                                    ))}
-                                    {project.tech.length > 4 && (
-                                        <span className="px-2.5 py-1 text-[11px] rounded-md text-text-dim font-mono">
-                                            +{project.tech.length - 4}
-                                        </span>
-                                    )}
-                                </div>
-
-                                {/* Right: year + arrow */}
-                                <div className="flex items-center gap-4 md:ml-auto shrink-0">
-                                    <span className="font-mono text-text-dim text-xs hidden sm:block">
-                                        {project.year}
-                                    </span>
-                                    <ArrowUpRight
-                                        size={16}
-                                        className="text-text-dim group-hover:text-accent transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Bottom border accent on hover */}
-                            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                        </motion.div>
-                    ))}
+                        {allTechs.map((tech, i) => (
+                            <motion.button
+                                key={tech}
+                                custom={i + 1}
+                                variants={pillVariants}
+                                initial="hidden"
+                                whileInView="visible"
+                                viewport={{ once: true }}
+                                onClick={() => setActiveFilter(tech)}
+                                className={`px-4 py-1.5 text-xs font-mono rounded-full border transition-all duration-300 cursor-pointer ${activeFilter === tech
+                                        ? 'bg-accent/15 text-accent border-accent/30 shadow-[0_0_12px_rgba(226,160,78,0.15)]'
+                                        : 'bg-surface/40 text-text-dim border-white/[0.06] hover:border-white/[0.15] hover:text-text-muted'
+                                    }`}
+                            >
+                                {tech}
+                            </motion.button>
+                        ))}
+                    </div>
                 </div>
+
+                {/* ── Carousel ── */}
+                {filtered.length === 0 ? (
+                    <div className="text-center py-20 text-text-dim font-mono text-sm">
+                        No projects match this filter.
+                    </div>
+                ) : (
+                    <div
+                        className="relative"
+                        onMouseEnter={() => setIsPaused(true)}
+                        onMouseLeave={() => setIsPaused(false)}
+                    >
+                        {/* Chevron buttons */}
+                        {filtered.length > 1 && (
+                            <>
+                                <button
+                                    onClick={goPrev}
+                                    aria-label="Previous project"
+                                    className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 z-20 p-2 rounded-full bg-surface/80 border border-white/[0.06] text-text-dim hover:text-accent hover:border-accent/30 transition-all duration-300 backdrop-blur-sm cursor-pointer hidden md:flex items-center justify-center"
+                                >
+                                    <ChevronLeft size={18} />
+                                </button>
+                                <button
+                                    onClick={goNext}
+                                    aria-label="Next project"
+                                    className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 z-20 p-2 rounded-full bg-surface/80 border border-white/[0.06] text-text-dim hover:text-accent hover:border-accent/30 transition-all duration-300 backdrop-blur-sm cursor-pointer hidden md:flex items-center justify-center"
+                                >
+                                    <ChevronRight size={18} />
+                                </button>
+                            </>
+                        )}
+
+                        {/* Slide area */}
+                        <div className="overflow-hidden rounded-xl">
+                            <AnimatePresence initial={false} custom={direction} mode="wait">
+                                <motion.div
+                                    key={currentProject.id + '-' + currentIndex}
+                                    custom={direction}
+                                    variants={slideVariants}
+                                    initial="enter"
+                                    animate="center"
+                                    exit="exit"
+                                    onClick={() => setSelected(currentProject)}
+                                    className="group relative rounded-xl border border-white/[0.06] bg-surface/40 overflow-hidden cursor-pointer transition-colors duration-400 hover:border-accent/30 hover:bg-surface"
+                                >
+                                    <div className="flex flex-col md:flex-row min-h-[280px]">
+                                        {/* Left panel: project info */}
+                                        <div className="flex-1 p-6 md:p-8 flex flex-col justify-center relative z-10">
+                                            {/* Number + year badge */}
+                                            <div className="flex items-center gap-3 mb-4">
+                                                <span className="font-mono text-accent text-xs tracking-widest">
+                                                    {String(currentIndex + 1).padStart(2, '0')}
+                                                </span>
+                                                <span className="w-8 h-px bg-accent/30" />
+                                                <span className="font-mono text-text-dim text-xs">
+                                                    {currentProject.year}
+                                                </span>
+                                            </div>
+
+                                            {/* Title + tagline */}
+                                            <h3 className="text-2xl md:text-3xl font-bold text-text tracking-tight group-hover:text-accent transition-colors duration-300 mb-1">
+                                                {currentProject.title}
+                                            </h3>
+                                            <p className="text-text-muted text-sm mb-4">
+                                                {currentProject.tagline}
+                                            </p>
+
+                                            {/* Description excerpt */}
+                                            <p className="text-text-dim text-sm leading-relaxed mb-5 line-clamp-2 max-w-md">
+                                                {currentProject.description}
+                                            </p>
+
+                                            {/* Tech stack pills */}
+                                            <div className="flex flex-wrap gap-1.5 mb-4">
+                                                {currentProject.tech.map((t) => (
+                                                    <span
+                                                        key={t}
+                                                        className={`px-2.5 py-1 text-[11px] rounded-md font-mono border transition-colors duration-300 ${activeFilter === t
+                                                                ? 'bg-accent/15 text-accent border-accent/25'
+                                                                : 'bg-surface-light/60 text-text-dim border-white/[0.04] group-hover:text-text-muted group-hover:border-white/[0.08]'
+                                                            }`}
+                                                    >
+                                                        {t}
+                                                    </span>
+                                                ))}
+                                            </div>
+
+                                            {/* View project prompt */}
+                                            <div className="flex items-center gap-2 text-text-dim text-xs font-mono group-hover:text-accent transition-colors duration-300">
+                                                <span>View project</span>
+                                                <ArrowUpRight
+                                                    size={14}
+                                                    className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Right panel: project image with diagonal mask */}
+                                        <div className="relative w-full md:w-[45%] min-h-[200px] md:min-h-0 shrink-0 hidden md:block">
+                                            <div
+                                                className="absolute inset-0 overflow-hidden"
+                                                style={{
+                                                    clipPath: 'polygon(15% 0, 100% 0, 100% 100%, 0% 100%)',
+                                                }}
+                                            >
+                                                <img
+                                                    src={currentProject.image}
+                                                    alt={currentProject.title}
+                                                    className="w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-700 ease-out"
+                                                />
+                                                {/* Gradient overlays for blending */}
+                                                <div className="absolute inset-0 bg-gradient-to-r from-surface/90 via-surface/40 to-transparent" />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-surface/60 via-transparent to-surface/30" />
+                                            </div>
+                                        </div>
+
+                                        {/* Mobile: full-width image at bottom */}
+                                        <div className="md:hidden relative w-full h-[180px] overflow-hidden">
+                                            <img
+                                                src={currentProject.image}
+                                                alt={currentProject.title}
+                                                className="w-full h-full object-cover"
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/60 to-transparent" />
+                                        </div>
+                                    </div>
+
+                                    {/* Bottom border accent on hover */}
+                                    <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                                    {/* Subtle glow effect on hover */}
+                                    <div className="absolute -inset-px rounded-xl bg-gradient-to-r from-accent/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+                                    {/* Subtle progress bar for auto-cycle */}
+                                    {!isPaused && filtered.length > 1 && (
+                                        <div className="absolute bottom-0 left-0 right-0 h-[2px] overflow-hidden z-10">
+                                            <motion.div
+                                                key={currentProject.id + '-progress'}
+                                                initial={{ scaleX: 0 }}
+                                                animate={{ scaleX: 1 }}
+                                                transition={{
+                                                    duration: AUTO_CYCLE_MS / 1000,
+                                                    ease: 'linear',
+                                                }}
+                                                className="h-full bg-gradient-to-r from-accent/50 to-accent/20 origin-left"
+                                            />
+                                        </div>
+                                    )}
+                                </motion.div>
+                            </AnimatePresence>
+                        </div>
+
+                        {/* Dot indicators */}
+                        {filtered.length > 1 && (
+                            <div className="flex items-center justify-center gap-2 mt-6">
+                                {filtered.map((_, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => goTo(i)}
+                                        aria-label={`Go to project ${i + 1}`}
+                                        className="group/dot p-1 cursor-pointer"
+                                    >
+                                        <span
+                                            className={`block rounded-full transition-all duration-400 ${i === currentIndex
+                                                    ? 'w-6 h-2 bg-accent shadow-[0_0_8px_rgba(226,160,78,0.3)]'
+                                                    : 'w-2 h-2 bg-text-dim/40 group-hover/dot:bg-text-dim'
+                                                }`}
+                                        />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
 
             {/* Expanded detail modal */}
@@ -216,7 +404,9 @@ export default function Projects() {
                                             <h3 className="text-2xl font-bold tracking-tight text-text">
                                                 {selected.title}
                                             </h3>
-                                            <p className="text-text-muted text-sm mt-1">{selected.tagline}</p>
+                                            <p className="text-text-muted text-sm mt-1">
+                                                {selected.tagline}
+                                            </p>
                                         </div>
                                         <button
                                             onClick={() => setSelected(null)}
