@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { MapPin, GraduationCap, Coffee, Code2, Gamepad2, Music } from 'lucide-react';
 import SectionHeading from './SectionHeading';
+import GitHubGraph from './GitHubGraph';
 
 const funFacts = [
     { icon: Coffee, label: 'Fueled by', value: 'Cold Brew & Lo-fi' },
@@ -151,6 +152,9 @@ export default function About() {
                                 ))}
                             </div>
                         </div>
+
+                        {/* GitHub contribution graph */}
+                        <GitHubGraph />
                     </div>
                 </div>
             </div>
