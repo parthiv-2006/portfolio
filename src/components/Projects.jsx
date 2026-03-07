@@ -9,7 +9,7 @@ const projects = [
         title: 'Anima',
         tagline: 'Gamified Habit Tracking',
         description:
-            'A full-stack gamified habit-tracking application that decouples frontend logic using a Monorepo architecture and leverages Zustand for complex game loops. Features fluid, 60fps animations designed with Framer Motion and Lottie to increase user retention.',
+            '"Your Tamagotchi for Productivity." Anima transforms daily routines into an engaging journey by turning habit tracking into a game. Instead of just checking boxes, users build consistency by caring for a virtual pet that evolves and grows based on their real-world productivity.',
         tech: ['React', 'Vite', 'Zustand', 'Framer Motion', 'MongoDB'],
         year: '2025',
         role: 'Full-Stack',
@@ -22,7 +22,7 @@ const projects = [
         title: 'MacroMatch',
         tagline: 'Intelligent Nutrition Platform',
         description:
-            'A nutrition platform that optimizes meal generation logic using the Simplex Algorithm (Linear Programming) to solve macronutrient constraint systems in under 200ms. Features a robust CI/CD pipeline via Vercel/Render and JWT-based session management.',
+            'A full-stack MERN application solving meal planning by combining smart pantry management with intelligent meal generation. It tracks inventory and uses linear programming to generate optimized meal plans that hit specific macronutrient targets, complete with an analytics dashboard for nutrition trends.',
         tech: ['React', 'Node.js', 'Express', 'MongoDB'],
         year: '2025',
         role: 'Full-Stack',
@@ -35,7 +35,7 @@ const projects = [
         title: 'Palate',
         tagline: 'AI Restaurant Recommender',
         description:
-            'A web app that mitigates credential vulnerabilities by implementing passkey-first authentication using WebAuthn. Synchronizes real-time lobby states for concurrent users by leveraging Next.js Server Actions and optimistic UI updates. Integrates Google Gemini AI to analyze user behavior patterns and generate personalized recommendations.',
+            'An AI-powered social dining app built for UofTHacks 2026 to eliminate the friction of group restaurant decisions. Combining behavioral analytics with Google Gemini AI, Palate acts as an impartial mediator that provides hyper-personalized recommendations, all secured seamlessly via passkey-first authentication.',
         tech: ['Next.js', 'TypeScript', 'MongoDB', 'Gemini AI', 'WebAuthn'],
         year: '2026',
         role: 'Full-Stack',
