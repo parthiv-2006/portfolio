@@ -9,33 +9,39 @@ const projects = [
         title: 'Anima',
         tagline: 'Gamified Habit Tracking',
         description:
-            'A full-stack gamified habit-tracking application that transforms daily routines into engaging quests. Users create habits, earn XP, level up their character avatar, and compete on leaderboards — making self-improvement feel like playing an RPG.',
-        tech: ['React', 'Node.js', 'Express', 'MongoDB', 'Framer Motion', 'JWT Auth'],
+            'A full-stack gamified habit-tracking application that decouples frontend logic using a Monorepo architecture and leverages Zustand for complex game loops. Features fluid, 60fps animations designed with Framer Motion and Lottie to increase user retention.',
+        tech: ['React', 'Vite', 'Zustand', 'Framer Motion', 'MongoDB'],
         year: '2025',
         role: 'Full-Stack',
         image: '/projects/anima.png',
+        github: 'https://github.com/parthiv-2006/Anima',
+        live: 'https://anima-client.vercel.app/'
     },
     {
         id: 'macromatch',
         title: 'MacroMatch',
-        tagline: 'Full-Stack Nutrition Platform',
+        tagline: 'Intelligent Nutrition Platform',
         description:
-            'An intelligent nutrition platform that helps users track macronutrients, plan meals, and reach dietary goals. Features AI-powered meal suggestions based on user preferences and fitness objectives.',
-        tech: ['React', 'Python', 'Flask', 'PostgreSQL', 'REST API', 'Chart.js'],
+            'A nutrition platform that optimizes meal generation logic using the Simplex Algorithm (Linear Programming) to solve macronutrient constraint systems in under 200ms. Features a robust CI/CD pipeline via Vercel/Render and JWT-based session management.',
+        tech: ['React', 'Node.js', 'Express', 'MongoDB'],
         year: '2025',
         role: 'Full-Stack',
         image: '/projects/macromatch.png',
+        github: 'https://github.com/parthiv-2006/MacroMatch',
+        live: 'https://macro-match-cyan.vercel.app/'
     },
     {
-        id: 'uofthacks',
-        title: 'UofTHacks Submission',
-        tagline: 'Hackathon Project',
+        id: 'palate',
+        title: 'Palate',
+        tagline: 'AI Restaurant Recommender',
         description:
-            'A hackathon project built in 36 hours at UofTHacks. Rapid prototyping of an innovative solution addressing real-world challenges with a team of talented engineers.',
-        tech: ['React', 'Node.js', 'Socket.io', 'MongoDB', 'Tailwind CSS'],
-        year: '2025',
-        role: 'Frontend Lead',
+            'A web app that mitigates credential vulnerabilities by implementing passkey-first authentication using WebAuthn. Synchronizes real-time lobby states for concurrent users by leveraging Next.js Server Actions and optimistic UI updates. Integrates Google Gemini AI to analyze user behavior patterns and generate personalized recommendations.',
+        tech: ['Next.js', 'TypeScript', 'MongoDB', 'Gemini AI', 'WebAuthn'],
+        year: '2026',
+        role: 'Full-Stack',
         image: '/projects/uofthacks.png',
+        github: 'https://github.com/parthiv-2006/palate',
+        live: 'https://www.mypalate.tech/'
     },
 ];
 
@@ -162,8 +168,8 @@ export default function Projects() {
                             viewport={{ once: true }}
                             onClick={() => setActiveFilter('All')}
                             className={`px-4 py-1.5 text-xs font-mono rounded-full border transition-all duration-300 cursor-pointer ${activeFilter === 'All'
-                                    ? 'bg-accent/15 text-accent border-accent/30 shadow-[0_0_12px_rgba(226,160,78,0.15)]'
-                                    : 'bg-surface/40 text-text-dim border-white/[0.06] hover:border-white/[0.15] hover:text-text-muted'
+                                ? 'bg-accent/15 text-accent border-accent/30 shadow-[0_0_12px_rgba(226,160,78,0.15)]'
+                                : 'bg-surface/40 text-text-dim border-white/[0.06] hover:border-white/[0.15] hover:text-text-muted'
                                 }`}
                         >
                             All
@@ -179,8 +185,8 @@ export default function Projects() {
                                 viewport={{ once: true }}
                                 onClick={() => setActiveFilter(tech)}
                                 className={`px-4 py-1.5 text-xs font-mono rounded-full border transition-all duration-300 cursor-pointer ${activeFilter === tech
-                                        ? 'bg-accent/15 text-accent border-accent/30 shadow-[0_0_12px_rgba(226,160,78,0.15)]'
-                                        : 'bg-surface/40 text-text-dim border-white/[0.06] hover:border-white/[0.15] hover:text-text-muted'
+                                    ? 'bg-accent/15 text-accent border-accent/30 shadow-[0_0_12px_rgba(226,160,78,0.15)]'
+                                    : 'bg-surface/40 text-text-dim border-white/[0.06] hover:border-white/[0.15] hover:text-text-muted'
                                     }`}
                             >
                                 {tech}
@@ -266,8 +272,8 @@ export default function Projects() {
                                                     <span
                                                         key={t}
                                                         className={`px-2.5 py-1 text-[11px] rounded-md font-mono border transition-colors duration-300 ${activeFilter === t
-                                                                ? 'bg-accent/15 text-accent border-accent/25'
-                                                                : 'bg-surface-light/60 text-text-dim border-white/[0.04] group-hover:text-text-muted group-hover:border-white/[0.08]'
+                                                            ? 'bg-accent/15 text-accent border-accent/25'
+                                                            : 'bg-surface-light/60 text-text-dim border-white/[0.04] group-hover:text-text-muted group-hover:border-white/[0.08]'
                                                             }`}
                                                     >
                                                         {t}
@@ -352,8 +358,8 @@ export default function Projects() {
                                     >
                                         <span
                                             className={`block rounded-full transition-all duration-400 ${i === currentIndex
-                                                    ? 'w-6 h-2 bg-accent shadow-[0_0_8px_rgba(226,160,78,0.3)]'
-                                                    : 'w-2 h-2 bg-text-dim/40 group-hover/dot:bg-text-dim'
+                                                ? 'w-6 h-2 bg-accent shadow-[0_0_8px_rgba(226,160,78,0.3)]'
+                                                : 'w-2 h-2 bg-text-dim/40 group-hover/dot:bg-text-dim'
                                                 }`}
                                         />
                                     </button>
@@ -442,18 +448,26 @@ export default function Projects() {
                                     </div>
 
                                     <div className="flex gap-3">
-                                        <a
-                                            href="#"
-                                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-accent/10 text-accent text-sm font-medium border border-accent/20 hover:bg-accent/20 transition-colors"
-                                        >
-                                            <Github size={15} /> Source
-                                        </a>
-                                        <a
-                                            href="#"
-                                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-light text-text-muted text-sm font-medium border border-white/[0.06] hover:border-white/[0.15] hover:text-text transition-colors"
-                                        >
-                                            <ExternalLink size={15} /> Live Demo
-                                        </a>
+                                        {selected.github && (
+                                            <a
+                                                href={selected.github}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-accent/10 text-accent text-sm font-medium border border-accent/20 hover:bg-accent/20 transition-colors"
+                                            >
+                                                <Github size={15} /> Source
+                                            </a>
+                                        )}
+                                        {selected.live && (
+                                            <a
+                                                href={selected.live}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-light text-text-muted text-sm font-medium border border-white/[0.06] hover:border-white/[0.15] hover:text-text transition-colors"
+                                            >
+                                                <ExternalLink size={15} /> Live Demo
+                                            </a>
+                                        )}
                                     </div>
                                 </div>
                             </motion.div>

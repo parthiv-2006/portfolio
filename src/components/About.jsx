@@ -1,13 +1,13 @@
 import { motion } from 'framer-motion';
-import { MapPin, GraduationCap, Coffee, Code2, Gamepad2, Music } from 'lucide-react';
+import { MapPin, GraduationCap, Code2, Smile, Shield, Plane } from 'lucide-react';
 import SectionHeading from './SectionHeading';
 import GitHubGraph from './GitHubGraph';
 
 const funFacts = [
-    { icon: Coffee, label: 'Fueled by', value: 'Cold Brew & Lo-fi' },
+    { icon: Smile, label: 'Late Bloomer', value: "Didn't lose my first babytooth till I was 14" },
+    { icon: Shield, label: 'Indestructible', value: 'Have never broken a bone' },
     { icon: Code2, label: 'First language', value: 'Python (age 14)' },
-    { icon: Gamepad2, label: 'Side quest', value: 'Game dev with Unity' },
-    { icon: Music, label: 'Coding playlist', value: 'Synthwave & Jazz' },
+    { icon: Plane, label: 'Wanderlust', value: 'Always plotting out my next trip' },
 ];
 
 const cardVariants = {
@@ -46,7 +46,7 @@ export default function About() {
                             <div className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden border border-white/[0.08] bg-surface">
                                 {/* Placeholder headshot — replace /headshot.jpg with your real photo */}
                                 <img
-                                    src="/headshot.jpg"
+                                    src="/headshot.png"
                                     alt="Parthiv Paul"
                                     className="w-full h-full object-cover group-hover/photo:scale-105 transition-transform duration-700 ease-out"
                                     onError={(e) => {
@@ -94,25 +94,23 @@ export default function About() {
                             className="mb-10"
                         >
                             <p className="text-text text-base md:text-lg leading-relaxed mb-5">
-                                I got into programming when I was 14 — built a janky Python calculator and
-                                thought I was basically a hacker. That spark turned into an obsession with
-                                building things that{' '}
+                                Hey! I first caught the programming bug at 14 after throwing together a delightfully janky
+                                Python calculator. I convinced myself I was basically a hacker, and that wild spark quickly
+                                turned into a full-blown obsession with building digital experiences that{' '}
                                 <span className="text-accent font-medium">actually work</span> and{' '}
-                                <span className="text-accent font-medium">feel good to use</span>.
+                                <span className="text-accent font-medium">feel amazing to use</span>.
                             </p>
                             <p className="text-text-muted text-base leading-relaxed mb-5">
-                                Now I'm a Computer Science Specialist at the University of Toronto,
-                                where I've been lucky enough to dive deep into algorithms, systems design,
-                                and the stuff that makes software tick under the hood. But what really
-                                gets me going is the intersection of{' '}
-                                <em className="text-text not-italic font-medium">engineering and design</em>
-                                {' '}— making complex systems feel effortless.
+                                Fast forward to today, I'm studying as a Computer Science Specialist at the University of Toronto.
+                                I'm the type of programmer who gets excited about both the messy backend structure and making
+                                the final product look incredible. Currently, I'm on the lookout for Software Engineering internships
+                                for both <span className="text-accent font-medium">Summer 2026</span> and <span className="text-accent font-medium">Fall 2026</span>,
+                                so if you're building a vibrant team and need someone eager to roll up their sleeves, let's talk!
                             </p>
                             <p className="text-text-muted text-base leading-relaxed">
-                                When I'm not coding, you'll find me exploring new coffee spots around
-                                Toronto, tinkering with game dev side projects, or dissecting the UI of
-                                apps I admire. I believe the best software is built by people who care
-                                about every pixel <em>and</em> every millisecond.
+                                I try not to be just a keyboard warrior! Aside from coding, I love travelling, fitness,
+                                playing the guitar, and reading. I firmly believe that the best code is written by people who live
+                                colorful lives away from the screen, caring about every pixel <em>and</em> every millisecond.
                             </p>
                         </motion.div>
 
