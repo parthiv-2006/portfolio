@@ -7,7 +7,7 @@ import { createGameState, processCommand, getEntryMessage } from '../adventureEn
 /* ── Resume download helper ── */
 const downloadResume = () => {
     const link = document.createElement('a');
-    link.href = '/resume.pdf';
+    link.href = 'resume.pdf';
     link.download = 'Parthiv_Paul_Resume.pdf';
     document.body.appendChild(link);
     link.click();

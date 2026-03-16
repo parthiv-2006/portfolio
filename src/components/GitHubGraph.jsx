@@ -189,6 +189,10 @@ export default function GitHubGraph() {
                         />
                     ))}
                 </div>
+            ) : allData.length === 0 ? (
+                <div className="flex items-center justify-center py-8">
+                    <span className="text-text-dim text-xs font-mono">Unable to load contribution data.</span>
+                </div>
             ) : (
                 <>
                     {/* Grid of day cells */}

@@ -250,12 +250,16 @@ export default function Projects() {
                             onClick={() => setSelected(null)}
                             className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
                         />
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6">
+                        <div 
+                            className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6"
+                            onClick={() => setSelected(null)}
+                        >
                             <motion.div
                                 initial={{ opacity: 0, y: 20, scale: 0.97 }}
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                 exit={{ opacity: 0, y: 10, scale: 0.98 }}
                                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                                onClick={(e) => e.stopPropagation()}
                                 className="relative w-full max-w-2xl rounded-2xl border border-white/[0.08] bg-surface overflow-hidden shadow-2xl shadow-black/40 flex flex-col max-h-[90vh]"
                             >
                                 {/* Header */}
