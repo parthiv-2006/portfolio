@@ -102,7 +102,7 @@ export default function Projects() {
                             className={`px-4 py-1.5 text-xs font-mono rounded-full border transition-all duration-300 cursor-pointer ${
                                 activeFilter === 'All'
                                     ? 'bg-accent/15 text-accent border-accent/30 shadow-[0_0_12px_rgba(226,160,78,0.15)]'
-                                    : 'bg-surface/40 text-text-dim border-white/[0.06] hover:border-white/[0.15] hover:text-text-muted'
+                                    : 'bg-surface/40 text-text-muted border-white/6 hover:border-white/15 hover:text-text'
                             }`}
                         >
                             All
@@ -120,7 +120,7 @@ export default function Projects() {
                                 className={`px-4 py-1.5 text-xs font-mono rounded-full border transition-all duration-300 cursor-pointer ${
                                     activeFilter === tech
                                         ? 'bg-accent/15 text-accent border-accent/30 shadow-[0_0_12px_rgba(226,160,78,0.15)]'
-                                        : 'bg-surface/40 text-text-dim border-white/[0.06] hover:border-white/[0.15] hover:text-text-muted'
+                                        : 'bg-surface/40 text-text-muted border-white/6 hover:border-white/15 hover:text-text'
                                 }`}
                             >
                                 {tech}
@@ -145,7 +145,7 @@ export default function Projects() {
                                 whileInView="visible"
                                 viewport={{ once: true, margin: "-50px" }}
                                 onClick={() => setSelected(project)}
-                                className="group relative rounded-2xl border border-white/[0.06] bg-surface/40 overflow-hidden cursor-pointer transition-all duration-400 hover:border-accent/25 hover:bg-surface hover:-translate-y-1"
+                                className="group relative rounded-2xl border border-white/6 bg-surface/40 overflow-hidden cursor-pointer transition-all duration-400 hover:border-accent/25 hover:bg-surface hover:-translate-y-1 hover:shadow-[0_12px_40px_-10px_var(--color-accent-glow)]"
                             >
                                 <div className="p-6 md:p-8 relative z-10 flex flex-col md:flex-row md:items-start gap-6">
                                     <div className="flex-1 flex flex-col min-h-full">
@@ -181,7 +181,7 @@ export default function Projects() {
                                                     className={`px-3 py-1.5 text-xs rounded-lg font-mono border transition-colors duration-300 ${
                                                         activeFilter === t
                                                             ? 'bg-accent/15 text-accent border-accent/25'
-                                                            : 'bg-surface-light/50 text-text-dim border-white/[0.08] group-hover:text-text-muted group-hover:border-white/[0.15]'
+                                                            : 'bg-surface-light/50 text-text-muted border-white/8 group-hover:text-text group-hover:border-white/15'
                                                     }`}
                                                 >
                                                     {t}
@@ -198,7 +198,7 @@ export default function Projects() {
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         onClick={(e) => e.stopPropagation()}
-                                                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-light text-text-muted text-xs md:text-sm font-mono border border-white/[0.06] hover:border-white/[0.2] hover:text-text transition-all duration-300"
+                                                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-light text-text-muted text-xs md:text-sm font-mono border border-white/6 hover:border-white/20 hover:text-text transition-all duration-300"
                                                     >
                                                         <Github size={15} /> Source
                                                     </a>
@@ -220,7 +220,7 @@ export default function Projects() {
                                                 <span>Details</span>
                                                 <ArrowUpRight
                                                     size={14}
-                                                    className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                                                    className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1"
                                                 />
                                             </div>
                                         </div>
@@ -278,7 +278,7 @@ export default function Projects() {
                                         </div>
                                         <button
                                             onClick={() => setSelected(null)}
-                                            className="p-2 rounded-lg text-text-dim hover:text-text hover:bg-surface-light transition-colors shrink-0 ml-4 border border-transparent hover:border-white/[0.08]"
+                                            className="min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-lg text-text-dim hover:text-text hover:bg-surface-light transition-colors shrink-0 ml-4 border border-transparent hover:border-white/[0.08]"
                                             aria-label="Close"
                                         >
                                             <X size={20} />

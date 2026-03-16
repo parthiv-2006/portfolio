@@ -86,8 +86,7 @@ export default function Hero() {
                     transition={{ duration: 0.6, delay: 0.8 }}
                     className="text-text-muted text-base md:text-lg max-w-lg mx-auto leading-relaxed mb-10"
                 >
-                    I care about performance, clean APIs, and interfaces
-                    that don't get in the way.
+                    Always Learning. Always Building. Sometimes it works out.
                 </motion.p>
 
                 {/* CTAs row */}

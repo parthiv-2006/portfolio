@@ -12,6 +12,11 @@
   --color-text: #E8E4DE;
   --color-text-muted: #8A8578;
   --color-text-dim: #5C584E;
+  
+  /* Semantic Functional Tokens */
+  --color-action-primary: var(--color-accent);
+  --color-action-hover: var(--color-accent-glow);
+  --color-border-interactive: var(--color-border-hover);
   --font-sans: "Inter", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", monospace;
   --font-display: "Instrument Serif", "Georgia", serif;

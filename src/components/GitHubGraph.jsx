@@ -180,12 +180,17 @@ export default function GitHubGraph() {
 
             {/* Contribution grid */}
             {loading ? (
-                <div className="flex gap-1 justify-center py-4">
-                    {Array.from({ length: 7 }).map((_, i) => (
+                <div className="flex flex-wrap opacity-60" style={{ gap: '3px' }}>
+                    {Array.from({ length: 30 }).map((_, i) => (
                         <div
                             key={i}
-                            className="w-3 h-3 rounded-sm bg-surface-light/40 animate-pulse"
-                            style={{ animationDelay: `${i * 100}ms` }}
+                            className="aspect-square bg-surface-light/40 rounded-[3px] animate-pulse border border-white/[0.02]"
+                            style={{
+                                width: `calc((100% - ${(30 - 1) * 3}px) / 30)`,
+                                minWidth: '6px',
+                                maxWidth: '18px',
+                                animationDelay: `${(i % 5) * 150}ms`
+                            }}
                         />
                     ))}
                 </div>
