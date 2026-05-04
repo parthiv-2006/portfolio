@@ -1,0 +1,384 @@
+.card {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease, transform 150ms ease, box-shadow 150ms ease;
+}
+
+.cardHovered {
+  background: var(--surface-2);
+  border-color: var(--hairline-2);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px color-mix(in oklch, var(--bg) 70%, transparent);
+}
+
+.cardExpanded {
+  background: var(--surface-3);
+  border-color: var(--hairline-2);
+}
+
+.card:focus-visible {
+  outline: 1.5px solid color-mix(in oklch, var(--accent) 55%, transparent);
+  outline-offset: 1px;
+}
+
+.cardList {
+  border-left: 2px solid var(--card-accent, transparent);
+}
+
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.topLeft {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.topRight {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.categoryBadge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  border-radius: 4px;
+  padding: 1.5px 5px;
+  white-space: nowrap;
+}
+
+.modeTag {
+  font-size: 9.5px;
+  color: var(--ink-4);
+  letter-spacing: 0.02em;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+
+.dateText {
+  font-size: 9.5px;
+  color: var(--ink-4);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+
+.chevron {
+  color: var(--ink-4);
+  display: flex;
+}
+
+.deleteBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ink-4);
+  padding: 2px;
+  border-radius: 3px;
+  transition: color 120ms ease;
+}
+
+.deleteBtn:hover {
+  color: #f87171;
+}
+
+.previewText {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--ink-3);
+  line-height: 1.5;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.previewExpanded {
+  -webkit-line-clamp: unset;
+}
+
+.tagRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.tagChip {
+  font-size: 9.5px;
+  color: var(--ink-4);
+  background: color-mix(in oklch, var(--ink) 3%, transparent);
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  padding: 1px 5px;
+  letter-spacing: 0.01em;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  white-space: nowrap;
+}
+
+.expandedBody {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--hairline);
+}
+
+.originalLabel {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  margin: 0 0 6px;
+}
+
+.explanationText {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: var(--ink);
+  line-height: 1.65;
+}
+
+.urlText {
+  margin: 0;
+  font-size: 10px;
+  color: var(--ink-4);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recallSection {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--hairline);
+}
+
+.recallSectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.recallSectionLabel {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  margin: 0;
+}
+
+.customTag {
+  font-size: 8.5px;
+  color: oklch(0.72 0.10 230);
+  background: oklch(0.72 0.10 230 / 0.10);
+  border: 1px solid oklch(0.72 0.10 230 / 0.22);
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-family: "JetBrains Mono", monospace;
+}
+
+.recallLoading {
+  font-size: 11px;
+  color: var(--ink-4);
+  margin: 0;
+}
+
+.recallQA {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.recallSide {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.recallSideLabel {
+  font-size: 9px;
+  font-weight: 700;
+  font-family: "JetBrains Mono", monospace;
+  color: var(--accent);
+  min-width: 12px;
+  padding-top: 1px;
+}
+
+.recallText {
+  font-size: 11.5px;
+  color: var(--ink-2);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.recallEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.recallFieldLabel {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+
+.recallTextarea {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--hairline);
+  border-radius: 5px;
+  color: var(--ink-2);
+  font-size: 11.5px;
+  font-family: inherit;
+  line-height: 1.5;
+  padding: 6px 8px;
+  resize: vertical;
+  box-sizing: border-box;
+  transition: border-color 120ms ease;
+}
+
+.recallTextarea:focus {
+  outline: none;
+  border-color: var(--accent-border);
+}
+
+.recallError {
+  font-size: 10.5px;
+  color: #f87171;
+  margin: 2px 0 0;
+}
+
+.recallActions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.recallAutoBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 5px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-bg);
+  color: var(--accent);
+  cursor: pointer;
+  transition: background 120ms ease;
+  font-family: inherit;
+}
+.recallAutoBtn:hover { background: color-mix(in oklch, var(--accent-bg) 160%, transparent); }
+
+.recallCustomBtn {
+  font-size: 10.5px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 5px;
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+  font-family: inherit;
+}
+.recallCustomBtn:hover { background: var(--surface-2); color: var(--ink-2); }
+
+.recallSaveBtn {
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 5px;
+  border: none;
+  background: var(--accent);
+  color: var(--accent-ink);
+  cursor: pointer;
+  transition: opacity 120ms ease;
+  font-family: inherit;
+}
+.recallSaveBtn:disabled { opacity: 0.4; cursor: default; }
+.recallSaveBtn:not(:disabled):hover { opacity: 0.88; }
+
+.recallCancelBtn {
+  font-size: 10.5px;
+  padding: 4px 10px;
+  border-radius: 5px;
+  border: 1px solid var(--hairline);
+  background: none;
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: color 120ms ease;
+  font-family: inherit;
+}
+.recallCancelBtn:hover { color: var(--ink-2); }
+
+.recallEditBtn {
+  font-size: 10.5px;
+  padding: 4px 10px;
+  border-radius: 5px;
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+  font-family: inherit;
+}
+.recallEditBtn:hover { background: var(--surface-2); color: var(--ink-2); }
+
+.recallRemoveBtn {
+  font-size: 10.5px;
+  padding: 4px 10px;
+  border-radius: 5px;
+  border: 1px solid oklch(0.50 0.12 25 / 0.2);
+  background: none;
+  color: oklch(0.60 0.12 25);
+  cursor: pointer;
+  transition: color 120ms ease;
+  font-family: inherit;
+}
+.recallRemoveBtn:hover { color: #f87171; border-color: oklch(0.50 0.12 25 / 0.4); }
+
+.recallBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 2px 5px;
+  border-radius: 4px;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+}
+
+.recallPreview {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.recallEmpty {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}

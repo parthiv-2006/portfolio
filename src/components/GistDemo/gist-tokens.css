@@ -1,0 +1,45 @@
+/* Gist design tokens — scoped to .gist-scope to avoid portfolio variable conflicts */
+
+.gist-scope {
+  /* Surfaces */
+  --bg:         oklch(0.16 0.004 120);
+  --surface:    oklch(0.20 0.005 120);
+  --surface-2:  oklch(0.23 0.005 120);
+  --surface-3:  oklch(0.27 0.006 120);
+  --hairline:   oklch(0.30 0.006 120);
+  --hairline-2: oklch(0.36 0.008 120);
+
+  /* Ink */
+  --ink:   oklch(0.95 0.005 95);
+  --ink-2: oklch(0.78 0.006 95);
+  --ink-3: oklch(0.58 0.008 95);
+  --ink-4: oklch(0.42 0.008 95);
+
+  /* Accent — sage/moss */
+  --accent:        oklch(0.75 0.11 150);
+  --accent-dim:    oklch(0.55 0.09 150);
+  --accent-bg:     oklch(0.30 0.05 150 / 0.3);
+  --accent-ink:    oklch(0.22 0.03 150);
+  --accent-border: oklch(0.55 0.09 150 / 0.4);
+  --accent-glow:   oklch(0.75 0.11 150 / 0.25);
+
+  /* Secondary — warm ochre */
+  --ochre:    oklch(0.78 0.11 80);
+  --ochre-bg: oklch(0.30 0.04 80 / 0.3);
+
+  /* Radii */
+  --r1: 4px;
+  --r2: 6px;
+  --r3: 10px;
+
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+
+  font-family: var(--font-sans);
+  color: var(--ink);
+  box-sizing: border-box;
+}
+
+.gist-scope *, .gist-scope *::before, .gist-scope *::after {
+  box-sizing: inherit;
+}

@@ -1,0 +1,430 @@
+@keyframes gistSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes gistFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  animation: gistFadeIn 200ms ease both;
+}
+
+.centerState {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.spinner {
+  width: 30px;
+  height: 30px;
+  border: 2px solid color-mix(in oklch, var(--accent-dim) 22%, transparent);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: gistSpin 0.75s linear infinite;
+}
+
+.spinnerInline {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border: 1.5px solid color-mix(in oklch, var(--accent-dim) 28%, transparent);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: gistSpin 0.75s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+.stateText {
+  font-size: 13px;
+  color: var(--ink-4);
+  margin: 0;
+}
+
+.emptyIllus {
+  width: 80px;
+  height: 80px;
+  opacity: 0.75;
+}
+
+.emptyTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0;
+}
+
+.emptySubtext {
+  font-size: 12px;
+  color: var(--ink-4);
+  margin: 0;
+  max-width: 260px;
+  line-height: 1.55;
+}
+
+.errorText {
+  font-size: 12px;
+  color: oklch(0.72 0.15 25);
+  margin: 0;
+  text-align: center;
+  max-width: 280px;
+}
+
+.computeBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  background: color-mix(in oklch, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in oklch, var(--accent-dim) 35%, transparent);
+  border-radius: 8px;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 140ms, border-color 140ms, opacity 140ms;
+  font-family: inherit;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.computeBtn:hover:not(:disabled) {
+  background: color-mix(in oklch, var(--accent) 20%, transparent);
+  border-color: color-mix(in oklch, var(--accent-dim) 55%, transparent);
+}
+
+.computeBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px 9px;
+  border-bottom: 1px solid var(--surface-2);
+  flex-shrink: 0;
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.metaRow {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.metaBadge {
+  font-size: 9.5px;
+  color: var(--ink-4);
+  padding: 1px 6px;
+  background: color-mix(in oklch, var(--surface-2) 50%, transparent);
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  letter-spacing: 0.01em;
+}
+
+.staleBadge {
+  font-size: 9.5px;
+  color: var(--ochre);
+  padding: 1px 6px;
+  background: color-mix(in oklch, var(--ochre-bg) 33%, transparent);
+  border: 1px solid color-mix(in oklch, var(--ochre) 22%, transparent);
+  border-radius: 4px;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border-bottom: 1px solid var(--surface);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.filterWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 100px;
+}
+
+.filterIcon {
+  position: absolute;
+  left: 8px;
+  width: 11px;
+  height: 11px;
+  color: var(--ink-4);
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.filterInput {
+  width: 100%;
+  padding: 5px 24px 5px 26px;
+  background: color-mix(in oklch, var(--surface-2) 40%, transparent);
+  border: 1px solid var(--hairline);
+  border-radius: 6px;
+  color: var(--ink);
+  font-size: 11px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 140ms;
+}
+
+.filterInput:focus-visible {
+  border-color: color-mix(in oklch, var(--accent-dim) 35%, transparent);
+}
+
+.filterInput::placeholder {
+  color: var(--hairline-2);
+}
+
+.clearX {
+  position: absolute;
+  right: 6px;
+  background: none;
+  border: none;
+  color: var(--ink-4);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0 2px;
+  transition: color 100ms;
+}
+
+.clearX:hover {
+  color: var(--ink-2);
+}
+
+.timeline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sliderStack {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tlSlider {
+  width: 90px;
+  accent-color: var(--accent);
+  cursor: pointer;
+  height: 2px;
+  margin: 0;
+}
+
+.tlLabel {
+  font-size: 9px;
+  color: var(--ink-4);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.canvasWrap {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+  cursor: grab;
+  background:
+    radial-gradient(ellipse 55% 55% at 50% 50%, color-mix(in oklch, var(--accent) 2.5%, transparent) 0%, transparent 70%);
+}
+
+.canvasDragging {
+  cursor: grabbing;
+}
+
+.svgInner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+.svg {
+  display: block;
+  overflow: visible;
+}
+
+.tooltip {
+  position: absolute;
+  pointer-events: none;
+  z-index: 50;
+  background: color-mix(in oklch, var(--bg) 97%, transparent);
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  padding: 8px 11px;
+  max-width: 180px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 30px oklch(0 0 0 / 0.55);
+  animation: gistFadeIn 80ms ease both;
+}
+
+.ttCategory {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+
+.ttTitle {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 4px;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ttSnippet {
+  font-size: 10.5px;
+  color: var(--ink-3);
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 5px;
+}
+
+.ttDate {
+  font-size: 9px;
+  color: var(--ink-4);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  letter-spacing: 0.02em;
+}
+
+.zoomCtrl {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 10;
+}
+
+.zBtn {
+  width: 26px;
+  height: 26px;
+  background: color-mix(in oklch, var(--surface) 94%, transparent);
+  border: 1px solid var(--hairline);
+  border-radius: 6px;
+  color: var(--ink-3);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  transition: color 120ms, border-color 120ms, background 120ms;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.zBtn:hover {
+  color: var(--accent);
+  border-color: color-mix(in oklch, var(--accent-dim) 35%, transparent);
+  background: color-mix(in oklch, var(--accent) 10%, transparent);
+}
+
+.legend {
+  display: flex;
+  gap: 4px;
+  padding: 6px 14px;
+  border-top: 1px solid var(--surface);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  max-height: 64px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--hairline-2) transparent;
+}
+
+.legendChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 5px;
+  border: 1px solid var(--hairline);
+  background: color-mix(in oklch, var(--surface) 40%, transparent);
+  color: var(--ink-4);
+  font-size: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 130ms;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.legendChip:hover {
+  border-color: var(--hairline-2);
+  color: var(--ink-2);
+}
+
+.legendChipActive {
+  border-color: var(--hairline-2);
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+.legendDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legendSz {
+  color: var(--ink-4);
+  font-size: 9px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner, .spinnerInline { animation: none; border-color: var(--accent); }
+  .container, .tooltip     { animation: none; }
+}
