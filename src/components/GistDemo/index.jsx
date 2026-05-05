@@ -93,24 +93,39 @@ export default function GistDemoWrapper() {
   const [gistBtnPos, setGistBtnPos]   = useState(null);
   const [selectedText, setSelectedText] = useState('');
 
-  const articleRef  = useRef(null);
-  const viewportRef = useRef(null);
+  const articleRef       = useRef(null);
+  const viewportRef      = useRef(null);
+  // Ref always holds the latest selected text so handleGistIt never reads
+  // a stale closure value (mousedown clears the selection before click fires,
+  // which causes React to re-render with selectedText='' before onClick runs).
+  const selectedTextRef  = useRef('');
 
   /* Track text selection inside the article */
   useEffect(() => {
     const handleSelectionChange = () => {
       const sel = window.getSelection();
       const text = sel?.toString().trim() ?? '';
-      if (!text || !articleRef.current) { setGistBtnPos(null); setSelectedText(''); return; }
+      if (!text || !articleRef.current) {
+        setGistBtnPos(null);
+        setSelectedText('');
+        selectedTextRef.current = '';
+        return;
+      }
       try {
         const range = sel.getRangeAt(0);
-        if (!articleRef.current.contains(range.commonAncestorContainer)) { setGistBtnPos(null); setSelectedText(''); return; }
+        if (!articleRef.current.contains(range.commonAncestorContainer)) {
+          setGistBtnPos(null);
+          setSelectedText('');
+          selectedTextRef.current = '';
+          return;
+        }
         const rect = range.getBoundingClientRect();
         const vpRect = viewportRef.current?.getBoundingClientRect();
-        if (!vpRect) { setGistBtnPos(null); setSelectedText(''); return; }
+        if (!vpRect) { setGistBtnPos(null); setSelectedText(''); selectedTextRef.current = ''; return; }
         setGistBtnPos({ x: rect.left + rect.width / 2 - vpRect.left, y: rect.top - 10 - vpRect.top });
         setSelectedText(text);
-      } catch { setGistBtnPos(null); setSelectedText(''); }
+        selectedTextRef.current = text;
+      } catch { setGistBtnPos(null); setSelectedText(''); selectedTextRef.current = ''; }
     };
     document.addEventListener('selectionchange', handleSelectionChange);
     return () => document.removeEventListener('selectionchange', handleSelectionChange);
@@ -118,27 +133,31 @@ export default function GistDemoWrapper() {
 
   /* Send selected text to backend */
   const handleGistIt = useCallback(async () => {
-    if (!selectedText || capturing) return;
+    // Read from ref, not state — state may already be '' due to React 18 batching
+    // flushing the selectionchange update before this click handler runs.
+    const text = selectedTextRef.current;
+    if (!text || capturing) return;
+    selectedTextRef.current = '';      // consume immediately
     setCapturing(true);
     setGistBtnPos(null);
+    window.getSelection()?.removeAllRanges();
     try {
       const apiKey = localStorage.getItem('gist_demo_api_key') || '';
       const headers = { 'Content-Type': 'application/json' };
       if (apiKey) headers['X-Gemini-Api-Key'] = apiKey;
       const res = await fetch(`${BACKEND}/gist`, {
         method: 'POST', headers,
-        body: JSON.stringify({ selected_text: selectedText, url: `https://${ARTICLE.url}`, mode: 'explain' }),
+        body: JSON.stringify({ selected_text: text, url: `https://${ARTICLE.url}`, mode: 'explain' }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || `Server error (${res.status})`);
       setCaptureResult(data);
       setPopupOpen(true);
-      window.getSelection()?.removeAllRanges();
     } catch (err) {
       setCaptureResult({ error: err.message });
       setPopupOpen(true);
     } finally { setCapturing(false); }
-  }, [selectedText, capturing]);
+  }, [capturing]);
 
   /* Visual capture */
   const handleCaptureArea = useCallback(async (rect) => {
@@ -263,9 +282,10 @@ export default function GistDemoWrapper() {
           ) : (
             /* ── Article mode ── */
             <>
-              {/* Article */}
+              {/* Article — clicking it dismisses the popup */}
               <div
                 ref={articleRef}
+                onClick={() => { if (popupOpen) setPopupOpen(false); }}
                 style={{
                   flex: 1, overflowY: 'auto',
                   padding: '40px 48px',
@@ -319,14 +339,18 @@ export default function GistDemoWrapper() {
               {popupOpen && !captureMode && (
                 <div style={{
                   position: 'absolute', top: '8px', right: '8px', zIndex: 50,
+                  // maxHeight keeps the popup inside the browser chrome on short screens
+                  maxHeight: 'calc(100% - 16px)',
+                  display: 'flex', flexDirection: 'column',
                   animation: 'gistPopupIn 180ms cubic-bezier(0.22, 1, 0.36, 1) both',
                 }}>
                   <style>{`@keyframes gistPopupIn{from{opacity:0;transform:translateY(-8px) scale(0.97)}to{opacity:1;transform:translateY(0) scale(1)}}`}</style>
                   <GistPopup
                     onCaptureStart={handleCaptureStart}
-                    captureResult={captureResult?.error ? null : captureResult}
+                    captureResult={captureResult}
                     onDismissResult={() => setCaptureResult(null)}
                     onOpenDashboard={handleOpenDashboard}
+                    onClose={() => setPopupOpen(false)}
                   />
                 </div>
               )}

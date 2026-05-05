@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { GistCaptureView } from './GistCaptureView';
 import { GistLibraryView } from './GistLibraryView';
 
@@ -56,22 +56,33 @@ const FOOTER_TEXT = {
   library: 'Your personal knowledge base',
 };
 
-export function GistPopup({ onCaptureStart, captureResult, onDismissResult, onOpenDashboard, initialTab = 'capture' }) {
+export function GistPopup({ onCaptureStart, captureResult, onDismissResult, onOpenDashboard, onClose, initialTab = 'capture' }) {
   const [activeTab, setActiveTab] = useState(initialTab);
 
+  // Auto-switch to Capture tab whenever a new result arrives
+  const prevResultRef = useRef(captureResult);
+  useEffect(() => {
+    if (captureResult && captureResult !== prevResultRef.current) {
+      setActiveTab('capture');
+    }
+    prevResultRef.current = captureResult;
+  }, [captureResult]);
+
   return (
-    <div style={{
-      fontFamily: FONT,
-      background: T.bg,
-      color: T.text,
-      width: '340px',
-      display: 'flex',
-      flexDirection: 'column',
-      borderRadius: '12px',
-      overflow: 'hidden',
-      boxShadow: '0 24px 64px oklch(0 0 0 / 0.65), 0 0 0 1px oklch(1 0 0 / 0.07)',
-      maxHeight: '560px',
-    }}>
+    <div
+      onClick={(e) => e.stopPropagation()} // prevent article-click from closing popup
+      style={{
+        fontFamily: FONT,
+        background: T.bg,
+        color: T.text,
+        width: '340px',
+        display: 'flex',
+        flexDirection: 'column',
+        borderRadius: '12px',
+        overflow: 'hidden',
+        boxShadow: '0 24px 64px oklch(0 0 0 / 0.65), 0 0 0 1px oklch(1 0 0 / 0.07)',
+        maxHeight: '100%',
+      }}>
       {/* Header */}
       <header style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -80,11 +91,32 @@ export function GistPopup({ onCaptureStart, captureResult, onDismissResult, onOp
         flexShrink: 0,
       }}>
         <GistMark />
-        <span style={{
-          fontSize: '9.5px', color: T.textDim, fontFamily: MONO,
-          padding: '2px 6px', background: T.bgElevated,
-          border: `1px solid ${T.border}`, borderRadius: '3px', letterSpacing: '0.04em',
-        }}>v1.0</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{
+            fontSize: '9.5px', color: T.textDim, fontFamily: MONO,
+            padding: '2px 6px', background: T.bgElevated,
+            border: `1px solid ${T.border}`, borderRadius: '3px', letterSpacing: '0.04em',
+          }}>v1.0</span>
+          {onClose && (
+            <button
+              onClick={onClose}
+              title="Close"
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                width: '20px', height: '20px', borderRadius: '4px',
+                background: 'none', border: 'none',
+                color: T.textDim, cursor: 'pointer', padding: 0,
+                transition: 'color 120ms ease, background 120ms ease',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = T.text; e.currentTarget.style.background = T.bgHover; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = T.textDim; e.currentTarget.style.background = 'none'; }}
+            >
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          )}
+        </div>
       </header>
 
       {/* Tab bar */}

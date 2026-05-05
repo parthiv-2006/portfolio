@@ -133,6 +133,33 @@ function FeatureCard({ icon, title, subtitle, rightSlot, onClick, accent = false
 
 /* Capture result toast shown after a successful gist save */
 function CaptureResult({ result, onClose }) {
+  // Error state
+  if (result.error) {
+    return (
+      <div style={{
+        background: 'oklch(0.25 0.05 25 / 0.15)', border: '1px solid oklch(0.50 0.12 25 / 0.3)',
+        borderLeft: '2px solid oklch(0.65 0.15 25)', borderRadius: '7px',
+        padding: '9px 11px', marginTop: '6px', position: 'relative',
+      }}>
+        <button
+          onClick={onClose}
+          style={{ position: 'absolute', top: '8px', right: '8px', background: 'none', border: 'none', cursor: 'pointer', color: 'oklch(0.72 0.15 25)', padding: 0, display: 'flex' }}
+          aria-label="Dismiss"
+        >
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+            <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
+          </svg>
+        </button>
+        <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', color: 'oklch(0.72 0.15 25)', fontFamily: MONO, marginBottom: '4px' }}>
+          Error
+        </div>
+        <p style={{ margin: 0, fontSize: '11.5px', color: 'oklch(0.72 0.15 25)', lineHeight: 1.5, paddingRight: '16px' }}>
+          {result.error}
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div style={{
       background: T.accentBg, border: `1px solid ${T.accentBorder}`,
