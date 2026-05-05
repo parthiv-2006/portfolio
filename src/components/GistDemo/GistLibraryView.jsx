@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { GistCard } from './GistCard';
 
 const BACKEND = 'https://gist-vc8m.onrender.com';
@@ -46,7 +46,7 @@ function IconEmptyLibrary() {
   );
 }
 
-export function GistLibraryView() {
+export function GistLibraryView({ initialTag = null, onTagConsumed } = {}) {
   const [items, setItems]       = useState([]);
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState(null);
@@ -58,6 +58,27 @@ export function GistLibraryView() {
   const [askResult, setAskResult] = useState(null);
   const [askError, setAskError]   = useState(null);
   const [srcExpanded, setSrcExp]  = useState(null);
+
+  const initialSearchDone = useRef(false);
+
+  // Auto-search when navigated here via a tag click from HomeView
+  useEffect(() => {
+    if (!initialTag || initialSearchDone.current) return;
+    initialSearchDone.current = true;
+    onTagConsumed?.();
+    setQuery(initialTag);
+    setAskState('searching');
+    setAskResult(null); setAskError(null); setSrcExp(null);
+    fetch(`${BACKEND}/library/ask`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: initialTag }),
+    })
+      .then((r) => r.ok ? r.json() : r.json().then((b) => Promise.reject(new Error(b.error ?? `Search failed (${r.status}).`))))
+      .then((data) => { setAskResult(data); setAskState('done'); })
+      .catch((e) => { setAskError(e.message); setAskState('error'); });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialTag]);
 
   useEffect(() => {
     let cancelled = false;
