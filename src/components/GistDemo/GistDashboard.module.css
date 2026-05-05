@@ -1,0 +1,345 @@
+@keyframes viewEnter {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+.layout {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  color: var(--ink);
+  overflow: hidden;
+}
+
+/* ── Sidebar ── */
+
+.sidebar {
+  width: 200px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg);
+  border-right: 1px solid var(--hairline);
+  overflow: hidden;
+  padding: 16px 12px;
+}
+
+.sidebarLogo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px 16px;
+  flex-shrink: 0;
+}
+
+.sidebarLogoMark {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebarLogoText {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebarWordmark {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.sidebarSubLabel {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px;
+  color: var(--ink-4);
+  margin-top: 2px;
+}
+
+/* Search button */
+
+.searchBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  margin-bottom: 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--hairline-2);
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--ink-2);
+  font-family: "Inter", -apple-system, system-ui, sans-serif;
+  font-size: 11.5px;
+  flex-shrink: 0;
+  transition: background 150ms ease;
+}
+
+.searchBtn:hover {
+  background: var(--surface-3);
+}
+
+.searchBtnLabel {
+  flex: 1;
+  text-align: left;
+}
+
+.searchBtnKbds {
+  display: flex;
+  gap: 3px;
+}
+
+/* Workspace label */
+
+.workspaceLabel {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--ink-4);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 0 10px 5px;
+  flex-shrink: 0;
+}
+
+/* Nav */
+
+.navList {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex-shrink: 0;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 10px;
+  border-radius: 5px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease;
+  width: 100%;
+  text-align: left;
+  font-family: "Inter", -apple-system, system-ui, sans-serif;
+  font-size: 12.5px;
+  font-weight: 500;
+  position: relative;
+}
+
+.navItemActive {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+.navItemActive::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: var(--accent);
+  border-radius: 0 1px 1px 0;
+}
+
+.navItemInactive {
+  color: var(--ink-2);
+}
+
+.navItemInactive:hover {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.navItem:focus-visible {
+  outline: 1.5px solid color-mix(in oklch, var(--accent) 50%, transparent);
+  outline-offset: -2px;
+}
+
+.navIcon {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.navBadge {
+  margin-left: auto;
+  min-width: 17px;
+  height: 17px;
+  border-radius: 9px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 9px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  font-variant-numeric: tabular-nums;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* Spacer */
+
+.sidebarSpacer {
+  flex: 1;
+}
+
+/* Streak card */
+
+.streakCard {
+  padding: 9px 11px;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 6px;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+}
+
+.streakLabel {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--ink-4);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.streakNumber {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  margin-bottom: 7px;
+}
+
+.streakValue {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.streakUnit {
+  font-size: 10px;
+  color: var(--ink-3);
+}
+
+.streakBars {
+  display: flex;
+  gap: 2px;
+}
+
+.streakBar {
+  flex: 1;
+  height: 4px;
+  border-radius: 1px;
+  background: var(--accent);
+}
+
+.streakBarDim {
+  flex: 1;
+  height: 4px;
+  border-radius: 1px;
+  background: var(--accent-dim);
+  opacity: 0.35;
+}
+
+/* Footer */
+
+.sidebarFooter {
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.sidebarFooterText {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9.5px;
+  color: var(--ink-4);
+}
+
+.sidebarFooterDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-left: auto;
+  animation: pulse 2.5s ease infinite;
+}
+
+/* Back button */
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  margin-bottom: 10px;
+  background: none;
+  border: 1px solid var(--hairline);
+  border-radius: 5px;
+  color: var(--ink-4);
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  cursor: pointer;
+  transition: color 130ms ease, border-color 130ms ease;
+  flex-shrink: 0;
+}
+
+.backBtn:hover {
+  color: var(--ink-2);
+  border-color: var(--hairline-2);
+}
+
+/* Kbd component */
+
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  background: var(--surface-3);
+  border: 1px solid var(--hairline-2);
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9.5px;
+  font-weight: 500;
+  color: var(--ink-2);
+}
+
+/* ── Main content area ── */
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--bg);
+  min-width: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--hairline-2) transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebarFooterDot { animation: none; }
+}
