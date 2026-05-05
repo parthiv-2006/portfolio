@@ -131,6 +131,38 @@ export default function GistDemoWrapper() {
     return () => document.removeEventListener('selectionchange', handleSelectionChange);
   }, []);
 
+  /* Helper: consume an SSE stream from /api/v1/simplify and return the full explanation */
+  const readSseStream = async (res) => {
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let explanation = '';
+    let buffer = '';
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() ?? '';
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const payload = line.slice(6).trim();
+        if (payload === '[DONE]') break;
+        try { const p = JSON.parse(payload); if (p.chunk) explanation += p.chunk; } catch {}
+      }
+    }
+    return explanation;
+  };
+
+  /* Helper: fire-and-forget save to library (non-fatal if it fails) */
+  const saveToLibrary = async (original_text, explanation, mode, headers) => {
+    try {
+      await fetch(`${BACKEND}/library/save`, {
+        method: 'POST', headers,
+        body: JSON.stringify({ original_text, explanation, mode, url: `https://${ARTICLE.url}`, gist_type: 'text' }),
+      });
+    } catch { /* non-fatal */ }
+  };
+
   /* Send selected text to backend */
   const handleGistIt = useCallback(async () => {
     // Read from ref, not state — state may already be '' due to React 18 batching
@@ -145,13 +177,24 @@ export default function GistDemoWrapper() {
       const apiKey = localStorage.getItem('gist_demo_api_key') || '';
       const headers = { 'Content-Type': 'application/json' };
       if (apiKey) headers['X-Gemini-Api-Key'] = apiKey;
-      const res = await fetch(`${BACKEND}/gist`, {
+
+      // Real endpoint: POST /api/v1/simplify — returns SSE stream, not JSON
+      const res = await fetch(`${BACKEND}/api/v1/simplify`, {
         method: 'POST', headers,
-        body: JSON.stringify({ selected_text: text, url: `https://${ARTICLE.url}`, mode: 'explain' }),
+        body: JSON.stringify({ selected_text: text, page_context: ARTICLE.url, complexity_level: 'standard' }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || `Server error (${res.status})`);
-      setCaptureResult(data);
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error (${res.status})`);
+      }
+
+      const explanation = await readSseStream(res);
+      if (!explanation) throw new Error('No explanation received. The server may still be waking up — try again in a moment.');
+
+      // Save to library (async, non-blocking)
+      saveToLibrary(text, explanation, 'standard', headers);
+
+      setCaptureResult({ explanation });
       setPopupOpen(true);
     } catch (err) {
       setCaptureResult({ error: err.message });
@@ -176,13 +219,22 @@ export default function GistDemoWrapper() {
       const apiKey = localStorage.getItem('gist_demo_api_key') || '';
       const headers = { 'Content-Type': 'application/json' };
       if (apiKey) headers['X-Gemini-Api-Key'] = apiKey;
-      const res = await fetch(`${BACKEND}/gist`, {
+
+      const res = await fetch(`${BACKEND}/api/v1/simplify`, {
         method: 'POST', headers,
-        body: JSON.stringify({ selected_text: capturedText, url: `https://${ARTICLE.url}`, mode: 'summarize' }),
+        body: JSON.stringify({ selected_text: capturedText, page_context: ARTICLE.url, complexity_level: 'simple' }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || `Server error (${res.status})`);
-      setCaptureResult(data);
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error (${res.status})`);
+      }
+
+      const explanation = await readSseStream(res);
+      if (!explanation) throw new Error('No explanation received. The server may still be waking up — try again in a moment.');
+
+      saveToLibrary(capturedText, explanation, 'simple', headers);
+
+      setCaptureResult({ explanation });
       setPopupOpen(true);
     } catch (err) {
       setCaptureResult({ error: err.message });
