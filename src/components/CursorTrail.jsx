@@ -329,7 +329,8 @@ export default function CursorTrail() {
         <canvas
             ref={canvasRef}
             aria-hidden="true"
-            className="fixed inset-0 z-9999 pointer-events-none"
+            className="fixed inset-0 pointer-events-none"
+            style={{ zIndex: 9999 }}
         />
     );
 }
