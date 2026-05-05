@@ -286,11 +286,13 @@ export default function CursorTrail() {
         };
 
         const onMouseDown = () => {
+            visibleRef.current = true; // clicking always means cursor is present
             stateRef.current = 'click';
             spawnRipple();
         };
 
         const onMouseUp = () => {
+            visibleRef.current = true; // restore after any click, no matter what
             // Check if still hovering something interactive
             const { x, y } = mouseRef.current;
             const target = document.elementFromPoint(x, y);
@@ -305,22 +307,37 @@ export default function CursorTrail() {
             visibleRef.current = true;
         };
 
+        // Restore cursor when the window regains focus after switching to another
+        // tab/app (e.g. clicking "Live Demo" then returning to the portfolio).
+        // `document.mouseenter` is unreliable in this scenario; `window.focus`
+        // and `visibilitychange` fire consistently across browsers.
+        const onWindowFocus = () => {
+            visibleRef.current = true;
+        };
+        const onVisibilityChange = () => {
+            if (!document.hidden) visibleRef.current = true;
+        };
+
         document.addEventListener('mousemove', onMouseMove);
         document.addEventListener('mousedown', onMouseDown);
         document.addEventListener('mouseup', onMouseUp);
         document.addEventListener('mouseleave', onMouseLeave);
         document.addEventListener('mouseenter', onMouseEnter);
+        document.addEventListener('visibilitychange', onVisibilityChange);
+        window.addEventListener('focus', onWindowFocus);
 
         // Start render loop
         rafRef.current = requestAnimationFrame(render);
 
         return () => {
             window.removeEventListener('resize', resize);
+            window.removeEventListener('focus', onWindowFocus);
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mousedown', onMouseDown);
             document.removeEventListener('mouseup', onMouseUp);
             document.removeEventListener('mouseleave', onMouseLeave);
             document.removeEventListener('mouseenter', onMouseEnter);
+            document.removeEventListener('visibilitychange', onVisibilityChange);
             if (rafRef.current) cancelAnimationFrame(rafRef.current);
         };
     }, [render, spawnRipple]);
