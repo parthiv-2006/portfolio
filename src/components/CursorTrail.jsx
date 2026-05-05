@@ -200,12 +200,14 @@ export default function CursorTrail() {
                 ctx.save();
                 ctx.translate(x, y);
                 ctx.rotate(anim.ringRotation);
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+                ctx.shadowBlur = 4;
 
                 // Dashed ring for that "target lock" feel
                 ctx.beginPath();
                 ctx.arc(0, 0, anim.ringRadius, 0, Math.PI * 2);
                 ctx.strokeStyle = `rgba(${ACCENT.r}, ${ACCENT.g}, ${ACCENT.b}, ${anim.ringAlpha})`;
-                ctx.lineWidth = 1;
+                ctx.lineWidth = 1.5;
                 ctx.setLineDash([4, 6]);
                 ctx.stroke();
                 ctx.setLineDash([]);
@@ -230,17 +232,21 @@ export default function CursorTrail() {
                 ctx.restore();
             }
 
-            // Core dot
+            // Core dot — dark shadow ensures contrast on light backgrounds
+            ctx.save();
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+            ctx.shadowBlur = 6;
             ctx.beginPath();
             ctx.arc(x, y, anim.dotRadius, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(${ACCENT.r}, ${ACCENT.g}, ${ACCENT.b}, 0.75)`;
+            ctx.fillStyle = `rgba(${ACCENT.r}, ${ACCENT.g}, ${ACCENT.b}, 0.9)`;
             ctx.fill();
+            ctx.restore();
 
             // White hot center
             if (anim.dotRadius > 1.5) {
                 ctx.beginPath();
                 ctx.arc(x, y, 1.5, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255, 255, 255, 0.6)`;
+                ctx.fillStyle = `rgba(255, 255, 255, 0.85)`;
                 ctx.fill();
             }
         }
@@ -267,6 +273,8 @@ export default function CursorTrail() {
         // ── Mouse tracking ──
         const onMouseMove = (e) => {
             mouseRef.current = { x: e.clientX, y: e.clientY };
+            // Always restore visibility on movement (handles tab-switch / focus return)
+            visibleRef.current = true;
 
             // Detect hover over interactive elements
             const target = document.elementFromPoint(e.clientX, e.clientY);
@@ -322,7 +330,6 @@ export default function CursorTrail() {
             ref={canvasRef}
             aria-hidden="true"
             className="fixed inset-0 z-9999 pointer-events-none"
-            style={{ mixBlendMode: 'screen' }}
         />
     );
 }
