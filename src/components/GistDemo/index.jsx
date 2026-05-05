@@ -43,7 +43,7 @@ function TrafficLights() {
 function GistItButton({ position, loading, onClick }) {
   if (!position) return null;
   return (
-    <div style={{ position: 'fixed', left: position.x, top: position.y, zIndex: 60, transform: 'translateX(-50%)', pointerEvents: 'auto' }}>
+    <div style={{ position: 'absolute', left: position.x, top: position.y, zIndex: 60, transform: 'translateX(-50%)', pointerEvents: 'auto' }}>
       <button
         onClick={onClick}
         disabled={loading}
@@ -106,7 +106,9 @@ export default function GistDemoWrapper() {
         const range = sel.getRangeAt(0);
         if (!articleRef.current.contains(range.commonAncestorContainer)) { setGistBtnPos(null); setSelectedText(''); return; }
         const rect = range.getBoundingClientRect();
-        setGistBtnPos({ x: rect.left + rect.width / 2, y: rect.top - 10 });
+        const vpRect = viewportRef.current?.getBoundingClientRect();
+        if (!vpRect) { setGistBtnPos(null); setSelectedText(''); return; }
+        setGistBtnPos({ x: rect.left + rect.width / 2 - vpRect.left, y: rect.top - 10 - vpRect.top });
         setSelectedText(text);
       } catch { setGistBtnPos(null); setSelectedText(''); }
     };
@@ -253,7 +255,7 @@ export default function GistDemoWrapper() {
         {/* Viewport */}
         <div
           ref={viewportRef}
-          style={{ flex: 1, position: 'relative', overflow: 'hidden', display: 'flex' }}
+          style={{ flex: 1, position: 'relative', overflow: 'visible', display: 'flex' }}
         >
           {dashboardMode ? (
             /* ── Full Dashboard mode ── */
@@ -339,15 +341,14 @@ export default function GistDemoWrapper() {
                   </div>
                 </div>
               )}
+
+              {/* "Gist it!" floating button — position:absolute so it works inside CSS-transformed ancestors */}
+              <GistItButton position={gistBtnPos} loading={capturing} onClick={handleGistIt} />
             </>
           )}
         </div>
       </div>
 
-      {/* "Gist it!" floating button */}
-      {!dashboardMode && (
-        <GistItButton position={gistBtnPos} loading={capturing} onClick={handleGistIt} />
-      )}
     </div>
   );
 }
