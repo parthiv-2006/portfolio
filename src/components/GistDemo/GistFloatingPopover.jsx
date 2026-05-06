@@ -1,16 +1,16 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 
-// ── Design tokens (match Popover.module.css) ─────────────────────────────────
+// ── Design tokens — CSS vars so light/dark theme works automatically ──────────
 const FONT = '"Inter", -apple-system, sans-serif';
 const MONO = '"JetBrains Mono", ui-monospace, monospace';
-const BG          = 'oklch(0.14 0.006 120)';
-const BG_ELEVATED = 'oklch(0.17 0.006 120)';
-const BG_INPUT    = 'oklch(0.20 0.004 120)';
-const INK         = 'oklch(0.92 0.006 95)';
-const INK2        = 'oklch(0.75 0.006 95)';
-const INK3        = 'oklch(0.55 0.004 95)';
-const HAIRLINE    = 'oklch(1 0 0 / 0.09)';
-const HAIRLINE2   = 'oklch(1 0 0 / 0.15)';
+const BG          = 'var(--bg)';
+const BG_ELEVATED = 'var(--surface)';
+const BG_INPUT    = 'var(--surface-2)';
+const INK         = 'var(--ink)';
+const INK2        = 'var(--ink-2)';
+const INK3        = 'var(--ink-3)';
+const HAIRLINE    = 'var(--hairline)';
+const HAIRLINE2   = 'var(--hairline-2)';
 
 const DEFAULT_W = 340;
 const DEFAULT_H = 400;
@@ -40,7 +40,8 @@ function getErrorMeta(error, code) {
     LLM_TIMEOUT:           { title: 'Request Timed Out',   hint: 'Try selecting a shorter passage.' },
     LLM_UNAVAILABLE:       { title: 'Service Unavailable', hint: 'Gemini may be warming up — try again shortly.' },
     LLM_ERROR:             { title: 'AI Error',            hint: 'Try again or select different text.' },
-    NETWORK_ERROR:         { title: 'No Connection',       hint: 'Check your internet connection.' },
+    NETWORK_ERROR:         { title: 'No Connection',       hint: 'Check your internet connection, or the AI backend may still be waking up — try again in a moment.' },
+    CORS_ERROR:            { title: 'Domain Not Allowed',  hint: 'The backend is blocking requests from this domain. Add this origin to the backend CORS allowlist.' },
     TEXT_TOO_LONG:         { title: 'Text Too Long',       hint: 'Max 2,000 characters. Select a shorter passage.' },
     EMPTY_TEXT:            { title: 'Nothing Selected',    hint: 'Highlight some text on the page first.' },
   };
@@ -50,7 +51,8 @@ function getErrorMeta(error, code) {
   if (m.includes('quota') || m.includes('exhausted'))         return MAP.QUOTA_EXCEEDED;
   if (m.includes('too many') || m.includes('rate limit'))     return MAP.RATE_LIMITED;
   if (m.includes('too long') || m.includes('2,000'))          return MAP.TEXT_TOO_LONG;
-  if (m.includes('network') || m.includes('offline'))         return MAP.NETWORK_ERROR;
+  if (m.includes('failed to fetch') || m.includes('network') || m.includes('offline')) return MAP.NETWORK_ERROR;
+  if (m.includes('cors') || m.includes('blocked') || m.includes('not allowed')) return MAP.CORS_ERROR;
   if (m.includes('unavailable') || m.includes('starting up')) return MAP.LLM_UNAVAILABLE;
   if (m.includes('timed out') || m.includes('timeout'))       return MAP.LLM_TIMEOUT;
   return { title: 'Something Went Wrong', hint: 'Try selecting different text or try again.' };
@@ -449,7 +451,7 @@ export function GistFloatingPopover({
                 style={{
                   padding: '3px 8px', borderRadius: 5, fontSize: 10.5, fontWeight: 600,
                   fontFamily: FONT, cursor: 'pointer', border: 'none',
-                  background: active ? `${col}18` : 'oklch(1 0 0 / 0.04)',
+                  background: active ? `${col}18` : 'var(--surface-2)',
                   color: active ? col : INK3,
                   outline: active ? `1px solid ${col}30` : '1px solid oklch(1 0 0 / 0.07)',
                   transition: 'all 120ms ease',
@@ -469,7 +471,7 @@ export function GistFloatingPopover({
             flex: 1, overflowY: 'auto', minHeight: 0,
             padding: '10px 12px',
             display: 'flex', flexDirection: 'column', gap: 8,
-            scrollbarWidth: 'thin', scrollbarColor: 'oklch(0.28 0 0) transparent',
+            scrollbarWidth: 'thin', scrollbarColor: 'var(--surface-3) transparent',
           }}
         >
           {/* Empty / idle state */}
@@ -505,8 +507,8 @@ export function GistFloatingPopover({
                   /* User bubble */
                   <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                     <div style={{
-                      background: 'oklch(0.22 0.015 150)', maxWidth: '88%',
-                      border: '1px solid oklch(0.75 0.11 150 / 0.2)',
+                      background: 'var(--accent-bg)', maxWidth: '88%',
+                      border: '1px solid var(--accent-border)',
                       borderRadius: '10px 10px 3px 10px',
                       padding: '7px 11px', fontSize: 12, color: 'oklch(0.84 0.006 95)',
                       lineHeight: 1.55, wordBreak: 'break-word', userSelect: 'text', cursor: 'text',
@@ -554,7 +556,7 @@ export function GistFloatingPopover({
               {[72, 88, 60, 80].map((w, i) => (
                 <div key={i} style={{
                   height: 9, borderRadius: 5, marginBottom: 9, width: `${w}%`,
-                  background: `linear-gradient(90deg, oklch(0.22 0 0) 25%, oklch(0.28 0 0) 50%, oklch(0.22 0 0) 75%)`,
+                  background: `linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 50%, var(--surface-2) 75%)`,
                   backgroundSize: '200% 100%',
                   animation: `gistSkel ${1.2 + i * 0.1}s ease infinite`,
                 }} />

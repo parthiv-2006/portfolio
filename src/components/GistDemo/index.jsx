@@ -8,6 +8,18 @@ import './gist-tokens.css';
 
 const BACKEND = 'https://gist-vc8m.onrender.com';
 
+// Retry fetch up to `retries` times on network error (handles Render cold-start timeouts)
+async function fetchWithRetry(url, options, retries = 2, baseDelayMs = 2000) {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await fetch(url, options);
+    } catch (err) {
+      if (attempt === retries) throw err;
+      await new Promise(r => setTimeout(r, baseDelayMs * (attempt + 1)));
+    }
+  }
+}
+
 /* ── Sample article ── */
 const ARTICLE = {
   url: 'research.ai/personal-knowledge-graphs',
@@ -107,6 +119,11 @@ export default function GistDemoWrapper() {
   const [popoverAnchorRect,  setPopoverAnchorRect]  = useState(null);
   const [popoverError,       setPopoverError]       = useState(null);
   const [popoverErrorCode,   setPopoverErrorCode]   = useState(null);
+
+  /* ── Backend warm-up: ping once on mount so Render dyno is awake ── */
+  useEffect(() => {
+    fetch(`${BACKEND}/library`).catch(() => {/* silent — just waking the dyno */});
+  }, []);
 
   /* ── Theme ── */
   const getEffectiveTheme = (pref) => {
@@ -249,7 +266,7 @@ export default function GistDemoWrapper() {
     };
     if (messages.length) body.messages = messages;
 
-    const res = await fetch(`${BACKEND}/api/v1/simplify`, {
+    const res = await fetchWithRetry(`${BACKEND}/api/v1/simplify`, {
       method: 'POST', headers, body: JSON.stringify(body),
     });
 
