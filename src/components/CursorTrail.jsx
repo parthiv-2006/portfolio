@@ -78,6 +78,12 @@ export default function CursorTrail() {
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+        // Gist demo is open — clear canvas and let native cursor take over
+        if (document.body.hasAttribute('data-demo-open')) {
+            rafRef.current = requestAnimationFrame(render);
+            return;
+        }
+
         const anim    = animRef.current;
         const targets = getTargets(stateRef.current);
 

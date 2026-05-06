@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ExternalLink, Github, X, ArrowUpRight } from 'lucide-react';
 import SectionHeading from './SectionHeading';
@@ -91,6 +91,16 @@ export default function Projects() {
     }, [activeFilter]);
 
     const isDemo = selected?.hasDemo;
+
+    // Signal to CursorTrail to yield to the native cursor while the demo is open
+    useEffect(() => {
+        if (isDemo && selected) {
+            document.body.dataset.demoOpen = 'true';
+        } else {
+            delete document.body.dataset.demoOpen;
+        }
+        return () => { delete document.body.dataset.demoOpen; };
+    }, [isDemo, selected]);
 
     return (
         <section id="projects" className="w-full">

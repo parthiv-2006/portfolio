@@ -71,6 +71,14 @@
   *::after {
     cursor: none !important;
   }
+
+  /* Restore native cursor inside the Gist interactive demo */
+  body[data-demo-open],
+  body[data-demo-open] *,
+  body[data-demo-open] *::before,
+  body[data-demo-open] *::after {
+    cursor: auto !important;
+  }
 }
 
 /* Scroll-snap container */
