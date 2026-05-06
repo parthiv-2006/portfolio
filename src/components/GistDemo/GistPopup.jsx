@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { GistCaptureView } from './GistCaptureView';
 import { GistLibraryView } from './GistLibraryView';
 
@@ -56,163 +56,168 @@ const FOOTER_TEXT = {
   library: 'Your personal knowledge base',
 };
 
-export function GistPopup({ onCaptureStart, captureResult, onDismissResult, onOpenDashboard, onClose, initialTab = 'capture' }) {
+export function GistPopup({
+  onCaptureStart,
+  onOpenDashboard,
+  onToggleSidebar,
+  isSidebarMode = false,
+  onClose,
+  initialTab = 'capture',
+}) {
   const [activeTab, setActiveTab] = useState(initialTab);
 
-  // Auto-switch to Capture tab whenever a new result arrives
-  const prevResultRef = useRef(captureResult);
-  useEffect(() => {
-    if (captureResult && captureResult !== prevResultRef.current) {
-      setActiveTab('capture');
-    }
-    prevResultRef.current = captureResult;
-  }, [captureResult]);
-
   return (
-    <div
-      onClick={(e) => e.stopPropagation()} // prevent article-click from closing popup
-      style={{
-        fontFamily: FONT,
-        background: T.bg,
-        color: T.text,
-        width: '340px',
-        display: 'flex',
-        flexDirection: 'column',
-        borderRadius: '12px',
-        overflow: 'hidden',
-        boxShadow: '0 24px 64px oklch(0 0 0 / 0.65), 0 0 0 1px oklch(1 0 0 / 0.07)',
-        maxHeight: '100%',
-      }}>
-      {/* Header */}
-      <header style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '11px 14px',
-        borderBottom: `1px solid ${T.border}`,
-        flexShrink: 0,
-      }}>
-        <GistMark />
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{
-            fontSize: '9.5px', color: T.textDim, fontFamily: MONO,
-            padding: '2px 6px', background: T.bgElevated,
-            border: `1px solid ${T.border}`, borderRadius: '3px', letterSpacing: '0.04em',
-          }}>v1.0</span>
-          {onClose && (
+    <>
+      {/*
+        Override the global `cursor: none !important` rule inside this popup so
+        the native OS cursor is visible when hovering over its controls.
+      */}
+      <style>{`
+        .gist-popup-scope, .gist-popup-scope * { cursor: default !important; }
+        .gist-popup-scope button  { cursor: pointer !important; }
+        .gist-popup-scope input,
+        .gist-popup-scope textarea { cursor: text !important; }
+      `}</style>
+
+      <div
+        className="gist-popup-scope"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          fontFamily: FONT,
+          background: T.bg,
+          color: T.text,
+          width: '340px',
+          display: 'flex',
+          flexDirection: 'column',
+          borderRadius: '12px',
+          overflow: 'hidden',
+          boxShadow: '0 24px 64px oklch(0 0 0 / 0.65), 0 0 0 1px oklch(1 0 0 / 0.07)',
+          maxHeight: '100%',
+        }}
+      >
+        {/* Header */}
+        <header style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '11px 14px',
+          borderBottom: `1px solid ${T.border}`,
+          flexShrink: 0,
+        }}>
+          <GistMark />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{
+              fontSize: '9.5px', color: T.textDim, fontFamily: MONO,
+              padding: '2px 6px', background: T.bgElevated,
+              border: `1px solid ${T.border}`, borderRadius: '3px', letterSpacing: '0.04em',
+            }}>v1.0</span>
+            {onClose && (
+              <button
+                onClick={onClose}
+                title="Close"
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  width: '20px', height: '20px', borderRadius: '4px',
+                  background: 'none', border: 'none',
+                  color: T.textDim, cursor: 'pointer', padding: 0,
+                  transition: 'color 120ms ease, background 120ms ease',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = T.text; e.currentTarget.style.background = T.bgHover; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = T.textDim; e.currentTarget.style.background = 'none'; }}
+              >
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            )}
+          </div>
+        </header>
+
+        {/* Tab bar */}
+        <div style={{ display: 'flex', borderBottom: `1px solid ${T.border}`, flexShrink: 0 }}>
+          {TABS.map(({ id, label, icon }) => {
+            const active = activeTab === id;
+            return (
+              <button
+                key={id}
+                onClick={() => setActiveTab(id)}
+                style={{
+                  flex: 1,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px',
+                  background: 'none', border: 'none',
+                  borderBottom: active ? `2px solid ${T.accent}` : '2px solid transparent',
+                  padding: '9px 0',
+                  fontSize: '11px',
+                  fontWeight: active ? 600 : 500,
+                  color: active ? T.text : T.textMuted,
+                  cursor: 'pointer',
+                  transition: 'color 120ms ease',
+                  fontFamily: FONT,
+                }}
+              >
+                <span style={{ color: active ? T.accent : T.textDim, display: 'flex', transition: 'color 120ms ease' }}>
+                  {icon}
+                </span>
+                {label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Body */}
+        <div style={{
+          flex: 1, overflowY: 'auto', minHeight: 0,
+          display: 'flex', flexDirection: 'column',
+          scrollbarWidth: 'thin', scrollbarColor: 'var(--hairline-2) transparent',
+        }}>
+          {activeTab === 'capture' && (
+            <GistCaptureView
+              onCaptureStart={onCaptureStart}
+              onToggleSidebar={onToggleSidebar}
+              isSidebarMode={isSidebarMode}
+            />
+          )}
+          {activeTab === 'library' && <GistLibraryView />}
+        </div>
+
+        {/* Footer */}
+        <footer style={{
+          padding: '8px 14px',
+          borderTop: `1px solid ${T.border}`,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          flexShrink: 0, gap: '8px',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+            <div style={{
+              width: '6px', height: '6px', borderRadius: '50%',
+              background: T.accent, boxShadow: `0 0 6px var(--accent-glow)`,
+              flexShrink: 0,
+            }} />
+            <span style={{ fontSize: '10.5px', color: T.textDim, fontFamily: MONO, letterSpacing: '0.02em', whiteSpace: 'nowrap' }}>
+              {FOOTER_TEXT[activeTab]}
+            </span>
+          </div>
+
+          {onOpenDashboard && (
             <button
-              onClick={onClose}
-              title="Close"
+              onClick={onOpenDashboard}
               style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                width: '20px', height: '20px', borderRadius: '4px',
+                display: 'flex', alignItems: 'center', gap: '4px',
                 background: 'none', border: 'none',
-                color: T.textDim, cursor: 'pointer', padding: 0,
-                transition: 'color 120ms ease, background 120ms ease',
+                color: T.accent, fontSize: '10.5px', fontWeight: 600,
+                fontFamily: MONO, cursor: 'pointer', padding: '2px 0',
+                whiteSpace: 'nowrap', flexShrink: 0,
+                transition: 'opacity 120ms ease', letterSpacing: '0.02em',
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = T.text; e.currentTarget.style.background = T.bgHover; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = T.textDim; e.currentTarget.style.background = 'none'; }}
+              onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.7'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; }}
             >
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+              Full library
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
               </svg>
             </button>
           )}
-        </div>
-      </header>
-
-      {/* Tab bar */}
-      <div style={{ display: 'flex', borderBottom: `1px solid ${T.border}`, flexShrink: 0 }}>
-        {TABS.map(({ id, label, icon }) => {
-          const active = activeTab === id;
-          return (
-            <button
-              key={id}
-              onClick={() => setActiveTab(id)}
-              style={{
-                flex: 1,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px',
-                background: 'none', border: 'none',
-                borderBottom: active ? `2px solid ${T.accent}` : '2px solid transparent',
-                padding: '9px 0',
-                fontSize: '11px',
-                fontWeight: active ? 600 : 500,
-                color: active ? T.text : T.textMuted,
-                cursor: 'pointer',
-                transition: 'color 120ms ease',
-                fontFamily: FONT,
-              }}
-            >
-              <span style={{ color: active ? T.accent : T.textDim, display: 'flex', transition: 'color 120ms ease' }}>
-                {icon}
-              </span>
-              {label}
-            </button>
-          );
-        })}
+        </footer>
       </div>
-
-      {/* Body */}
-      <div style={{
-        flex: 1,
-        overflowY: 'auto',
-        minHeight: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        scrollbarWidth: 'thin',
-        scrollbarColor: 'var(--hairline-2) transparent',
-      }}>
-        {activeTab === 'capture' && (
-          <GistCaptureView
-            onCaptureStart={onCaptureStart}
-            captureResult={captureResult}
-            onDismissResult={onDismissResult}
-          />
-        )}
-        {activeTab === 'library' && <GistLibraryView />}
-      </div>
-
-      {/* Footer */}
-      <footer style={{
-        padding: '8px 14px',
-        borderTop: `1px solid ${T.border}`,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        flexShrink: 0,
-        gap: '8px',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-          <div style={{
-            width: '6px', height: '6px', borderRadius: '50%',
-            background: T.accent,
-            boxShadow: `0 0 6px var(--accent-glow)`,
-            flexShrink: 0,
-          }} />
-          <span style={{ fontSize: '10.5px', color: T.textDim, fontFamily: MONO, letterSpacing: '0.02em', whiteSpace: 'nowrap' }}>
-            {FOOTER_TEXT[activeTab]}
-          </span>
-        </div>
-
-        {/* Open Dashboard button */}
-        {onOpenDashboard && (
-          <button
-            onClick={onOpenDashboard}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '4px',
-              background: 'none', border: 'none',
-              color: T.accent, fontSize: '10.5px', fontWeight: 600,
-              fontFamily: MONO, cursor: 'pointer', padding: '2px 0',
-              whiteSpace: 'nowrap', flexShrink: 0,
-              transition: 'opacity 120ms ease',
-              letterSpacing: '0.02em',
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.7'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; }}
-          >
-            Full library
-            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
-            </svg>
-          </button>
-        )}
-      </footer>
-    </div>
+    </>
   );
 }

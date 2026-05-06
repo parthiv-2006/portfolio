@@ -1,12 +1,13 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { GistPopup }          from './GistPopup';
-import { GistCaptureOverlay } from './GistCaptureOverlay';
-import { GistDashboard }      from './GistDashboard';
+import { GistPopup }             from './GistPopup';
+import { GistCaptureOverlay }    from './GistCaptureOverlay';
+import { GistDashboard }         from './GistDashboard';
+import { GistFloatingPopover }   from './GistFloatingPopover';
 import './gist-tokens.css';
 
 const BACKEND = 'https://gist-vc8m.onrender.com';
 
-/* ── Sample article shown inside the fake browser ── */
+/* ── Sample article ── */
 const ARTICLE = {
   url: 'research.ai/personal-knowledge-graphs',
   title: 'The Rise of Personal Knowledge Graphs',
@@ -19,7 +20,7 @@ const ARTICLE = {
   ],
 };
 
-/* ── Puzzle-piece icon ── */
+/* ── Icons ── */
 function IconPuzzle() {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
@@ -28,7 +29,6 @@ function IconPuzzle() {
   );
 }
 
-/* ── Traffic-light dots ── */
 function TrafficLights() {
   return (
     <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
@@ -39,7 +39,7 @@ function TrafficLights() {
   );
 }
 
-/* ── "Gist it!" floating button ── */
+/* ── "Gist it!" pill ── */
 function GistItButton({ position, loading, onClick }) {
   if (!position) return null;
   return (
@@ -82,61 +82,96 @@ function GistItButton({ position, loading, onClick }) {
   );
 }
 
-/* ── Main GistDemoWrapper ── */
+/* ── Main wrapper ── */
 export default function GistDemoWrapper() {
-  const [popupOpen, setPopupOpen]           = useState(false);
-  const [dashboardMode, setDashboardMode]   = useState(false);
-  const [captureMode, setCaptureMode]       = useState(false);
-  const [captureResult, setCaptureResult]   = useState(null);
-  const [capturing, setCapturing]           = useState(false);
+  /* Extension popup (toolbar button) */
+  const [popupOpen,     setPopupOpen]     = useState(false);
+  /* Dashboard full-page mode */
+  const [dashboardMode, setDashboardMode] = useState(false);
+  /* Area-capture overlay */
+  const [captureMode,   setCaptureMode]   = useState(false);
+  /* Spinner shown while SSE request is being initiated */
+  const [capturing,     setCapturing]     = useState(false);
+  /* "Gist it!" button position */
+  const [gistBtnPos,    setGistBtnPos]    = useState(null);
 
-  const [gistBtnPos, setGistBtnPos]   = useState(null);
-  const [selectedText, setSelectedText] = useState('');
+  /* ── Floating popover state ── */
+  const [popoverOpen,        setPopoverOpen]        = useState(false);
+  const [popoverState,       setPopoverState]       = useState('IDLE');   // IDLE|LOADING|STREAMING|DONE|ERROR
+  const [popoverMessages,    setPopoverMessages]    = useState([]);       // { role, content }[]
+  const [popoverStreamText,  setPopoverStreamText]  = useState('');
+  const [popoverMode,        setPopoverMode]        = useState('standard');
+  const [sidebarMode,        setSidebarMode]        = useState(false);
+  const [saveStatus,         setSaveStatus]         = useState('unsaved'); // unsaved|saving|saved|error
+  const [popoverAnchorRect,  setPopoverAnchorRect]  = useState(null);
+  const [popoverError,       setPopoverError]       = useState(null);
+  const [popoverErrorCode,   setPopoverErrorCode]   = useState(null);
 
+  /* ── Refs (stale-closure-safe access inside async callbacks) ── */
   const articleRef       = useRef(null);
   const viewportRef      = useRef(null);
-  // Ref always holds the latest selected text so handleGistIt never reads
-  // a stale closure value (mousedown clears the selection before click fires,
-  // which causes React to re-render with selectedText='' before onClick runs).
-  const selectedTextRef  = useRef('');
+  const selectedTextRef  = useRef('');   // latest highlighted text
+  const anchorRectRef    = useRef(null); // selection bounding rect relative to viewport
+  const popoverModeRef   = useRef('standard');
+  const originalTextRef  = useRef('');  // original gisted text (for mode re-gist)
+  const backendMsgsRef   = useRef([]);  // full history sent to backend
 
-  /* Track text selection inside the article */
+  /* ─────────────────────────────────────────────────────────────────────────
+     Text selection tracking
+  ───────────────────────────────────────────────────────────────────────── */
   useEffect(() => {
-    const handleSelectionChange = () => {
+    const onSelectionChange = () => {
       const sel = window.getSelection();
       const text = sel?.toString().trim() ?? '';
+
       if (!text || !articleRef.current) {
         setGistBtnPos(null);
-        setSelectedText('');
         selectedTextRef.current = '';
+        anchorRectRef.current = null;
         return;
       }
       try {
         const range = sel.getRangeAt(0);
         if (!articleRef.current.contains(range.commonAncestorContainer)) {
           setGistBtnPos(null);
-          setSelectedText('');
           selectedTextRef.current = '';
+          anchorRectRef.current = null;
           return;
         }
-        const rect = range.getBoundingClientRect();
+        const rect   = range.getBoundingClientRect();
         const vpRect = viewportRef.current?.getBoundingClientRect();
-        if (!vpRect) { setGistBtnPos(null); setSelectedText(''); selectedTextRef.current = ''; return; }
-        setGistBtnPos({ x: rect.left + rect.width / 2 - vpRect.left, y: rect.top - 10 - vpRect.top });
-        setSelectedText(text);
+        if (!vpRect) { setGistBtnPos(null); selectedTextRef.current = ''; return; }
+
         selectedTextRef.current = text;
-      } catch { setGistBtnPos(null); setSelectedText(''); selectedTextRef.current = ''; }
+        anchorRectRef.current = {
+          x: rect.left - vpRect.left,
+          y: rect.top  - vpRect.top,
+          width:  rect.width,
+          height: rect.height,
+        };
+        setGistBtnPos({
+          x: rect.left + rect.width / 2 - vpRect.left,
+          y: rect.top - 10 - vpRect.top,
+        });
+      } catch {
+        setGistBtnPos(null);
+        selectedTextRef.current = '';
+        anchorRectRef.current = null;
+      }
     };
-    document.addEventListener('selectionchange', handleSelectionChange);
-    return () => document.removeEventListener('selectionchange', handleSelectionChange);
+
+    document.addEventListener('selectionchange', onSelectionChange);
+    return () => document.removeEventListener('selectionchange', onSelectionChange);
   }, []);
 
-  /* Helper: consume an SSE stream from /api/v1/simplify and return the full explanation */
-  const readSseStream = async (res) => {
-    const reader = res.body.getReader();
+  /* ─────────────────────────────────────────────────────────────────────────
+     SSE stream helper — calls onChunk with the accumulated text on each chunk
+  ───────────────────────────────────────────────────────────────────────── */
+  const streamSse = useCallback(async (res, onChunk) => {
+    const reader  = res.body.getReader();
     const decoder = new TextDecoder();
-    let explanation = '';
     let buffer = '';
+    let full   = '';
     while (true) {
       const { value, done } = await reader.read();
       if (done) break;
@@ -146,102 +181,273 @@ export default function GistDemoWrapper() {
       for (const line of lines) {
         if (!line.startsWith('data: ')) continue;
         const payload = line.slice(6).trim();
-        if (payload === '[DONE]') break;
-        try { const p = JSON.parse(payload); if (p.chunk) explanation += p.chunk; } catch {}
+        if (payload === '[DONE]') { buffer = ''; break; }
+        try {
+          const p = JSON.parse(payload);
+          if (p.chunk) { full += p.chunk; onChunk(full); }
+        } catch { /* ignore malformed */ }
       }
     }
-    return explanation;
-  };
+    return full;
+  }, []);
 
-  /* Helper: fire-and-forget save to library (non-fatal if it fails) */
-  const saveToLibrary = async (original_text, explanation, mode, headers) => {
+  /* ─────────────────────────────────────────────────────────────────────────
+     Library save (fire-and-forget)
+  ───────────────────────────────────────────────────────────────────────── */
+  const saveToLibrary = useCallback(async (original_text, explanation, mode, headers) => {
     try {
       await fetch(`${BACKEND}/library/save`, {
         method: 'POST', headers,
-        body: JSON.stringify({ original_text, explanation, mode, url: `https://${ARTICLE.url}`, gist_type: 'text' }),
+        body: JSON.stringify({
+          original_text, explanation, mode,
+          url: `https://${ARTICLE.url}`, gist_type: 'text',
+        }),
       });
     } catch { /* non-fatal */ }
-  };
-
-  /* Send selected text to backend */
-  const handleGistIt = useCallback(async () => {
-    // Read from ref, not state — state may already be '' due to React 18 batching
-    // flushing the selectionchange update before this click handler runs.
-    const text = selectedTextRef.current;
-    if (!text || capturing) return;
-    selectedTextRef.current = '';      // consume immediately
-    setCapturing(true);
-    setGistBtnPos(null);
-    window.getSelection()?.removeAllRanges();
-    try {
-      const apiKey = localStorage.getItem('gist_demo_api_key') || '';
-      const headers = { 'Content-Type': 'application/json' };
-      if (apiKey) headers['X-Gemini-Api-Key'] = apiKey;
-
-      // Real endpoint: POST /api/v1/simplify — returns SSE stream, not JSON
-      const res = await fetch(`${BACKEND}/api/v1/simplify`, {
-        method: 'POST', headers,
-        body: JSON.stringify({ selected_text: text, page_context: ARTICLE.url, complexity_level: 'standard' }),
-      });
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || `Server error (${res.status})`);
-      }
-
-      const explanation = await readSseStream(res);
-      if (!explanation) throw new Error('No explanation received. The server may still be waking up — try again in a moment.');
-
-      // Save to library (async, non-blocking)
-      saveToLibrary(text, explanation, 'standard', headers);
-
-      setCaptureResult({ explanation });
-      setPopupOpen(true);
-    } catch (err) {
-      setCaptureResult({ error: err.message });
-      setPopupOpen(true);
-    } finally { setCapturing(false); }
-  }, [capturing]);
-
-  /* Visual capture */
-  const handleCaptureArea = useCallback(async (rect) => {
-    setCaptureMode(false);
-    setCapturing(true);
-    try {
-      const paraEls = articleRef.current?.querySelectorAll('p') ?? [];
-      let capturedText = '';
-      for (const el of paraEls) {
-        const elRect = el.getBoundingClientRect();
-        if (elRect.bottom > rect.y && elRect.top < rect.y + rect.height && elRect.right > rect.x && elRect.left < rect.x + rect.width) {
-          capturedText += (capturedText ? ' ' : '') + el.textContent;
-        }
-      }
-      if (!capturedText) capturedText = ARTICLE.paragraphs[0];
-      const apiKey = localStorage.getItem('gist_demo_api_key') || '';
-      const headers = { 'Content-Type': 'application/json' };
-      if (apiKey) headers['X-Gemini-Api-Key'] = apiKey;
-
-      const res = await fetch(`${BACKEND}/api/v1/simplify`, {
-        method: 'POST', headers,
-        body: JSON.stringify({ selected_text: capturedText, page_context: ARTICLE.url, complexity_level: 'simple' }),
-      });
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || `Server error (${res.status})`);
-      }
-
-      const explanation = await readSseStream(res);
-      if (!explanation) throw new Error('No explanation received. The server may still be waking up — try again in a moment.');
-
-      saveToLibrary(capturedText, explanation, 'simple', headers);
-
-      setCaptureResult({ explanation });
-      setPopupOpen(true);
-    } catch (err) {
-      setCaptureResult({ error: err.message });
-      setPopupOpen(true);
-    } finally { setCapturing(false); }
   }, []);
 
+  /* ─────────────────────────────────────────────────────────────────────────
+     Core: fetch + stream an explanation and push it into the popover
+  ───────────────────────────────────────────────────────────────────────── */
+  const fetchAndStream = useCallback(async ({ text, mode, messages = [], anchor = null, saveAfter = true }) => {
+    const apiKey  = localStorage.getItem('gist_demo_api_key') || '';
+    const headers = { 'Content-Type': 'application/json' };
+    if (apiKey) headers['X-Gemini-Api-Key'] = apiKey;
+
+    if (anchor) setPopoverAnchorRect(anchor);
+
+    setPopoverState('LOADING');
+    setPopoverStreamText('');
+
+    const body = {
+      selected_text:    text,
+      page_context:     ARTICLE.url,
+      complexity_level: mode,
+    };
+    if (messages.length) body.messages = messages;
+
+    const res = await fetch(`${BACKEND}/api/v1/simplify`, {
+      method: 'POST', headers, body: JSON.stringify(body),
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      const err = new Error(errData.error || `Server error (${res.status})`);
+      err.code = errData.code;
+      throw err;
+    }
+
+    setPopoverState('STREAMING');
+    const explanation = await streamSse(res, (partial) => setPopoverStreamText(partial));
+
+    if (!explanation) throw new Error('No explanation received. The backend may still be waking up — try again in a moment.');
+
+    setPopoverStreamText('');
+
+    if (saveAfter) saveToLibrary(text, explanation, mode, headers);
+
+    return explanation;
+  }, [streamSse, saveToLibrary]);
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     Handle "Gist it!" click
+  ───────────────────────────────────────────────────────────────────────── */
+  const handleGistIt = useCallback(async () => {
+    const text = selectedTextRef.current;
+    if (!text || capturing) return;
+
+    selectedTextRef.current = '';
+    setGistBtnPos(null);
+    window.getSelection()?.removeAllRanges();
+
+    /* Open popover immediately in LOADING so the user sees feedback at once */
+    originalTextRef.current  = text;
+    backendMsgsRef.current   = [];
+    const mode               = popoverModeRef.current;
+
+    setPopoverOpen(true);
+    setPopoverMessages([]);
+    setPopoverStreamText('');
+    setSaveStatus('unsaved');
+    setPopoverError(null);
+    setPopoverErrorCode(null);
+    setCapturing(true);
+
+    try {
+      const explanation = await fetchAndStream({
+        text,
+        mode,
+        anchor: anchorRectRef.current,
+      });
+
+      const modelMsg = { role: 'model', content: explanation };
+      setPopoverMessages([modelMsg]);
+      setPopoverState('DONE');
+      backendMsgsRef.current = [
+        { role: 'user',  content: text },
+        { role: 'model', content: explanation },
+      ];
+    } catch (err) {
+      setPopoverState('ERROR');
+      setPopoverError(err.message);
+      setPopoverErrorCode(err.code ?? null);
+    } finally {
+      setCapturing(false);
+    }
+  }, [capturing, fetchAndStream]);
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     Visual area capture
+  ───────────────────────────────────────────────────────────────────────── */
+  const handleCaptureArea = useCallback(async (rect) => {
+    setCaptureMode(false);
+
+    /* Extract text from paragraphs that overlap the drawn rect */
+    const paraEls = articleRef.current?.querySelectorAll('p') ?? [];
+    let capturedText = '';
+    for (const el of paraEls) {
+      const elRect = el.getBoundingClientRect();
+      if (
+        elRect.bottom > rect.y && elRect.top    < rect.y + rect.height &&
+        elRect.right  > rect.x && elRect.left   < rect.x + rect.width
+      ) {
+        capturedText += (capturedText ? ' ' : '') + el.textContent;
+      }
+    }
+    if (!capturedText) capturedText = ARTICLE.paragraphs[0];
+
+    originalTextRef.current = capturedText;
+    backendMsgsRef.current  = [];
+    const mode              = popoverModeRef.current;
+
+    setPopoverOpen(true);
+    setPopoverMessages([]);
+    setPopoverStreamText('');
+    setSaveStatus('unsaved');
+    setPopoverError(null);
+    setPopoverErrorCode(null);
+    /* Position popover top-left for captures (no text-selection anchor) */
+    setPopoverAnchorRect({ x: 20, y: 60, width: 0, height: 0 });
+    setCapturing(true);
+
+    try {
+      const explanation = await fetchAndStream({ text: capturedText, mode });
+
+      setPopoverMessages([{ role: 'model', content: explanation }]);
+      setPopoverState('DONE');
+      backendMsgsRef.current = [
+        { role: 'user',  content: capturedText },
+        { role: 'model', content: explanation  },
+      ];
+    } catch (err) {
+      setPopoverState('ERROR');
+      setPopoverError(err.message);
+      setPopoverErrorCode(err.code ?? null);
+    } finally {
+      setCapturing(false);
+    }
+  }, [fetchAndStream]);
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     Follow-up chat message
+  ───────────────────────────────────────────────────────────────────────── */
+  const handleSendFollowUp = useCallback(async (query) => {
+    const mode    = popoverModeRef.current;
+    const history = backendMsgsRef.current;
+
+    /* Optimistically add the user bubble */
+    setPopoverMessages(prev => [...prev, { role: 'user', content: query }]);
+    setSaveStatus('unsaved');
+
+    try {
+      const explanation = await fetchAndStream({
+        text:      query,
+        mode,
+        messages:  history,
+        saveAfter: false,
+      });
+
+      const modelMsg = { role: 'model', content: explanation };
+      setPopoverMessages(prev => [...prev, modelMsg]);
+      setPopoverState('DONE');
+      backendMsgsRef.current = [
+        ...history,
+        { role: 'user',  content: query       },
+        { role: 'model', content: explanation  },
+      ];
+    } catch (err) {
+      /* Roll back the optimistic user bubble */
+      setPopoverMessages(prev => prev.slice(0, -1));
+      setPopoverState('ERROR');
+      setPopoverError(err.message);
+      setPopoverErrorCode(err.code ?? null);
+    }
+  }, [fetchAndStream]);
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     Mode change — re-gists the original text with the new mode
+  ───────────────────────────────────────────────────────────────────────── */
+  const handleModeChange = useCallback(async (newMode) => {
+    setPopoverMode(newMode);
+    popoverModeRef.current = newMode;
+
+    const text = originalTextRef.current;
+    if (!text) return;
+
+    backendMsgsRef.current = [];
+    setPopoverMessages([]);
+    setSaveStatus('unsaved');
+    setPopoverError(null);
+    setPopoverErrorCode(null);
+
+    try {
+      const explanation = await fetchAndStream({ text, mode: newMode });
+      setPopoverMessages([{ role: 'model', content: explanation }]);
+      setPopoverState('DONE');
+      backendMsgsRef.current = [
+        { role: 'user',  content: text        },
+        { role: 'model', content: explanation },
+      ];
+    } catch (err) {
+      setPopoverState('ERROR');
+      setPopoverError(err.message);
+      setPopoverErrorCode(err.code ?? null);
+    }
+  }, [fetchAndStream]);
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     Manual save to library
+  ───────────────────────────────────────────────────────────────────────── */
+  const handleSaveGist = useCallback(async (content) => {
+    setSaveStatus('saving');
+    try {
+      const apiKey  = localStorage.getItem('gist_demo_api_key') || '';
+      const headers = { 'Content-Type': 'application/json' };
+      if (apiKey) headers['X-Gemini-Api-Key'] = apiKey;
+      await saveToLibrary(
+        originalTextRef.current || content,
+        content,
+        popoverModeRef.current,
+        headers,
+      );
+      setSaveStatus('saved');
+    } catch {
+      setSaveStatus('error');
+    }
+  }, [saveToLibrary]);
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     Sidebar toggle
+  ───────────────────────────────────────────────────────────────────────── */
+  const handleToggleSidebar = useCallback(() => {
+    setSidebarMode(v => !v);
+    /* Open the popover if it was closed and sidebar is being activated */
+    setPopoverOpen(true);
+  }, []);
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     Other navigation handlers
+  ───────────────────────────────────────────────────────────────────────── */
   const handleCaptureStart = useCallback(() => {
     setCaptureMode(true);
     setPopupOpen(false);
@@ -256,14 +462,18 @@ export default function GistDemoWrapper() {
     setDashboardMode(false);
   }, []);
 
-  /* URL bar text */
+  /* ─────────────────────────────────────────────────────────────────────────
+     Derived
+  ───────────────────────────────────────────────────────────────────────── */
   const urlBarText = dashboardMode
     ? 'chrome-extension://gist/dashboard.html'
     : ARTICLE.url;
 
+  /* ─────────────────────────────────────────────────────────────────────────
+     Render
+  ───────────────────────────────────────────────────────────────────────── */
   return (
     <div className="gist-scope" style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
-      {/* ── Browser chrome ── */}
       <div style={{
         width: '100%', height: '100%',
         display: 'flex', flexDirection: 'column',
@@ -273,7 +483,7 @@ export default function GistDemoWrapper() {
         border: '1px solid oklch(1 0 0 / 0.08)',
       }}>
 
-        {/* Title bar */}
+        {/* ── Title bar ── */}
         <div style={{
           display: 'flex', alignItems: 'center', gap: '10px',
           padding: '0 14px', height: '42px',
@@ -283,7 +493,6 @@ export default function GistDemoWrapper() {
         }}>
           <TrafficLights />
 
-          {/* URL bar */}
           <div style={{
             flex: 1, display: 'flex', alignItems: 'center', gap: '7px',
             background: '#1a1a1a', border: '1px solid oklch(1 0 0 / 0.1)',
@@ -299,12 +508,11 @@ export default function GistDemoWrapper() {
             </span>
           </div>
 
-          {/* Extensions area */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto' }}>
             <button
               onClick={() => {
-                if (dashboardMode) { handleBackToArticle(); }
-                else { setPopupOpen((v) => !v); }
+                if (dashboardMode) handleBackToArticle();
+                else setPopupOpen(v => !v);
               }}
               title="Gist Extension"
               style={{
@@ -323,27 +531,32 @@ export default function GistDemoWrapper() {
           </div>
         </div>
 
-        {/* Viewport */}
+        {/* ── Viewport ── */}
         <div
           ref={viewportRef}
           style={{ flex: 1, position: 'relative', overflow: 'visible', display: 'flex' }}
         >
           {dashboardMode ? (
-            /* ── Full Dashboard mode ── */
             <GistDashboard onBack={handleBackToArticle} />
           ) : (
-            /* ── Article mode ── */
             <>
-              {/* Article — clicking it dismisses the popup */}
+              {/* Article */}
               <div
                 ref={articleRef}
-                onClick={() => { if (popupOpen) setPopupOpen(false); }}
+                onClick={() => {
+                  if (popupOpen) setPopupOpen(false);
+                  /* Floating popover only closes on click-outside when not in sidebar mode */
+                  if (popoverOpen && !sidebarMode) setPopoverOpen(false);
+                }}
                 style={{
                   flex: 1, overflowY: 'auto',
                   padding: '40px 48px',
+                  /* Shrink right padding to give sidebar breathing room */
+                  paddingRight: sidebarMode && popoverOpen ? '388px' : '48px',
                   background: '#f8f6f1', color: '#1a1a18',
                   fontFamily: '"Inter", Georgia, serif',
                   scrollbarWidth: 'thin', scrollbarColor: '#c8c4b8 transparent',
+                  transition: 'padding-right 250ms ease',
                 }}
               >
                 {/* Instruction banner */}
@@ -359,8 +572,7 @@ export default function GistDemoWrapper() {
                     <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
                   </svg>
                   <span>
-                    <strong>Interactive demo:</strong> Select any text below then click <strong>"Gist it!"</strong> to capture with AI.
-                    Click <strong>⊞</strong> in the toolbar to open the extension popup, or click <strong>"Full library →"</strong> inside the popup to open the full dashboard.
+                    <strong>Interactive demo:</strong> Select any text then click <strong>"Gist it!"</strong> for a live AI explanation with chat. Click <strong>⊞</strong> to open the extension popup, or <strong>"Full library →"</strong> to open the full dashboard.
                   </span>
                 </div>
 
@@ -375,7 +587,7 @@ export default function GistDemoWrapper() {
                 </div>
 
                 {ARTICLE.paragraphs.map((para, i) => (
-                  <p key={i} style={{ fontSize: '15px', lineHeight: 1.75, color: '#2a2a28', marginBottom: '20px', margin: '0 0 20px', fontFamily: 'Georgia, "Times New Roman", serif', cursor: 'text' }}>
+                  <p key={i} style={{ fontSize: '15px', lineHeight: 1.75, color: '#2a2a28', margin: '0 0 20px', fontFamily: 'Georgia, "Times New Roman", serif', cursor: 'text' }}>
                     {para}
                   </p>
                 ))}
@@ -387,11 +599,10 @@ export default function GistDemoWrapper() {
                 <GistCaptureOverlay onCapture={handleCaptureArea} onCancel={() => setCaptureMode(false)} />
               )}
 
-              {/* Popup */}
+              {/* ── Extension popup (toolbar button) ── */}
               {popupOpen && !captureMode && (
                 <div style={{
-                  position: 'absolute', top: '8px', right: '8px', zIndex: 50,
-                  // maxHeight keeps the popup inside the browser chrome on short screens
+                  position: 'absolute', top: '8px', right: '8px', zIndex: 55,
                   maxHeight: 'calc(100% - 16px)',
                   display: 'flex', flexDirection: 'column',
                   animation: 'gistPopupIn 180ms cubic-bezier(0.22, 1, 0.36, 1) both',
@@ -399,32 +610,50 @@ export default function GistDemoWrapper() {
                   <style>{`@keyframes gistPopupIn{from{opacity:0;transform:translateY(-8px) scale(0.97)}to{opacity:1;transform:translateY(0) scale(1)}}`}</style>
                   <GistPopup
                     onCaptureStart={handleCaptureStart}
-                    captureResult={captureResult}
-                    onDismissResult={() => setCaptureResult(null)}
                     onOpenDashboard={handleOpenDashboard}
+                    onToggleSidebar={handleToggleSidebar}
+                    isSidebarMode={sidebarMode}
                     onClose={() => setPopupOpen(false)}
                   />
                 </div>
               )}
 
-              {/* Capturing overlay */}
+              {/* ── Floating Gist popover ── */}
+              {popoverOpen && !captureMode && (
+                <GistFloatingPopover
+                  state={popoverState}
+                  messages={popoverMessages}
+                  streamingText={popoverStreamText}
+                  error={popoverError}
+                  errorCode={popoverErrorCode}
+                  anchorRect={popoverAnchorRect}
+                  mode={popoverMode}
+                  isSidebarMode={sidebarMode}
+                  saveStatus={saveStatus}
+                  onClose={() => { setPopoverOpen(false); setSidebarMode(false); }}
+                  onModeChange={handleModeChange}
+                  onSendMessage={handleSendFollowUp}
+                  onSaveGist={handleSaveGist}
+                  onToggleSidebar={handleToggleSidebar}
+                />
+              )}
+
+              {/* Capturing spinner */}
               {capturing && (
-                <div style={{ position: 'absolute', inset: 0, zIndex: 45, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'oklch(0 0 0 / 0.15)', backdropFilter: 'blur(2px)' }}>
-                  <div style={{ background: 'oklch(0.16 0.004 120 / 0.95)', border: '1px solid oklch(0.75 0.11 150 / 0.3)', borderRadius: '12px', padding: '16px 24px', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 12px 40px oklch(0 0 0 / 0.5)' }}>
-                    <div style={{ width: '16px', height: '16px', border: '2px solid oklch(0.75 0.11 150 / 0.25)', borderTopColor: 'oklch(0.75 0.11 150)', borderRadius: '50%', animation: 'gistBtnSpin 0.7s linear infinite' }} />
-                    <span style={{ fontSize: '13px', color: 'oklch(0.78 0.006 95)', fontFamily: '"Inter", sans-serif' }}>Gisting with AI…</span>
-                    <style>{`@keyframes gistBtnSpin{to{transform:rotate(360deg)}}`}</style>
+                <div style={{ position: 'absolute', inset: 0, zIndex: 45, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'oklch(0 0 0 / 0.12)', backdropFilter: 'blur(2px)' }}>
+                  <div style={{ background: 'oklch(0.16 0.004 120 / 0.95)', border: '1px solid oklch(0.75 0.11 150 / 0.3)', borderRadius: '12px', padding: '14px 22px', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 12px 40px oklch(0 0 0 / 0.5)' }}>
+                    <div style={{ width: '14px', height: '14px', border: '2px solid oklch(0.75 0.11 150 / 0.25)', borderTopColor: 'oklch(0.75 0.11 150)', borderRadius: '50%', animation: 'gistBtnSpin 0.7s linear infinite' }} />
+                    <span style={{ fontSize: '12.5px', color: 'oklch(0.78 0.006 95)', fontFamily: '"Inter", sans-serif' }}>Connecting to AI…</span>
                   </div>
                 </div>
               )}
 
-              {/* "Gist it!" floating button — position:absolute so it works inside CSS-transformed ancestors */}
+              {/* "Gist it!" pill button */}
               <GistItButton position={gistBtnPos} loading={capturing} onClick={handleGistIt} />
             </>
           )}
         </div>
       </div>
-
     </div>
   );
 }

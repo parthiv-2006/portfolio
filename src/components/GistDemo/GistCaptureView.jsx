@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 
-const BACKEND = 'https://gist-vc8m.onrender.com';
-
 const T = {
   bg: 'var(--bg)', bgElevated: 'var(--surface)', bgHover: 'var(--surface-2)',
   bgActive: 'var(--surface-3)', border: 'var(--hairline)', borderMid: 'var(--hairline-2)',
@@ -94,10 +92,10 @@ function KbdSet({ keys }) {
 function FeatureCard({ icon, title, subtitle, rightSlot, onClick, accent = false }) {
   const [hovered, setHovered] = useState(false);
   const isClickable = !!onClick;
-  const border = accent ? T.accentBorder : hovered && isClickable ? T.borderMid : T.border;
-  const iconBg = accent ? T.accentBg : hovered && isClickable ? T.bgActive : T.bgHover;
+  const border    = accent ? T.accentBorder : hovered && isClickable ? T.borderMid : T.border;
+  const iconBg    = accent ? T.accentBg    : hovered && isClickable ? T.bgActive   : T.bgHover;
   const iconBorder = accent ? T.accentBorder : T.border;
-  const iconColor = accent ? T.accent : hovered && isClickable ? T.textMuted : T.textDim;
+  const iconColor = accent ? T.accent      : hovered && isClickable ? T.textMuted  : T.textDim;
 
   return (
     <div
@@ -131,82 +129,15 @@ function FeatureCard({ icon, title, subtitle, rightSlot, onClick, accent = false
   );
 }
 
-/* Capture result toast shown after a successful gist save */
-function CaptureResult({ result, onClose }) {
-  // Error state
-  if (result.error) {
-    return (
-      <div style={{
-        background: 'oklch(0.25 0.05 25 / 0.15)', border: '1px solid oklch(0.50 0.12 25 / 0.3)',
-        borderLeft: '2px solid oklch(0.65 0.15 25)', borderRadius: '7px',
-        padding: '9px 11px', marginTop: '6px', position: 'relative',
-      }}>
-        <button
-          onClick={onClose}
-          style={{ position: 'absolute', top: '8px', right: '8px', background: 'none', border: 'none', cursor: 'pointer', color: 'oklch(0.72 0.15 25)', padding: 0, display: 'flex' }}
-          aria-label="Dismiss"
-        >
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-            <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
-          </svg>
-        </button>
-        <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', color: 'oklch(0.72 0.15 25)', fontFamily: MONO, marginBottom: '4px' }}>
-          Error
-        </div>
-        <p style={{ margin: 0, fontSize: '11.5px', color: 'oklch(0.72 0.15 25)', lineHeight: 1.5, paddingRight: '16px' }}>
-          {result.error}
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <div style={{
-      background: T.accentBg, border: `1px solid ${T.accentBorder}`,
-      borderRadius: '8px', padding: '10px 12px', marginTop: '6px',
-      position: 'relative',
-    }}>
-      <button
-        onClick={onClose}
-        style={{ position: 'absolute', top: '8px', right: '8px', background: 'none', border: 'none', cursor: 'pointer', color: T.textDim, padding: 0, display: 'flex' }}
-        aria-label="Dismiss"
-      >
-        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-          <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
-        </svg>
-      </button>
-      <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', color: T.accent, fontFamily: MONO, marginBottom: '5px' }}>
-        ✓ Gist saved
-      </div>
-      <p style={{ margin: 0, fontSize: '11.5px', color: T.text, lineHeight: 1.55 }}>{result.explanation}</p>
-      {result.category && (
-        <span style={{
-          display: 'inline-block', marginTop: '6px',
-          fontSize: '9px', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase',
-          padding: '1.5px 5px', borderRadius: '4px',
-          background: 'oklch(0.75 0.11 150 / 0.12)', color: T.accent,
-          border: '1px solid oklch(0.75 0.11 150 / 0.25)',
-        }}>{result.category}</span>
-      )}
-    </div>
-  );
-}
-
-export function GistCaptureView({ onCaptureStart, captureResult, onDismissResult }) {
+export function GistCaptureView({ onCaptureStart, onToggleSidebar, isSidebarMode = false }) {
   const [autoGistEnabled, setAutoGistEnabled] = useState(
     localStorage.getItem('gist_demo_autoGist') === 'true'
   );
-  const [capturing, setCapturing] = useState(false);
-  const [captureError, setCaptureError] = useState(null);
 
   const handleAutoGistToggle = () => {
     const next = !autoGistEnabled;
     setAutoGistEnabled(next);
     localStorage.setItem('gist_demo_autoGist', String(next));
-  };
-
-  const handleVisualCapture = () => {
-    onCaptureStart?.();
   };
 
   return (
@@ -220,16 +151,16 @@ export function GistCaptureView({ onCaptureStart, captureResult, onDismissResult
         title="Visual Capture"
         subtitle="Drag to select any area of the page"
         rightSlot={<KbdSet keys={['Alt', '⇧', 'G']} />}
-        onClick={handleVisualCapture}
+        onClick={() => onCaptureStart?.()}
       />
 
       <FeatureCard
         icon={<IconSidebar />}
         title="Sidebar Mode"
-        subtitle="Persistent panel on the right"
-        onClick={() => {
-          /* Web demo: sidebar not applicable outside extension */
-        }}
+        subtitle="Pin the Gist panel to the right edge"
+        accent={isSidebarMode}
+        rightSlot={<Toggle enabled={isSidebarMode} onToggle={() => onToggleSidebar?.()} />}
+        onClick={() => onToggleSidebar?.()}
       />
 
       <FeatureCard
@@ -256,18 +187,10 @@ export function GistCaptureView({ onCaptureStart, captureResult, onDismissResult
       }}>
         <span style={{ color: T.textDim, display: 'flex', flexShrink: 0, marginTop: '1px' }}><IconGrip /></span>
         <p style={{ margin: 0, fontSize: '11.5px', color: T.textMuted, lineHeight: 1.55 }}>
-          The panel is <strong style={{ color: T.text }}>draggable</strong> and{' '}
+          The Gist panel is <strong style={{ color: T.text }}>draggable</strong> and{' '}
           <strong style={{ color: T.text }}>resizable</strong> — grab the header or corner.
         </p>
       </div>
-
-      {captureError && (
-        <div style={{ fontSize: '11.5px', color: 'oklch(0.72 0.15 25)', padding: '8px 10px', background: 'oklch(0.25 0.05 25 / 0.12)', borderRadius: '7px', border: '1px solid oklch(0.50 0.12 25 / 0.25)' }}>
-          {captureError}
-        </div>
-      )}
-
-      {captureResult && <CaptureResult result={captureResult} onClose={onDismissResult} />}
     </main>
   );
 }
