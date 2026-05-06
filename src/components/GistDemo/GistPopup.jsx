@@ -63,6 +63,8 @@ export function GistPopup({
   isSidebarMode = false,
   onClose,
   initialTab = 'capture',
+  autoGistEnabled = false,
+  onAutoGistToggle,
 }) {
   const [activeTab, setActiveTab] = useState(initialTab);
 
@@ -173,6 +175,8 @@ export function GistPopup({
               onCaptureStart={onCaptureStart}
               onToggleSidebar={onToggleSidebar}
               isSidebarMode={isSidebarMode}
+              autoGistEnabled={autoGistEnabled}
+              onAutoGistToggle={onAutoGistToggle}
             />
           )}
           {activeTab === 'library' && <GistLibraryView />}

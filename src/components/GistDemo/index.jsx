@@ -3,6 +3,7 @@ import { GistPopup }             from './GistPopup';
 import { GistCaptureOverlay }    from './GistCaptureOverlay';
 import { GistDashboard }         from './GistDashboard';
 import { GistFloatingPopover }   from './GistFloatingPopover';
+import { GistAutoGistWidget }    from './GistAutoGistWidget';
 import './gist-tokens.css';
 
 const BACKEND = 'https://gist-vc8m.onrender.com';
@@ -107,14 +108,22 @@ export default function GistDemoWrapper() {
   const [popoverError,       setPopoverError]       = useState(null);
   const [popoverErrorCode,   setPopoverErrorCode]   = useState(null);
 
+  /* ── AutoGist state ── */
+  const [autoGistEnabled,  setAutoGistEnabled]  = useState(
+    localStorage.getItem('gist_demo_autoGist') === 'true'
+  );
+  const [widgetState,     setWidgetState]     = useState('idle');   // 'idle'|'loading'|'ready'
+  const [widgetTakeaways, setWidgetTakeaways] = useState([]);
+
   /* ── Refs (stale-closure-safe access inside async callbacks) ── */
-  const articleRef       = useRef(null);
-  const viewportRef      = useRef(null);
-  const selectedTextRef  = useRef('');   // latest highlighted text
-  const anchorRectRef    = useRef(null); // selection bounding rect relative to viewport
-  const popoverModeRef   = useRef('standard');
-  const originalTextRef  = useRef('');  // original gisted text (for mode re-gist)
-  const backendMsgsRef   = useRef([]);  // full history sent to backend
+  const articleRef           = useRef(null);
+  const viewportRef          = useRef(null);
+  const selectedTextRef      = useRef('');   // latest highlighted text
+  const anchorRectRef        = useRef(null); // selection bounding rect relative to viewport
+  const popoverModeRef       = useRef('standard');
+  const originalTextRef      = useRef('');  // original gisted text (for mode re-gist)
+  const backendMsgsRef       = useRef([]);  // full history sent to backend
+  const lastAutoGistTextRef  = useRef('');  // dedup: skip if same text as last extraction
 
   /* ─────────────────────────────────────────────────────────────────────────
      Text selection tracking
@@ -437,6 +446,100 @@ export default function GistDemoWrapper() {
   }, [saveToLibrary]);
 
   /* ─────────────────────────────────────────────────────────────────────────
+     AutoGist toggle + scroll observer
+  ───────────────────────────────────────────────────────────────────────── */
+  const handleAutoGistToggle = useCallback(() => {
+    const next = !autoGistEnabled;
+    setAutoGistEnabled(next);
+    localStorage.setItem('gist_demo_autoGist', String(next));
+    if (!next) {
+      setWidgetState('idle');
+      setWidgetTakeaways([]);
+      lastAutoGistTextRef.current = '';
+    }
+  }, [autoGistEnabled]);
+
+  useEffect(() => {
+    if (!autoGistEnabled) return;
+
+    const EXTRACTION_DELAY_MS = 2000;
+    const INITIAL_DELAY_MS    = 3000;
+    const MIN_TEXT_CHARS      = 100;
+    const MAX_TEXT_CHARS      = 1500;
+    const MIN_WORD_COUNT      = 5;
+
+    function extractViewportText() {
+      const container = articleRef.current;
+      if (!container) return '';
+      const containerRect = container.getBoundingClientRect();
+      const elements = Array.from(
+        container.querySelectorAll('p, h1, h2, h3, h4, li, blockquote')
+      );
+      const chunks = [];
+      let totalChars = 0;
+      for (const el of elements) {
+        if (totalChars >= MAX_TEXT_CHARS) break;
+        const rect = el.getBoundingClientRect();
+        if (rect.bottom < containerRect.top || rect.top > containerRect.bottom) continue;
+        const text = (el.textContent ?? '').replace(/\s+/g, ' ').trim();
+        if (text.split(' ').length < MIN_WORD_COUNT) continue;
+        const remaining = MAX_TEXT_CHARS - totalChars;
+        chunks.push(text.slice(0, remaining));
+        totalChars += text.length;
+      }
+      return chunks.join(' ').slice(0, MAX_TEXT_CHARS);
+    }
+
+    async function fetchTakeaways(text) {
+      const apiKey  = localStorage.getItem('gist_demo_api_key') || '';
+      const headers = { 'Content-Type': 'application/json' };
+      if (apiKey) headers['X-Gemini-Api-Key'] = apiKey;
+      setWidgetState('loading');
+      try {
+        const res = await fetch(`${BACKEND}/autogist`, {
+          method: 'POST', headers,
+          body: JSON.stringify({ text_chunk: text, url: ARTICLE.url }),
+        });
+        if (!res.ok) throw new Error('failed');
+        const data = await res.json();
+        const takeaways = data.takeaways ?? [];
+        if (takeaways.length > 0) {
+          setWidgetTakeaways(takeaways);
+          setWidgetState('ready');
+        } else {
+          setWidgetState('idle');
+        }
+      } catch {
+        setWidgetState('idle');
+      }
+    }
+
+    function tryExtract() {
+      const text = extractViewportText();
+      if (text.length >= MIN_TEXT_CHARS && text !== lastAutoGistTextRef.current) {
+        lastAutoGistTextRef.current = text;
+        fetchTakeaways(text);
+      }
+    }
+
+    let timer = null;
+    const onScroll = () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(tryExtract, EXTRACTION_DELAY_MS);
+    };
+
+    const container = articleRef.current;
+    if (!container) return;
+    container.addEventListener('scroll', onScroll, { passive: true });
+    timer = setTimeout(tryExtract, INITIAL_DELAY_MS);
+
+    return () => {
+      container.removeEventListener('scroll', onScroll);
+      if (timer) clearTimeout(timer);
+    };
+  }, [autoGistEnabled]);
+
+  /* ─────────────────────────────────────────────────────────────────────────
      Sidebar toggle
   ───────────────────────────────────────────────────────────────────────── */
   const handleToggleSidebar = useCallback(() => {
@@ -614,6 +717,8 @@ export default function GistDemoWrapper() {
                     onToggleSidebar={handleToggleSidebar}
                     isSidebarMode={sidebarMode}
                     onClose={() => setPopupOpen(false)}
+                    autoGistEnabled={autoGistEnabled}
+                    onAutoGistToggle={handleAutoGistToggle}
                   />
                 </div>
               )}
@@ -650,6 +755,18 @@ export default function GistDemoWrapper() {
 
               {/* "Gist it!" pill button */}
               <GistItButton position={gistBtnPos} loading={capturing} onClick={handleGistIt} />
+
+              {/* AutoGist ambient widget */}
+              {autoGistEnabled && !captureMode && (
+                <GistAutoGistWidget
+                  state={widgetState}
+                  takeaways={widgetTakeaways}
+                  onDismiss={() => {
+                    setWidgetState('idle');
+                    setWidgetTakeaways([]);
+                  }}
+                />
+              )}
             </>
           )}
         </div>

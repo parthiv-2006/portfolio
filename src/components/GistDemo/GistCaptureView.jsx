@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 const T = {
   bg: 'var(--bg)', bgElevated: 'var(--surface)', bgHover: 'var(--surface-2)',
@@ -129,16 +129,8 @@ function FeatureCard({ icon, title, subtitle, rightSlot, onClick, accent = false
   );
 }
 
-export function GistCaptureView({ onCaptureStart, onToggleSidebar, isSidebarMode = false }) {
-  const [autoGistEnabled, setAutoGistEnabled] = useState(
-    localStorage.getItem('gist_demo_autoGist') === 'true'
-  );
-
-  const handleAutoGistToggle = () => {
-    const next = !autoGistEnabled;
-    setAutoGistEnabled(next);
-    localStorage.setItem('gist_demo_autoGist', String(next));
-  };
+export function GistCaptureView({ onCaptureStart, onToggleSidebar, isSidebarMode = false, autoGistEnabled = false, onAutoGistToggle }) {
+  const handleAutoGistToggle = () => onAutoGistToggle?.();
 
   return (
     <main style={{ padding: '11px 12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>

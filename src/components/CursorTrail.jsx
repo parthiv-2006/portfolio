@@ -273,10 +273,14 @@ export default function CursorTrail() {
         // ── Mouse tracking ──
         const onMouseMove = (e) => {
             mouseRef.current = { x: e.clientX, y: e.clientY };
-            // Always restore visibility on movement (handles tab-switch / focus return)
             visibleRef.current = true;
 
-            // Detect hover over interactive elements
+            // If no mouse button is held but state is stuck at 'click', we missed a mouseup
+            // (e.g. the click opened a new tab or moved focus away before mouseup fired).
+            if (stateRef.current === 'click' && e.buttons === 0) {
+                stateRef.current = 'default';
+            }
+
             const target = document.elementFromPoint(e.clientX, e.clientY);
             const isInteractive = target && target.closest(INTERACTIVE_SELECTOR);
 
