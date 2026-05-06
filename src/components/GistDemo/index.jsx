@@ -108,6 +108,20 @@ export default function GistDemoWrapper() {
   const [popoverError,       setPopoverError]       = useState(null);
   const [popoverErrorCode,   setPopoverErrorCode]   = useState(null);
 
+  /* ── Theme ── */
+  const getEffectiveTheme = (pref) => {
+    if (pref === 'system') return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return pref;
+  };
+  const [themePref, setThemePref] = useState(() => localStorage.getItem('gist_demo_theme') || 'dark');
+  const effectiveTheme = getEffectiveTheme(themePref);
+
+  useEffect(() => {
+    const onThemeChange = (e) => setThemePref(e.detail);
+    window.addEventListener('gist:theme-change', onThemeChange);
+    return () => window.removeEventListener('gist:theme-change', onThemeChange);
+  }, []);
+
   /* ── AutoGist state ── */
   const [autoGistEnabled,  setAutoGistEnabled]  = useState(
     localStorage.getItem('gist_demo_autoGist') === 'true'
@@ -578,7 +592,7 @@ export default function GistDemoWrapper() {
   return (
     // stopPropagation prevents clicks from bubbling to the parent project-card
     // onClick handler (which opens the full-screen dark project modal).
-    <div className="gist-scope" onClick={(e) => e.stopPropagation()} style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div className={`gist-scope${effectiveTheme === 'light' ? ' gist-light' : ''}`} onClick={(e) => e.stopPropagation()} style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
       <div style={{
         width: '100%', height: '100%',
         display: 'flex', flexDirection: 'column',

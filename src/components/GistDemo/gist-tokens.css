@@ -43,3 +43,22 @@
 .gist-scope *, .gist-scope *::before, .gist-scope *::after {
   box-sizing: inherit;
 }
+
+/* ── Light theme overrides ── */
+.gist-scope.gist-light {
+  --bg:         oklch(0.97 0.003 110);
+  --surface:    oklch(0.93 0.004 110);
+  --surface-2:  oklch(0.89 0.005 110);
+  --surface-3:  oklch(0.84 0.005 110);
+  --hairline:   oklch(0.82 0.005 110);
+  --hairline-2: oklch(0.72 0.007 110);
+
+  --ink:   oklch(0.15 0.006 120);
+  --ink-2: oklch(0.30 0.007 120);
+  --ink-3: oklch(0.50 0.008 120);
+  --ink-4: oklch(0.65 0.008 120);
+
+  --accent-bg:     oklch(0.88 0.06 150 / 0.4);
+  --accent-ink:    oklch(0.18 0.05 150);
+  --accent-border: oklch(0.55 0.09 150 / 0.5);
+}

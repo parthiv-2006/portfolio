@@ -286,7 +286,11 @@ export function GistSettingsView() {
               <button
                 key={value}
                 className={`${styles.themeOption} ${active ? styles.themeOptionActive : ''}`}
-                onClick={() => { setThemePref(value); localStorage.setItem('gist_demo_theme', value); }}
+                onClick={() => {
+                  setThemePref(value);
+                  localStorage.setItem('gist_demo_theme', value);
+                  window.dispatchEvent(new CustomEvent('gist:theme-change', { detail: value }));
+                }}
                 aria-pressed={active}
                 type="button"
               >

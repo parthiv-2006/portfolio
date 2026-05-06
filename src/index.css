@@ -79,6 +79,14 @@
   body[data-demo-open] *::after {
     cursor: auto !important;
   }
+
+  /* Fallback: custom cursor lost (e.g. left viewport, focus trap) — restore native */
+  body[data-cursor-lost],
+  body[data-cursor-lost] *,
+  body[data-cursor-lost] *::before,
+  body[data-cursor-lost] *::after {
+    cursor: auto !important;
+  }
 }
 
 /* Scroll-snap container */

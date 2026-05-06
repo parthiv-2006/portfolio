@@ -34,6 +34,8 @@ export default function CursorTrail() {
     const visibleRef   = useRef(true);
     const clickStampRef  = useRef(0);
     const leaveTimerRef  = useRef(null); // debounce handle for mouseleave
+    const lastDrawnRef   = useRef(performance.now());
+    const cursorLostRef  = useRef(false);
 
     const stateRef = useRef('default');
 
@@ -80,6 +82,11 @@ export default function CursorTrail() {
 
         // Gist demo is open — clear canvas and let native cursor take over
         if (document.body.hasAttribute('data-demo-open')) {
+            lastDrawnRef.current = now;
+            if (cursorLostRef.current) {
+                cursorLostRef.current = false;
+                document.body.removeAttribute('data-cursor-lost');
+            }
             rafRef.current = requestAnimationFrame(render);
             return;
         }
@@ -153,6 +160,7 @@ export default function CursorTrail() {
 
         // ── Cursor dot ──
         if (visibleRef.current) {
+            lastDrawnRef.current = now;
             const { x, y } = mouseRef.current;
 
             // Ambient glow
@@ -215,6 +223,14 @@ export default function CursorTrail() {
                 ctx.fillStyle = 'rgba(255,255,255,0.85)';
                 ctx.fill();
             }
+        }
+
+        // Cursor-lost detection: if unseen for >1.5 s, restore native cursor as fallback
+        const lost = !visibleRef.current && (now - lastDrawnRef.current > 1500);
+        if (lost !== cursorLostRef.current) {
+            cursorLostRef.current = lost;
+            if (lost) document.body.setAttribute('data-cursor-lost', '');
+            else document.body.removeAttribute('data-cursor-lost');
         }
 
         rafRef.current = requestAnimationFrame(render);
@@ -348,6 +364,7 @@ export default function CursorTrail() {
             document.removeEventListener('mouseleave',      onMouseLeave);
             document.removeEventListener('mouseenter',      onMouseEnter);
             document.removeEventListener('visibilitychange', onVisibilityChange);
+            document.body.removeAttribute('data-cursor-lost');
             if (rafRef.current) cancelAnimationFrame(rafRef.current);
         };
     }, [render, spawnRipple]);
