@@ -2,23 +2,14 @@ import { useEffect, useRef, useCallback } from 'react';
 
 /**
  * CursorTrail — State-Aware Custom Cursor
- * ─────────────────────────────────────────
- * Three distinct cursor states, each with unique visual language:
  *
- * 1. DEFAULT (scrolling/idle)
- *    Small accent dot + comet-tail particle trail
+ * States: 'default' | 'hover' | 'click'
  *
- * 2. HOVER (over interactive elements: a, button, input, etc.)
- *    Dot shrinks to a tiny point. A larger ring expands around it
- *    creating a "lens" or "target lock" effect. The ring breathes
- *    with a subtle pulse. Trail particles become wider + slower.
- *
- * 3. CLICK (mousedown)
- *    Ring contracts sharply inward. A ripple burst fires outward.
- *    Dot scales up briefly. Spring-back to hover state on release.
- *
- * Performance: canvas-only, requestAnimationFrame, object-pooled particles,
- * lerped transitions (no sudden jumps), prefers-reduced-motion respected.
+ * Visibility model:
+ *   visibleRef drives whether the cursor is drawn. It starts true and is only
+ *   set false by a DEBOUNCED mouseleave (150 ms). Any mouse activity within
+ *   that window cancels the hide, preventing spurious disappearances caused by
+ *   OS scrollbars, Framer Motion DOM mutations, overlays, and iframes.
  */
 
 const PARTICLE_COUNT = 15;
@@ -26,140 +17,111 @@ const PARTICLE_LIFETIME = 400;
 const SPAWN_RATE = 24;
 const TRAIL_MAX_RADIUS = 2;
 
-// Accent color matching the portfolio
 const ACCENT = { r: 226, g: 160, b: 78 };
 
-// Interactive element selector for hover detection
-const INTERACTIVE_SELECTOR = 'a, button, input, textarea, select, [role="button"], [tabindex], label, summary';
+const INTERACTIVE_SELECTOR =
+    'a, button, input, textarea, select, [role="button"], [tabindex], label, summary';
 
-// Lerp utility for smooth transitions
 const lerp = (a, b, t) => a + (b - a) * t;
 
 export default function CursorTrail() {
-    const canvasRef = useRef(null);
-    const mouseRef = useRef({ x: -100, y: -100 });
+    const canvasRef    = useRef(null);
+    const mouseRef     = useRef({ x: -100, y: -100 });
     const particlesRef = useRef([]);
-    const ripplesRef = useRef([]);
+    const ripplesRef   = useRef([]);
     const lastSpawnRef = useRef(0);
-    const rafRef = useRef(null);
-    const visibleRef = useRef(true);
-    const clickStampRef = useRef(0); // when we last entered 'click' state
+    const rafRef       = useRef(null);
+    const visibleRef   = useRef(true);
+    const clickStampRef  = useRef(0);
+    const leaveTimerRef  = useRef(null); // debounce handle for mouseleave
 
-    // Cursor state: 'default' | 'hover' | 'click'
     const stateRef = useRef('default');
 
-    // Animated values (lerped each frame for smooth transitions)
     const animRef = useRef({
-        dotRadius: 4,       // Current dot radius
-        ringRadius: 0,      // Current ring radius (0 = invisible)
-        ringAlpha: 0,       // Current ring opacity
-        glowRadius: 18,     // Ambient glow size
-        ringRotation: 0,    // Ring dashed rotation angle
+        dotRadius:    4,
+        ringRadius:   0,
+        ringAlpha:    0,
+        glowRadius:   18,
+        ringRotation: 0,
     });
 
-    // Target values per state
     const getTargets = (state) => {
         switch (state) {
-            case 'hover':
-                return { dotRadius: 2, ringRadius: 18, ringAlpha: 0.4, glowRadius: 14 };
-            case 'click':
-                return { dotRadius: 4, ringRadius: 10, ringAlpha: 0.6, glowRadius: 6 };
-            default:
-                return { dotRadius: 3, ringRadius: 0, ringAlpha: 0, glowRadius: 10 };
+            case 'hover': return { dotRadius: 2,  ringRadius: 18, ringAlpha: 0.4, glowRadius: 14 };
+            case 'click': return { dotRadius: 4,  ringRadius: 10, ringAlpha: 0.6, glowRadius: 6  };
+            default:      return { dotRadius: 3,  ringRadius: 0,  ringAlpha: 0,   glowRadius: 10 };
         }
     };
 
-    /* ── Spawn a trail particle ── */
     const spawnParticle = useCallback(() => {
         const { x, y } = mouseRef.current;
         if (x < 0 || y < 0) return;
-
         const isHover = stateRef.current === 'hover';
         particlesRef.current.push({
-            x,
-            y,
+            x, y,
             born: performance.now(),
             vx: (Math.random() - 0.5) * (isHover ? 0.8 : 0.4),
             vy: (Math.random() - 0.5) * (isHover ? 0.8 : 0.4),
         });
-
-        if (particlesRef.current.length > PARTICLE_COUNT) {
-            particlesRef.current.shift();
-        }
+        if (particlesRef.current.length > PARTICLE_COUNT) particlesRef.current.shift();
     }, []);
 
-    /* ── Spawn a ripple burst (on click) ── */
     const spawnRipple = useCallback(() => {
         const { x, y } = mouseRef.current;
-        ripplesRef.current.push({
-            x,
-            y,
-            born: performance.now(),
-            maxRadius: 40 + Math.random() * 15,
-        });
+        ripplesRef.current.push({ x, y, born: performance.now(), maxRadius: 40 + Math.random() * 15 });
     }, []);
 
-    /* ── Main render loop ── */
     const render = useCallback((now) => {
         const canvas = canvasRef.current;
         if (!canvas) return;
 
         const ctx = canvas.getContext('2d');
-        const { width, height } = canvas;
-        ctx.clearRect(0, 0, width, height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        const anim = animRef.current;
+        const anim    = animRef.current;
         const targets = getTargets(stateRef.current);
 
-        // Auto-recover from stuck 'click' state (e.g. rapid clicks, focus traps)
+        // Auto-recover from stuck 'click' state (missed mouseup, focus traps, rapid clicks)
         if (stateRef.current === 'click' && now - clickStampRef.current > 600) {
             stateRef.current = 'default';
         }
 
-        // Lerp speed — faster for click (snappy), slower for hover (smooth)
         const speed = stateRef.current === 'click' ? 0.2 : 0.1;
-        anim.dotRadius = lerp(anim.dotRadius, targets.dotRadius, speed);
-        anim.ringRadius = lerp(anim.ringRadius, targets.ringRadius, speed);
-        anim.ringAlpha = lerp(anim.ringAlpha, targets.ringAlpha, speed);
-        anim.glowRadius = lerp(anim.glowRadius, targets.glowRadius, speed);
-        anim.ringRotation += 0.01; // Slow continuous rotation
+        anim.dotRadius    = lerp(anim.dotRadius,    targets.dotRadius,  speed);
+        anim.ringRadius   = lerp(anim.ringRadius,   targets.ringRadius, speed);
+        anim.ringAlpha    = lerp(anim.ringAlpha,    targets.ringAlpha,  speed);
+        anim.glowRadius   = lerp(anim.glowRadius,   targets.glowRadius, speed);
+        anim.ringRotation += 0.01;
 
-        // Spawn trail particles
         if (now - lastSpawnRef.current > SPAWN_RATE && visibleRef.current) {
             spawnParticle();
             lastSpawnRef.current = now;
         }
 
-        // ── Draw trail particles ──
+        // ── Particles ──
         const alive = [];
         for (const p of particlesRef.current) {
             const age = now - p.born;
             if (age > PARTICLE_LIFETIME) continue;
-
             const progress = age / PARTICLE_LIFETIME;
-            const alpha = 1 - progress;
-            const radius = TRAIL_MAX_RADIUS * (1 - progress * 0.7);
-
             p.x += p.vx;
             p.y += p.vy;
-
             ctx.beginPath();
-            ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(${ACCENT.r}, ${ACCENT.g}, ${ACCENT.b}, ${alpha * 0.25})`;
+            ctx.arc(p.x, p.y, TRAIL_MAX_RADIUS * (1 - progress * 0.7), 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},${(1 - progress) * 0.25})`;
             ctx.fill();
-
             alive.push(p);
         }
         particlesRef.current = alive;
 
-        // ── Draw comet-tail line ──
+        // ── Comet tail ──
         if (alive.length > 1) {
             ctx.beginPath();
             ctx.moveTo(alive[0].x, alive[0].y);
             for (let i = 1; i < alive.length; i++) {
                 const progress = (now - alive[i].born) / PARTICLE_LIFETIME;
                 ctx.lineTo(alive[i].x, alive[i].y);
-                ctx.strokeStyle = `rgba(${ACCENT.r}, ${ACCENT.g}, ${ACCENT.b}, ${(1 - progress) * 0.08})`;
+                ctx.strokeStyle = `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},${(1 - progress) * 0.08})`;
             }
             const { x: mx, y: my } = mouseRef.current;
             ctx.lineTo(mx, my);
@@ -167,99 +129,84 @@ export default function CursorTrail() {
             ctx.stroke();
         }
 
-        // ── Draw ripple bursts ──
+        // ── Ripples ──
         const aliveRipples = [];
         for (const r of ripplesRef.current) {
             const age = now - r.born;
-            const duration = 500;
-            if (age > duration) continue;
-
-            const progress = age / duration;
-            const radius = r.maxRadius * progress;
-            const alpha = (1 - progress) * 0.35;
-
+            const dur = 500;
+            if (age > dur) continue;
+            const progress = age / dur;
             ctx.beginPath();
-            ctx.arc(r.x, r.y, radius, 0, Math.PI * 2);
-            ctx.strokeStyle = `rgba(${ACCENT.r}, ${ACCENT.g}, ${ACCENT.b}, ${alpha})`;
-            ctx.lineWidth = 1.5 * (1 - progress);
+            ctx.arc(r.x, r.y, r.maxRadius * progress, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},${(1 - progress) * 0.35})`;
+            ctx.lineWidth   = 1.5 * (1 - progress);
             ctx.stroke();
-
             aliveRipples.push(r);
         }
         ripplesRef.current = aliveRipples;
 
-        // ── Draw main cursor ──
+        // ── Cursor dot ──
         if (visibleRef.current) {
             const { x, y } = mouseRef.current;
 
             // Ambient glow
-            const gradient = ctx.createRadialGradient(x, y, 0, x, y, anim.glowRadius);
-            gradient.addColorStop(0, `rgba(${ACCENT.r}, ${ACCENT.g}, ${ACCENT.b}, 0.08)`);
-            gradient.addColorStop(1, `rgba(${ACCENT.r}, ${ACCENT.g}, ${ACCENT.b}, 0)`);
+            const g = ctx.createRadialGradient(x, y, 0, x, y, anim.glowRadius);
+            g.addColorStop(0, `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},0.08)`);
+            g.addColorStop(1, `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},0)`);
             ctx.beginPath();
             ctx.arc(x, y, anim.glowRadius, 0, Math.PI * 2);
-            ctx.fillStyle = gradient;
+            ctx.fillStyle = g;
             ctx.fill();
 
-            // ── Hover/click ring ──
+            // Hover/click ring
             if (anim.ringRadius > 0.5) {
                 ctx.save();
                 ctx.translate(x, y);
                 ctx.rotate(anim.ringRotation);
-                ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
-                ctx.shadowBlur = 4;
-
-                // Dashed ring for that "target lock" feel
+                ctx.shadowColor = 'rgba(0,0,0,0.7)';
+                ctx.shadowBlur  = 4;
                 ctx.beginPath();
                 ctx.arc(0, 0, anim.ringRadius, 0, Math.PI * 2);
-                ctx.strokeStyle = `rgba(${ACCENT.r}, ${ACCENT.g}, ${ACCENT.b}, ${anim.ringAlpha})`;
-                ctx.lineWidth = 1.5;
+                ctx.strokeStyle = `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},${anim.ringAlpha})`;
+                ctx.lineWidth   = 1.5;
                 ctx.setLineDash([4, 6]);
                 ctx.stroke();
                 ctx.setLineDash([]);
-
-                // Four crosshair ticks at cardinal points
-                const tickLen = 4;
+                ctx.strokeStyle = `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},${anim.ringAlpha * 0.6})`;
+                ctx.lineWidth   = 1;
                 const tickDist = anim.ringRadius + 3;
-                ctx.strokeStyle = `rgba(${ACCENT.r}, ${ACCENT.g}, ${ACCENT.b}, ${anim.ringAlpha * 0.6})`;
-                ctx.lineWidth = 1;
+                const tickLen  = 4;
                 for (let i = 0; i < 4; i++) {
                     const angle = (Math.PI / 2) * i;
-                    const cx = Math.cos(angle) * tickDist;
-                    const cy = Math.sin(angle) * tickDist;
-                    const ex = Math.cos(angle) * (tickDist + tickLen);
-                    const ey = Math.sin(angle) * (tickDist + tickLen);
                     ctx.beginPath();
-                    ctx.moveTo(cx, cy);
-                    ctx.lineTo(ex, ey);
+                    ctx.moveTo(Math.cos(angle) * tickDist,         Math.sin(angle) * tickDist);
+                    ctx.lineTo(Math.cos(angle) * (tickDist + tickLen), Math.sin(angle) * (tickDist + tickLen));
                     ctx.stroke();
                 }
-
                 ctx.restore();
             }
 
-            // Core dot — dark shadow + outline ring ensures contrast on any background
+            // Core dot — shadow gives depth; stroke ring ensures contrast on light backgrounds
             ctx.save();
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-            ctx.shadowBlur = 8;
+            ctx.shadowColor = 'rgba(0,0,0,0.8)';
+            ctx.shadowBlur  = 8;
             ctx.beginPath();
             ctx.arc(x, y, anim.dotRadius, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(${ACCENT.r}, ${ACCENT.g}, ${ACCENT.b}, 0.9)`;
+            ctx.fillStyle = `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},0.9)`;
             ctx.fill();
-            // Dark stroke ring — keeps dot visible on light/white backgrounds
-            ctx.shadowBlur = 0;
+            ctx.shadowBlur  = 0;
             ctx.beginPath();
             ctx.arc(x, y, anim.dotRadius, 0, Math.PI * 2);
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.45)';
-            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = 'rgba(0,0,0,0.45)';
+            ctx.lineWidth   = 1.5;
             ctx.stroke();
             ctx.restore();
 
-            // White hot center
+            // White hot centre
             if (anim.dotRadius > 1.5) {
                 ctx.beginPath();
                 ctx.arc(x, y, 1.5, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255, 255, 255, 0.85)`;
+                ctx.fillStyle = 'rgba(255,255,255,0.85)';
                 ctx.fill();
             }
         }
@@ -271,105 +218,129 @@ export default function CursorTrail() {
         const canvas = canvasRef.current;
         if (!canvas) return;
 
-        // Respect accessibility: reduced motion or touch-only → bail
         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
         if (window.matchMedia('(hover: none)').matches) return;
 
-        // Size canvas
         const resize = () => {
-            canvas.width = window.innerWidth;
+            canvas.width  = window.innerWidth;
             canvas.height = window.innerHeight;
         };
         resize();
         window.addEventListener('resize', resize);
 
-        // ── Mouse tracking ──
-        const onMouseMove = (e) => {
+        // ─── Helpers ────────────────────────────────────────────────────────────
+        const clearLeaveTimer = () => {
+            if (leaveTimerRef.current) {
+                clearTimeout(leaveTimerRef.current);
+                leaveTimerRef.current = null;
+            }
+        };
+
+        const setPos = (e) => {
             mouseRef.current = { x: e.clientX, y: e.clientY };
+        };
+
+        const hoverState = (e) => {
+            const target = document.elementFromPoint(e.clientX, e.clientY);
+            return target?.closest(INTERACTIVE_SELECTOR) ? 'hover' : 'default';
+        };
+
+        // ─── Event handlers ─────────────────────────────────────────────────────
+
+        const onMouseMove = (e) => {
+            clearLeaveTimer();
+            setPos(e);
             visibleRef.current = true;
 
-            // If no mouse button is held but state is stuck at 'click', we missed a mouseup
-            // (e.g. the click opened a new tab or moved focus away before mouseup fired).
+            // Recover from missed mouseup (e.g. click opened new tab)
             if (stateRef.current === 'click' && e.buttons === 0) {
                 stateRef.current = 'default';
             }
 
-            const target = document.elementFromPoint(e.clientX, e.clientY);
-            const isInteractive = target && target.closest(INTERACTIVE_SELECTOR);
-
             if (stateRef.current !== 'click') {
-                stateRef.current = isInteractive ? 'hover' : 'default';
+                stateRef.current = hoverState(e);
             }
         };
 
-        const onMouseDown = () => {
-            visibleRef.current = true;
-            stateRef.current = 'click';
+        const onMouseDown = (e) => {
+            clearLeaveTimer();
+            setPos(e);
+            visibleRef.current   = true;
+            stateRef.current     = 'click';
             clickStampRef.current = performance.now();
             spawnRipple();
         };
 
-        const onMouseUp = () => {
-            visibleRef.current = true; // restore after any click, no matter what
-            // Check if still hovering something interactive
-            const { x, y } = mouseRef.current;
-            const target = document.elementFromPoint(x, y);
-            const isInteractive = target && target.closest(INTERACTIVE_SELECTOR);
-            stateRef.current = isInteractive ? 'hover' : 'default';
+        const onMouseUp = (e) => {
+            clearLeaveTimer();
+            setPos(e);
+            visibleRef.current = true;
+            stateRef.current   = hoverState(e);
         };
 
-        // Force-restore cursor after any click — click-driven DOM changes (modals,
-        // overlays, focus traps) can fire mouseleave without a matching mouseenter.
-        const onDocumentClick = () => {
+        // Fires after mouseup — clears any spurious mouseleave that DOM mutations
+        // (modals, overlays, Framer Motion animations) may have triggered.
+        const onDocumentClick = (e) => {
+            clearLeaveTimer();
+            setPos(e);
             visibleRef.current = true;
         };
 
-        // Pointer cancel (e.g. touch gesture takeover) — reset click state cleanly.
         const onPointerCancel = () => {
             if (stateRef.current === 'click') stateRef.current = 'default';
         };
 
+        // Debounced hide: only set invisible if NO mouse activity arrives within
+        // 150 ms. This prevents spurious hides from scrollbars, iframes, and
+        // overlay DOM mutations that fire mouseleave without a matching mouseenter.
         const onMouseLeave = () => {
-            visibleRef.current = false;
+            clearLeaveTimer();
+            leaveTimerRef.current = setTimeout(() => {
+                visibleRef.current = false;
+            }, 150);
         };
+
         const onMouseEnter = () => {
+            clearLeaveTimer();
             visibleRef.current = true;
         };
 
-        // Restore cursor when the window regains focus after switching to another
-        // tab/app (e.g. clicking "Live Demo" then returning to the portfolio).
-        // `document.mouseenter` is unreliable in this scenario; `window.focus`
-        // and `visibilitychange` fire consistently across browsers.
         const onWindowFocus = () => {
+            clearLeaveTimer();
             visibleRef.current = true;
         };
+
         const onVisibilityChange = () => {
-            if (!document.hidden) visibleRef.current = true;
+            if (!document.hidden) {
+                clearLeaveTimer();
+                visibleRef.current = true;
+            }
         };
 
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mousedown', onMouseDown);
-        document.addEventListener('mouseup', onMouseUp);
-        document.addEventListener('click', onDocumentClick);
-        document.addEventListener('pointercancel', onPointerCancel);
-        document.addEventListener('mouseleave', onMouseLeave);
-        document.addEventListener('mouseenter', onMouseEnter);
+        // ─── Register ────────────────────────────────────────────────────────────
+        document.addEventListener('mousemove',       onMouseMove);
+        document.addEventListener('mousedown',       onMouseDown);
+        document.addEventListener('mouseup',         onMouseUp);
+        document.addEventListener('click',           onDocumentClick);
+        document.addEventListener('pointercancel',   onPointerCancel);
+        document.addEventListener('mouseleave',      onMouseLeave);
+        document.addEventListener('mouseenter',      onMouseEnter);
         document.addEventListener('visibilitychange', onVisibilityChange);
-        window.addEventListener('focus', onWindowFocus);
+        window.addEventListener('focus',             onWindowFocus);
 
-        // Start render loop
         rafRef.current = requestAnimationFrame(render);
 
         return () => {
-            window.removeEventListener('resize', resize);
-            window.removeEventListener('focus', onWindowFocus);
-            document.removeEventListener('mousemove', onMouseMove);
-            document.removeEventListener('mousedown', onMouseDown);
-            document.removeEventListener('mouseup', onMouseUp);
-            document.removeEventListener('click', onDocumentClick);
-            document.removeEventListener('pointercancel', onPointerCancel);
-            document.removeEventListener('mouseleave', onMouseLeave);
-            document.removeEventListener('mouseenter', onMouseEnter);
+            clearLeaveTimer();
+            window.removeEventListener('resize',            resize);
+            window.removeEventListener('focus',             onWindowFocus);
+            document.removeEventListener('mousemove',       onMouseMove);
+            document.removeEventListener('mousedown',       onMouseDown);
+            document.removeEventListener('mouseup',         onMouseUp);
+            document.removeEventListener('click',           onDocumentClick);
+            document.removeEventListener('pointercancel',   onPointerCancel);
+            document.removeEventListener('mouseleave',      onMouseLeave);
+            document.removeEventListener('mouseenter',      onMouseEnter);
             document.removeEventListener('visibilitychange', onVisibilityChange);
             if (rafRef.current) cancelAnimationFrame(rafRef.current);
         };
