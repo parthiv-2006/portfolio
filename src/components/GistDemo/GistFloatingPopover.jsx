@@ -359,9 +359,18 @@ export function GistFloatingPopover({
           100% { background-position: -200% 0; }
         }
         .gist-fp-input:focus { outline: none; border-color: oklch(0.75 0.11 150 / 0.4) !important; box-shadow: 0 0 0 2px oklch(0.75 0.11 150 / 0.1); }
+        /* Override the global cursor:none !important from index.css */
+        .gist-fp-scope, .gist-fp-scope * { cursor: default !important; }
+        .gist-fp-scope button   { cursor: pointer !important; }
+        .gist-fp-scope input,
+        .gist-fp-scope textarea { cursor: text !important; }
+        .gist-fp-scope [data-grab]  { cursor: grab !important; }
+        .gist-fp-scope [data-grabbing] { cursor: grabbing !important; }
+        .gist-fp-scope [data-resize] { cursor: se-resize !important; }
       `}</style>
 
       <div
+        className="gist-fp-scope"
         onClick={(e) => e.stopPropagation()}
         style={{
           ...shellStyle,
@@ -370,19 +379,18 @@ export function GistFloatingPopover({
           overflow: 'hidden',
           boxShadow: '0 20px 60px oklch(0 0 0 / 0.65), 0 0 0 1px oklch(1 0 0 / 0.06)',
           zIndex: 62,
-          cursor: 'default',
           animation: !isSidebarMode ? 'gistPopIn 200ms cubic-bezier(0.22, 1, 0.36, 1) both' : undefined,
         }}
       >
         {/* ── Header / drag handle ── */}
         <div
           onMouseDown={onHeaderMouseDown}
+          {...(!isSidebarMode ? { [isDragging ? 'data-grabbing' : 'data-grab']: '' } : {})}
           style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             padding: '9px 10px', flexShrink: 0,
             borderBottom: `1px solid ${HAIRLINE}`,
             background: BG_ELEVATED,
-            cursor: isSidebarMode ? 'default' : isDragging ? 'grabbing' : 'grab',
           }}
         >
           {/* Brand + mode label */}
@@ -645,9 +653,10 @@ export function GistFloatingPopover({
         {!isSidebarMode && (
           <div
             onMouseDown={onResizeMouseDown}
+            data-resize=""
             style={{
               position: 'absolute', bottom: 0, right: 0,
-              width: 18, height: 18, cursor: 'se-resize',
+              width: 18, height: 18,
               display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end',
               padding: 4,
             }}
