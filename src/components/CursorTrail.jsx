@@ -7,15 +7,22 @@ import { useEffect, useRef, useCallback } from 'react';
  *
  * Visibility model:
  *   visibleRef drives whether the cursor is drawn. It starts true and is only
- *   set false by a DEBOUNCED mouseleave (150 ms). Any mouse activity within
+ *   set false by a DEBOUNCED mouseleave (500 ms). Any mouse activity within
  *   that window cancels the hide, preventing spurious disappearances caused by
  *   OS scrollbars, Framer Motion DOM mutations, overlays, and iframes.
+ *
+ * Loop resilience:
+ *   requestAnimationFrame is pre-scheduled at the TOP of render(), before any
+ *   code that could throw or early-return. This makes the loop self-healing:
+ *   no error or early exit can ever permanently kill it.
  */
 
-const PARTICLE_COUNT = 15;
+const PARTICLE_COUNT    = 15;
 const PARTICLE_LIFETIME = 400;
-const SPAWN_RATE = 24;
-const TRAIL_MAX_RADIUS = 2;
+const SPAWN_RATE        = 24;
+const TRAIL_MAX_RADIUS  = 2;
+const LEAVE_DEBOUNCE_MS = 500;   // long enough to survive rapid-click DOM mutations
+const CLICK_GRACE_MS    = 800;   // recent click forces cursor visible
 
 const ACCENT = { r: 226, g: 160, b: 78 };
 
@@ -25,15 +32,15 @@ const INTERACTIVE_SELECTOR =
 const lerp = (a, b, t) => a + (b - a) * t;
 
 export default function CursorTrail() {
-    const canvasRef    = useRef(null);
-    const mouseRef     = useRef({ x: -100, y: -100 });
-    const particlesRef = useRef([]);
-    const ripplesRef   = useRef([]);
-    const lastSpawnRef = useRef(0);
-    const rafRef       = useRef(null);
-    const visibleRef   = useRef(true);
+    const canvasRef      = useRef(null);
+    const mouseRef       = useRef({ x: -100, y: -100 });
+    const particlesRef   = useRef([]);
+    const ripplesRef     = useRef([]);
+    const lastSpawnRef   = useRef(0);
+    const rafRef         = useRef(null);
+    const visibleRef     = useRef(true);
     const clickStampRef  = useRef(0);
-    const leaveTimerRef  = useRef(null); // debounce handle for mouseleave
+    const leaveTimerRef  = useRef(null);
     const lastDrawnRef   = useRef(performance.now());
     const cursorLostRef  = useRef(false);
 
@@ -74,166 +81,174 @@ export default function CursorTrail() {
     }, []);
 
     const render = useCallback((now) => {
+        // Pre-schedule FIRST — errors and early returns can never kill the loop.
+        rafRef.current = requestAnimationFrame(render);
+
         const canvas = canvasRef.current;
         if (!canvas) return;
 
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        try {
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Gist demo is open — clear canvas and let native cursor take over
-        if (document.body.hasAttribute('data-demo-open')) {
-            lastDrawnRef.current = now;
-            if (cursorLostRef.current) {
-                cursorLostRef.current = false;
-                document.body.removeAttribute('data-cursor-lost');
-            }
-            rafRef.current = requestAnimationFrame(render);
-            return;
-        }
-
-        const anim    = animRef.current;
-        const targets = getTargets(stateRef.current);
-
-        // Auto-recover from stuck 'click' state (missed mouseup, focus traps, rapid clicks)
-        if (stateRef.current === 'click' && now - clickStampRef.current > 600) {
-            stateRef.current = 'default';
-        }
-
-        const speed = stateRef.current === 'click' ? 0.2 : 0.1;
-        anim.dotRadius    = lerp(anim.dotRadius,    targets.dotRadius,  speed);
-        anim.ringRadius   = lerp(anim.ringRadius,   targets.ringRadius, speed);
-        anim.ringAlpha    = lerp(anim.ringAlpha,    targets.ringAlpha,  speed);
-        anim.glowRadius   = lerp(anim.glowRadius,   targets.glowRadius, speed);
-        anim.ringRotation += 0.01;
-
-        if (now - lastSpawnRef.current > SPAWN_RATE && visibleRef.current) {
-            spawnParticle();
-            lastSpawnRef.current = now;
-        }
-
-        // ── Particles ──
-        const alive = [];
-        for (const p of particlesRef.current) {
-            const age = now - p.born;
-            if (age > PARTICLE_LIFETIME) continue;
-            const progress = age / PARTICLE_LIFETIME;
-            p.x += p.vx;
-            p.y += p.vy;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, TRAIL_MAX_RADIUS * (1 - progress * 0.7), 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},${(1 - progress) * 0.25})`;
-            ctx.fill();
-            alive.push(p);
-        }
-        particlesRef.current = alive;
-
-        // ── Comet tail ──
-        if (alive.length > 1) {
-            ctx.beginPath();
-            ctx.moveTo(alive[0].x, alive[0].y);
-            for (let i = 1; i < alive.length; i++) {
-                const progress = (now - alive[i].born) / PARTICLE_LIFETIME;
-                ctx.lineTo(alive[i].x, alive[i].y);
-                ctx.strokeStyle = `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},${(1 - progress) * 0.08})`;
-            }
-            const { x: mx, y: my } = mouseRef.current;
-            ctx.lineTo(mx, my);
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-        }
-
-        // ── Ripples ──
-        const aliveRipples = [];
-        for (const r of ripplesRef.current) {
-            const age = now - r.born;
-            const dur = 500;
-            if (age > dur) continue;
-            const progress = age / dur;
-            ctx.beginPath();
-            ctx.arc(r.x, r.y, r.maxRadius * progress, 0, Math.PI * 2);
-            ctx.strokeStyle = `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},${(1 - progress) * 0.35})`;
-            ctx.lineWidth   = 1.5 * (1 - progress);
-            ctx.stroke();
-            aliveRipples.push(r);
-        }
-        ripplesRef.current = aliveRipples;
-
-        // ── Cursor dot ──
-        if (visibleRef.current) {
-            lastDrawnRef.current = now;
-            const { x, y } = mouseRef.current;
-
-            // Ambient glow
-            const g = ctx.createRadialGradient(x, y, 0, x, y, anim.glowRadius);
-            g.addColorStop(0, `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},0.08)`);
-            g.addColorStop(1, `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},0)`);
-            ctx.beginPath();
-            ctx.arc(x, y, anim.glowRadius, 0, Math.PI * 2);
-            ctx.fillStyle = g;
-            ctx.fill();
-
-            // Hover/click ring
-            if (anim.ringRadius > 0.5) {
-                ctx.save();
-                ctx.translate(x, y);
-                ctx.rotate(anim.ringRotation);
-                ctx.shadowColor = 'rgba(0,0,0,0.7)';
-                ctx.shadowBlur  = 4;
-                ctx.beginPath();
-                ctx.arc(0, 0, anim.ringRadius, 0, Math.PI * 2);
-                ctx.strokeStyle = `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},${anim.ringAlpha})`;
-                ctx.lineWidth   = 1.5;
-                ctx.setLineDash([4, 6]);
-                ctx.stroke();
-                ctx.setLineDash([]);
-                ctx.strokeStyle = `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},${anim.ringAlpha * 0.6})`;
-                ctx.lineWidth   = 1;
-                const tickDist = anim.ringRadius + 3;
-                const tickLen  = 4;
-                for (let i = 0; i < 4; i++) {
-                    const angle = (Math.PI / 2) * i;
-                    ctx.beginPath();
-                    ctx.moveTo(Math.cos(angle) * tickDist,         Math.sin(angle) * tickDist);
-                    ctx.lineTo(Math.cos(angle) * (tickDist + tickLen), Math.sin(angle) * (tickDist + tickLen));
-                    ctx.stroke();
+            // Gist demo is open — clear canvas and yield to native cursor
+            if (document.body.hasAttribute('data-demo-open')) {
+                lastDrawnRef.current = now;
+                if (cursorLostRef.current) {
+                    cursorLostRef.current = false;
+                    document.body.removeAttribute('data-cursor-lost');
                 }
-                ctx.restore();
+                return;
             }
 
-            // Core dot — shadow gives depth; stroke ring ensures contrast on light backgrounds
-            ctx.save();
-            ctx.shadowColor = 'rgba(0,0,0,0.8)';
-            ctx.shadowBlur  = 8;
-            ctx.beginPath();
-            ctx.arc(x, y, anim.dotRadius, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},0.9)`;
-            ctx.fill();
-            ctx.shadowBlur  = 0;
-            ctx.beginPath();
-            ctx.arc(x, y, anim.dotRadius, 0, Math.PI * 2);
-            ctx.strokeStyle = 'rgba(0,0,0,0.45)';
-            ctx.lineWidth   = 1.5;
-            ctx.stroke();
-            ctx.restore();
+            // Recent click/mousedown → cursor must be present regardless of any
+            // spurious mouseleave fired by DOM mutations during rapid clicking.
+            if (now - clickStampRef.current < CLICK_GRACE_MS) {
+                visibleRef.current = true;
+            }
 
-            // White hot centre
-            if (anim.dotRadius > 1.5) {
+            const anim    = animRef.current;
+            const targets = getTargets(stateRef.current);
+
+            // Auto-recover from stuck 'click' state
+            if (stateRef.current === 'click' && now - clickStampRef.current > 600) {
+                stateRef.current = 'default';
+            }
+
+            const speed = stateRef.current === 'click' ? 0.2 : 0.1;
+            anim.dotRadius    = lerp(anim.dotRadius,    targets.dotRadius,  speed);
+            anim.ringRadius   = lerp(anim.ringRadius,   targets.ringRadius, speed);
+            anim.ringAlpha    = lerp(anim.ringAlpha,    targets.ringAlpha,  speed);
+            anim.glowRadius   = lerp(anim.glowRadius,   targets.glowRadius, speed);
+            anim.ringRotation += 0.01;
+
+            if (now - lastSpawnRef.current > SPAWN_RATE && visibleRef.current) {
+                spawnParticle();
+                lastSpawnRef.current = now;
+            }
+
+            // ── Particles ──
+            const alive = [];
+            for (const p of particlesRef.current) {
+                const age = now - p.born;
+                if (age > PARTICLE_LIFETIME) continue;
+                const progress = age / PARTICLE_LIFETIME;
+                p.x += p.vx;
+                p.y += p.vy;
                 ctx.beginPath();
-                ctx.arc(x, y, 1.5, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(255,255,255,0.85)';
+                ctx.arc(p.x, p.y, TRAIL_MAX_RADIUS * (1 - progress * 0.7), 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},${(1 - progress) * 0.25})`;
                 ctx.fill();
+                alive.push(p);
             }
-        }
+            particlesRef.current = alive;
 
-        // Cursor-lost detection: if unseen for >1.5 s, restore native cursor as fallback
-        const lost = !visibleRef.current && (now - lastDrawnRef.current > 1500);
-        if (lost !== cursorLostRef.current) {
-            cursorLostRef.current = lost;
-            if (lost) document.body.setAttribute('data-cursor-lost', '');
-            else document.body.removeAttribute('data-cursor-lost');
-        }
+            // ── Comet tail ──
+            if (alive.length > 1) {
+                ctx.beginPath();
+                ctx.moveTo(alive[0].x, alive[0].y);
+                for (let i = 1; i < alive.length; i++) {
+                    const progress = (now - alive[i].born) / PARTICLE_LIFETIME;
+                    ctx.lineTo(alive[i].x, alive[i].y);
+                    ctx.strokeStyle = `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},${(1 - progress) * 0.08})`;
+                }
+                const { x: mx, y: my } = mouseRef.current;
+                ctx.lineTo(mx, my);
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+            }
 
-        rafRef.current = requestAnimationFrame(render);
+            // ── Ripples ──
+            const aliveRipples = [];
+            for (const r of ripplesRef.current) {
+                const age = now - r.born;
+                const dur = 500;
+                if (age > dur) continue;
+                const progress = age / dur;
+                ctx.beginPath();
+                ctx.arc(r.x, r.y, r.maxRadius * progress, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},${(1 - progress) * 0.35})`;
+                ctx.lineWidth   = 1.5 * (1 - progress);
+                ctx.stroke();
+                aliveRipples.push(r);
+            }
+            ripplesRef.current = aliveRipples;
+
+            // ── Cursor dot ──
+            if (visibleRef.current) {
+                lastDrawnRef.current = now;
+                const { x, y } = mouseRef.current;
+
+                // Ambient glow
+                const g = ctx.createRadialGradient(x, y, 0, x, y, anim.glowRadius);
+                g.addColorStop(0, `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},0.08)`);
+                g.addColorStop(1, `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},0)`);
+                ctx.beginPath();
+                ctx.arc(x, y, anim.glowRadius, 0, Math.PI * 2);
+                ctx.fillStyle = g;
+                ctx.fill();
+
+                // Hover/click ring
+                if (anim.ringRadius > 0.5) {
+                    ctx.save();
+                    ctx.translate(x, y);
+                    ctx.rotate(anim.ringRotation);
+                    ctx.shadowColor = 'rgba(0,0,0,0.7)';
+                    ctx.shadowBlur  = 4;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, anim.ringRadius, 0, Math.PI * 2);
+                    ctx.strokeStyle = `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},${anim.ringAlpha})`;
+                    ctx.lineWidth   = 1.5;
+                    ctx.setLineDash([4, 6]);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    ctx.strokeStyle = `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},${anim.ringAlpha * 0.6})`;
+                    ctx.lineWidth   = 1;
+                    const tickDist = anim.ringRadius + 3;
+                    const tickLen  = 4;
+                    for (let i = 0; i < 4; i++) {
+                        const angle = (Math.PI / 2) * i;
+                        ctx.beginPath();
+                        ctx.moveTo(Math.cos(angle) * tickDist,           Math.sin(angle) * tickDist);
+                        ctx.lineTo(Math.cos(angle) * (tickDist + tickLen), Math.sin(angle) * (tickDist + tickLen));
+                        ctx.stroke();
+                    }
+                    ctx.restore();
+                }
+
+                // Core dot
+                ctx.save();
+                ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                ctx.shadowBlur  = 8;
+                ctx.beginPath();
+                ctx.arc(x, y, anim.dotRadius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},0.9)`;
+                ctx.fill();
+                ctx.shadowBlur  = 0;
+                ctx.beginPath();
+                ctx.arc(x, y, anim.dotRadius, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(0,0,0,0.45)';
+                ctx.lineWidth   = 1.5;
+                ctx.stroke();
+                ctx.restore();
+
+                // White hot centre
+                if (anim.dotRadius > 1.5) {
+                    ctx.beginPath();
+                    ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+                    ctx.fill();
+                }
+            }
+
+            // Cursor-lost detection: if unseen for >1.5 s, restore native cursor as fallback
+            const lost = !visibleRef.current && (now - lastDrawnRef.current > 1500);
+            if (lost !== cursorLostRef.current) {
+                cursorLostRef.current = lost;
+                if (lost) document.body.setAttribute('data-cursor-lost', '');
+                else document.body.removeAttribute('data-cursor-lost');
+            }
+        } catch { /* swallow — next frame is already scheduled */ }
     }, [spawnParticle]);
 
     useEffect(() => {
@@ -284,11 +299,21 @@ export default function CursorTrail() {
             }
         };
 
+        // pointermove fires more reliably than mousemove during heavy DOM activity
+        // (Framer Motion animations, React re-renders). Used only to keep the
+        // position ref current — full state logic lives in onMouseMove.
+        const onPointerMove = (e) => {
+            if (e.pointerType !== 'mouse') return;
+            mouseRef.current = { x: e.clientX, y: e.clientY };
+            visibleRef.current = true;
+            clearLeaveTimer();
+        };
+
         const onMouseDown = (e) => {
             clearLeaveTimer();
             setPos(e);
-            visibleRef.current   = true;
-            stateRef.current     = 'click';
+            visibleRef.current    = true;
+            stateRef.current      = 'click';
             clickStampRef.current = performance.now();
             spawnRipple();
         };
@@ -296,30 +321,30 @@ export default function CursorTrail() {
         const onMouseUp = (e) => {
             clearLeaveTimer();
             setPos(e);
-            visibleRef.current = true;
-            stateRef.current   = hoverState(e);
+            visibleRef.current    = true;
+            // Refresh click stamp so the CLICK_GRACE_MS window stays open through mouseup
+            clickStampRef.current = performance.now();
+            stateRef.current      = hoverState(e);
         };
 
-        // Fires after mouseup — clears any spurious mouseleave that DOM mutations
-        // (modals, overlays, Framer Motion animations) may have triggered.
         const onDocumentClick = (e) => {
             clearLeaveTimer();
             setPos(e);
-            visibleRef.current = true;
+            visibleRef.current    = true;
+            clickStampRef.current = performance.now();
         };
 
         const onPointerCancel = () => {
             if (stateRef.current === 'click') stateRef.current = 'default';
         };
 
-        // Debounced hide: only set invisible if NO mouse activity arrives within
-        // 150 ms. This prevents spurious hides from scrollbars, iframes, and
-        // overlay DOM mutations that fire mouseleave without a matching mouseenter.
+        // Debounced hide with a generous 500 ms window so rapid-click DOM mutations
+        // (which fire mouseleave on document) don't prematurely hide the cursor.
         const onMouseLeave = () => {
             clearLeaveTimer();
             leaveTimerRef.current = setTimeout(() => {
                 visibleRef.current = false;
-            }, 150);
+            }, LEAVE_DEBOUNCE_MS);
         };
 
         const onMouseEnter = () => {
@@ -340,29 +365,31 @@ export default function CursorTrail() {
         };
 
         // ─── Register ────────────────────────────────────────────────────────────
-        document.addEventListener('mousemove',       onMouseMove);
-        document.addEventListener('mousedown',       onMouseDown);
-        document.addEventListener('mouseup',         onMouseUp);
-        document.addEventListener('click',           onDocumentClick);
-        document.addEventListener('pointercancel',   onPointerCancel);
-        document.addEventListener('mouseleave',      onMouseLeave);
-        document.addEventListener('mouseenter',      onMouseEnter);
+        document.addEventListener('mousemove',        onMouseMove);
+        document.addEventListener('pointermove',      onPointerMove);
+        document.addEventListener('mousedown',        onMouseDown);
+        document.addEventListener('mouseup',          onMouseUp);
+        document.addEventListener('click',            onDocumentClick);
+        document.addEventListener('pointercancel',    onPointerCancel);
+        document.addEventListener('mouseleave',       onMouseLeave);
+        document.addEventListener('mouseenter',       onMouseEnter);
         document.addEventListener('visibilitychange', onVisibilityChange);
-        window.addEventListener('focus',             onWindowFocus);
+        window.addEventListener('focus',              onWindowFocus);
 
         rafRef.current = requestAnimationFrame(render);
 
         return () => {
             clearLeaveTimer();
-            window.removeEventListener('resize',            resize);
-            window.removeEventListener('focus',             onWindowFocus);
-            document.removeEventListener('mousemove',       onMouseMove);
-            document.removeEventListener('mousedown',       onMouseDown);
-            document.removeEventListener('mouseup',         onMouseUp);
-            document.removeEventListener('click',           onDocumentClick);
-            document.removeEventListener('pointercancel',   onPointerCancel);
-            document.removeEventListener('mouseleave',      onMouseLeave);
-            document.removeEventListener('mouseenter',      onMouseEnter);
+            window.removeEventListener('resize',             resize);
+            window.removeEventListener('focus',              onWindowFocus);
+            document.removeEventListener('mousemove',        onMouseMove);
+            document.removeEventListener('pointermove',      onPointerMove);
+            document.removeEventListener('mousedown',        onMouseDown);
+            document.removeEventListener('mouseup',          onMouseUp);
+            document.removeEventListener('click',            onDocumentClick);
+            document.removeEventListener('pointercancel',    onPointerCancel);
+            document.removeEventListener('mouseleave',       onMouseLeave);
+            document.removeEventListener('mouseenter',       onMouseEnter);
             document.removeEventListener('visibilitychange', onVisibilityChange);
             document.body.removeAttribute('data-cursor-lost');
             if (rafRef.current) cancelAnimationFrame(rafRef.current);
