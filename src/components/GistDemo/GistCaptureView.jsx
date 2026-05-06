@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const T = {
   bg: 'var(--bg)', bgElevated: 'var(--surface)', bgHover: 'var(--surface-2)',
