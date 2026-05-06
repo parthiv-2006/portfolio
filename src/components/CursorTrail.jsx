@@ -43,6 +43,7 @@ export default function CursorTrail() {
     const lastSpawnRef = useRef(0);
     const rafRef = useRef(null);
     const visibleRef = useRef(true);
+    const clickStampRef = useRef(0); // when we last entered 'click' state
 
     // Cursor state: 'default' | 'hover' | 'click'
     const stateRef = useRef('default');
@@ -109,6 +110,11 @@ export default function CursorTrail() {
 
         const anim = animRef.current;
         const targets = getTargets(stateRef.current);
+
+        // Auto-recover from stuck 'click' state (e.g. rapid clicks, focus traps)
+        if (stateRef.current === 'click' && now - clickStampRef.current > 600) {
+            stateRef.current = 'default';
+        }
 
         // Lerp speed — faster for click (snappy), slower for hover (smooth)
         const speed = stateRef.current === 'click' ? 0.2 : 0.1;
@@ -232,14 +238,21 @@ export default function CursorTrail() {
                 ctx.restore();
             }
 
-            // Core dot — dark shadow ensures contrast on light backgrounds
+            // Core dot — dark shadow + outline ring ensures contrast on any background
             ctx.save();
             ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-            ctx.shadowBlur = 6;
+            ctx.shadowBlur = 8;
             ctx.beginPath();
             ctx.arc(x, y, anim.dotRadius, 0, Math.PI * 2);
             ctx.fillStyle = `rgba(${ACCENT.r}, ${ACCENT.g}, ${ACCENT.b}, 0.9)`;
             ctx.fill();
+            // Dark stroke ring — keeps dot visible on light/white backgrounds
+            ctx.shadowBlur = 0;
+            ctx.beginPath();
+            ctx.arc(x, y, anim.dotRadius, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.45)';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
             ctx.restore();
 
             // White hot center
@@ -290,8 +303,9 @@ export default function CursorTrail() {
         };
 
         const onMouseDown = () => {
-            visibleRef.current = true; // clicking always means cursor is present
+            visibleRef.current = true;
             stateRef.current = 'click';
+            clickStampRef.current = performance.now();
             spawnRipple();
         };
 
@@ -302,6 +316,17 @@ export default function CursorTrail() {
             const target = document.elementFromPoint(x, y);
             const isInteractive = target && target.closest(INTERACTIVE_SELECTOR);
             stateRef.current = isInteractive ? 'hover' : 'default';
+        };
+
+        // Force-restore cursor after any click — click-driven DOM changes (modals,
+        // overlays, focus traps) can fire mouseleave without a matching mouseenter.
+        const onDocumentClick = () => {
+            visibleRef.current = true;
+        };
+
+        // Pointer cancel (e.g. touch gesture takeover) — reset click state cleanly.
+        const onPointerCancel = () => {
+            if (stateRef.current === 'click') stateRef.current = 'default';
         };
 
         const onMouseLeave = () => {
@@ -325,6 +350,8 @@ export default function CursorTrail() {
         document.addEventListener('mousemove', onMouseMove);
         document.addEventListener('mousedown', onMouseDown);
         document.addEventListener('mouseup', onMouseUp);
+        document.addEventListener('click', onDocumentClick);
+        document.addEventListener('pointercancel', onPointerCancel);
         document.addEventListener('mouseleave', onMouseLeave);
         document.addEventListener('mouseenter', onMouseEnter);
         document.addEventListener('visibilitychange', onVisibilityChange);
@@ -339,6 +366,8 @@ export default function CursorTrail() {
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mousedown', onMouseDown);
             document.removeEventListener('mouseup', onMouseUp);
+            document.removeEventListener('click', onDocumentClick);
+            document.removeEventListener('pointercancel', onPointerCancel);
             document.removeEventListener('mouseleave', onMouseLeave);
             document.removeEventListener('mouseenter', onMouseEnter);
             document.removeEventListener('visibilitychange', onVisibilityChange);

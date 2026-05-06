@@ -576,7 +576,9 @@ export default function GistDemoWrapper() {
      Render
   ───────────────────────────────────────────────────────────────────────── */
   return (
-    <div className="gist-scope" style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+    // stopPropagation prevents clicks from bubbling to the parent project-card
+    // onClick handler (which opens the full-screen dark project modal).
+    <div className="gist-scope" onClick={(e) => e.stopPropagation()} style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
       <div style={{
         width: '100%', height: '100%',
         display: 'flex', flexDirection: 'column',
