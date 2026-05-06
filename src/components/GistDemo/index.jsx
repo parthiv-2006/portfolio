@@ -615,7 +615,8 @@ export default function GistDemoWrapper() {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto' }}>
             <button
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 if (dashboardMode) handleBackToArticle();
                 else setPopupOpen(v => !v);
               }}

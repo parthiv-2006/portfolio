@@ -275,7 +275,6 @@ export default function Projects() {
                         {isDemo ? (
                             <div
                                 className="fixed inset-4 md:inset-6 z-50 flex flex-col"
-                                onClick={() => setSelected(null)}
                             >
                                 <motion.div
                                     initial={{ opacity: 0, y: 16, scale: 0.97 }}
