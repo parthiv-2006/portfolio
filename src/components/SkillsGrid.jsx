@@ -20,12 +20,11 @@ import {
     SiFramer,
     SiVite,
     SiOpenai,
-    SiVisualstudiocode,
     SiGoogle,
 } from 'react-icons/si';
 import { FaJava, FaHtml5, FaCss3Alt } from 'react-icons/fa';
 import { VscDatabase } from 'react-icons/vsc';
-import { Brain, Cpu, Zap, Shield } from 'lucide-react';
+import { Brain, Cpu, Zap, Shield, Code2 } from 'lucide-react';
 import SectionHeading from './SectionHeading';
 
 const skills = [
@@ -60,7 +59,7 @@ const skills = [
     { name: 'Antigravity', icon: SiGoogle, category: 'AI Tools', core: false },
     { name: 'Cursor', icon: Cpu, category: 'AI Tools', core: true },
     { name: 'OpenAI Codex', icon: SiOpenai, category: 'AI Tools', core: false },
-    { name: 'VS Code', icon: SiVisualstudiocode, category: 'AI Tools', core: false },
+    { name: 'VS Code', icon: Code2, category: 'AI Tools', core: false },
 
     // ── Dev Tools & Concepts ──
     { name: 'Git/GitHub', icon: SiGit, category: 'Dev Tools & Concepts', core: true },
