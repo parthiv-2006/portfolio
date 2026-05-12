@@ -104,7 +104,7 @@ export default function About() {
                                 Fast forward to today, I'm studying as a Computer Science Specialist at the University of Toronto.
                                 I'm the type of programmer who gets excited about both the messy backend structure and making
                                 the final product look incredible. Currently, I'm on the lookout for Software Engineering internships
-                                for both <span className="text-accent font-medium">Summer 2026</span> and <span className="text-accent font-medium">Fall 2026</span>,
+                                for <span className="text-accent font-medium">Fall 2026</span> and <span className="text-accent font-medium">Winter 2027</span>,
                                 so if you're building a vibrant team and need someone eager to roll up their sleeves, let's talk!
                             </p>
                             <p className="text-text-muted text-base leading-relaxed">

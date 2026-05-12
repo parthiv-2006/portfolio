@@ -76,7 +76,7 @@ export default function Hero() {
                     transition={{ duration: 0.6, delay: 0.6 }}
                     className="font-mono text-accent text-sm tracking-wide mb-6 cursor-blink"
                 >
-                    cs @ uoft · full-stack engineer
+                    cs @ uoft · full-stack & ai engineer
                 </motion.p>
 
                 {/* One-liner */}
