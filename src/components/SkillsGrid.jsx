@@ -15,10 +15,17 @@ import {
     SiGit,
     SiDocker,
     SiGithubactions,
-    SiWebauthn
+    SiWebauthn,
+    SiFastapi,
+    SiFramer,
+    SiVite,
+    SiOpenai,
+    SiVisualstudiocode,
+    SiGoogle,
 } from 'react-icons/si';
 import { FaJava, FaHtml5, FaCss3Alt } from 'react-icons/fa';
 import { VscDatabase } from 'react-icons/vsc';
+import { Brain, Cpu, Zap, Shield } from 'lucide-react';
 import SectionHeading from './SectionHeading';
 
 const skills = [
@@ -37,21 +44,35 @@ const skills = [
     { name: 'React', icon: SiReact, category: 'Frameworks', core: true },
     { name: 'Node.js', icon: SiNodedotjs, category: 'Frameworks', core: true },
     { name: 'Express.js', icon: SiExpress, category: 'Frameworks', core: false },
+    { name: 'FastAPI', icon: SiFastapi, category: 'Frameworks', core: true },
     { name: 'MongoDB', icon: SiMongodb, category: 'Frameworks', core: true },
     { name: 'Tailwind CSS', icon: SiTailwindcss, category: 'Frameworks', core: true },
+    { name: 'Framer Motion', icon: SiFramer, category: 'Frameworks', core: false },
+    { name: 'Vite', icon: SiVite, category: 'Frameworks', core: false },
     { name: 'Redux', icon: SiRedux, category: 'Frameworks', core: false },
-    // Using a generic icon for Zustand as react-icons doesn't have one specifically usually
     { name: 'Zustand', icon: SiReact, category: 'Frameworks', core: false },
+    { name: 'LlamaIndex', icon: Brain, category: 'Frameworks', core: false },
+
+    // ── AI Tools ──
+    { name: 'Claude Code', icon: Brain, category: 'AI Tools', core: true },
+    { name: 'Claude API', icon: Brain, category: 'AI Tools', core: true },
+    { name: 'Google Gemini', icon: SiGoogle, category: 'AI Tools', core: true },
+    { name: 'Antigravity', icon: SiGoogle, category: 'AI Tools', core: false },
+    { name: 'Cursor', icon: Cpu, category: 'AI Tools', core: true },
+    { name: 'OpenAI Codex', icon: SiOpenai, category: 'AI Tools', core: false },
+    { name: 'VS Code', icon: SiVisualstudiocode, category: 'AI Tools', core: false },
 
     // ── Dev Tools & Concepts ──
     { name: 'Git/GitHub', icon: SiGit, category: 'Dev Tools & Concepts', core: true },
     { name: 'Docker', icon: SiDocker, category: 'Dev Tools & Concepts', core: false },
     { name: 'WebAuthn', icon: SiWebauthn, category: 'Dev Tools & Concepts', core: false },
+    { name: 'OAuth 2.0', icon: Shield, category: 'Dev Tools & Concepts', core: false },
+    { name: 'SSE', icon: Zap, category: 'Dev Tools & Concepts', core: false },
     { name: 'CI/CD', icon: SiGithubactions, category: 'Dev Tools & Concepts', core: true },
     { name: 'REST APIs', icon: VscDatabase, category: 'Dev Tools & Concepts', core: true },
 ];
 
-const categories = ['Languages', 'Frameworks', 'Dev Tools & Concepts'];
+const categories = ['Languages', 'Frameworks', 'AI Tools', 'Dev Tools & Concepts'];
 
 const containerVariants = {
     hidden: {},
