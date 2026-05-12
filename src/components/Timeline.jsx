@@ -1,9 +1,18 @@
 import { useRef } from 'react';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
-import { GraduationCap, Briefcase, Award, Rocket } from 'lucide-react';
+import { GraduationCap, Briefcase, Award, Rocket, Code2 } from 'lucide-react';
 import SectionHeading from './SectionHeading';
 
 const entries = [
+    {
+        icon: Code2,
+        title: 'GenLedge',
+        subtitle: 'Software Developer',
+        date: 'Mar 2026 – Apr 2026',
+        description:
+            'Built a Stripe MCP server (TypeScript, 12 tools) enabling AI accounting agents to query live payment data via the Model Context Protocol. Engineered a webhook pipeline with HMAC-SHA256 verification routing 12 event types to specialized AI employee roles for real-time general ledger entry generation.',
+        type: 'experience',
+    },
     {
         icon: Rocket,
         title: 'Outamation',
