@@ -22,8 +22,8 @@ const projects = [
         title: 'MacroMatch',
         tagline: 'Intelligent Nutrition Platform',
         description:
-            'A full-stack MERN application solving meal planning by combining smart pantry management with intelligent meal generation. It tracks inventory and uses linear programming to generate optimized meal plans that hit specific macronutrient targets, complete with an analytics dashboard for nutrition trends.',
-        tech: ['React', 'Node.js', 'Express', 'MongoDB'],
+            'A full-stack MERN application that solves meal planning using the Simplex Algorithm (Linear Programming) to satisfy macronutrient constraint systems in under 200ms. Combines smart pantry inventory tracking with a REST API (JWT auth) deployed via CI/CD, supporting 10,000+ daily meal permutations per user alongside an analytics dashboard for nutrition trends.',
+        tech: ['React', 'Node.js', 'Express', 'MongoDB', 'Linear Programming'],
         year: '2025',
         role: 'Full-Stack',
         github: 'https://github.com/parthiv-2006/MacroMatch',
@@ -47,7 +47,7 @@ const projects = [
         tagline: 'AI-Powered Knowledge Capture',
         description:
             'A Chrome extension that transforms how you retain information online. Highlight any text on any webpage for an instant AI-powered explanation, summary, or simplification — then save it to a searchable personal library. Synapse, its knowledge graph view, uses semantic embeddings and D3-style pan/zoom to visualise how your saved ideas connect across domains.',
-        tech: ['React', 'TypeScript', 'Chrome Extension', 'Gemini AI', 'MongoDB', 'Node.js'],
+        tech: ['React', 'TypeScript', 'Vite', 'FastAPI', 'Python', 'Gemini AI', 'SSE', 'Manifest V3'],
         year: '2026',
         role: 'Full-Stack',
         github: 'https://github.com/parthiv-2006/Gist',
