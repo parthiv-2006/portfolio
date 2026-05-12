@@ -116,7 +116,7 @@ export default function Hero() {
 
                     {/* Download Resume — creative pill button */}
                     <a
-                        href="resume.pdf"
+                        href="newresume.pdf"
                         download="Parthiv_Paul_Resume.pdf"
                         className="group/resume relative inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-medium text-accent border border-accent/25 bg-accent/[0.07] hover:bg-accent/15 hover:border-accent/40 transition-all duration-300 hover:shadow-[0_0_20px_rgba(226,160,78,0.15)]"
                     >
