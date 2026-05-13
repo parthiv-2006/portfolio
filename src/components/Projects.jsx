@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ExternalLink, Github, X, ArrowUpRight } from 'lucide-react';
+import { ExternalLink, Github, X, ArrowUpRight, Video } from 'lucide-react';
 import SectionHeading from './SectionHeading';
 import GistDemoWrapper from './GistDemo/index';
 
@@ -39,7 +39,8 @@ const projects = [
         year: '2026',
         role: 'Full-Stack',
         github: 'https://github.com/parthiv-2006/palate',
-        live: 'https://www.mypalate.tech/'
+        live: 'https://palate-self.vercel.app/',
+        devpost: 'https://devpost.com/software/palate-3uic5p',
     },
     {
         id: 'gist',
@@ -243,6 +244,17 @@ export default function Projects() {
                                                         <ExternalLink size={15} /> Live Demo
                                                     </a>
                                                 )}
+                                                {project.devpost && (
+                                                    <a
+                                                        href={project.devpost}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-light text-text-muted text-xs md:text-sm font-mono border border-white/6 hover:border-white/20 hover:text-text transition-all duration-300"
+                                                    >
+                                                        <Video size={15} /> Demo Video
+                                                    </a>
+                                                )}
                                             </div>
 
                                             <div className="ml-auto flex items-center gap-2 text-text-dim text-xs font-mono group-hover:text-accent transition-colors duration-300">
@@ -412,6 +424,16 @@ export default function Projects() {
                                                     className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-accent/10 text-accent text-sm font-medium border border-accent/20 hover:bg-accent/20 hover:shadow-[0_0_15px_rgba(226,160,78,0.15)] transition-all duration-300"
                                                 >
                                                     <ExternalLink size={16} /> Live Demo
+                                                </a>
+                                            )}
+                                            {selected.devpost && (
+                                                <a
+                                                    href={selected.devpost}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-surface-light text-text-muted text-sm font-medium border border-white/[0.08] hover:border-white/[0.2] hover:text-text transition-all duration-300"
+                                                >
+                                                    <Video size={16} /> Demo Video
                                                 </a>
                                             )}
                                         </div>
