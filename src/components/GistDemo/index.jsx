@@ -260,10 +260,11 @@ export default function GistDemoWrapper() {
     setPopoverStreamText('');
 
     const body = {
-      selected_text:    text,
       page_context:     ARTICLE.url,
       complexity_level: mode,
     };
+    // Only send selected_text for initial gists; follow-ups carry context in messages
+    if (text) body.selected_text = text;
     if (messages.length) body.messages = messages;
 
     const res = await fetchWithRetry(`${BACKEND}/api/v1/simplify`, {
@@ -394,6 +395,9 @@ export default function GistDemoWrapper() {
   const handleSendFollowUp = useCallback(async (query) => {
     const mode    = popoverModeRef.current;
     const history = backendMsgsRef.current;
+    // Include the new user message in the history — the backend expects the full
+    // conversation in `messages` with `selected_text` empty for follow-ups.
+    const fullHistory = [...history, { role: 'user', content: query }];
 
     /* Optimistically add the user bubble */
     setPopoverMessages(prev => [...prev, { role: 'user', content: query }]);
@@ -401,9 +405,9 @@ export default function GistDemoWrapper() {
 
     try {
       const explanation = await fetchAndStream({
-        text:      query,
+        text:      '',          // empty — follow-up is carried in messages
         mode,
-        messages:  history,
+        messages:  fullHistory, // full history including the new user turn
         saveAfter: false,
       });
 
