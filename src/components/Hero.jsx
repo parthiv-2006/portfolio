@@ -1,6 +1,7 @@
 import { useRef, useMemo } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Download } from 'lucide-react';
+import useLatestRepo from '../hooks/useLatestRepo';
 
 /* ── Dynamic greeting based on visitor's local time ── */
 function getGreeting() {
@@ -14,6 +15,8 @@ function getGreeting() {
 export default function Hero() {
     const containerRef = useRef(null);
     const greeting = useMemo(() => getGreeting(), []);
+
+    const latestRepo = useLatestRepo('parthiv-2006');
 
     const { scrollYProgress } = useScroll({
         target: containerRef,
@@ -78,6 +81,26 @@ export default function Hero() {
                 >
                     cs @ uoft · full-stack & ai engineer
                 </motion.p>
+
+                {/* Currently working on */}
+                {latestRepo && (
+                    <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.6, delay: 0.7 }}
+                        className="font-mono text-text-dim text-xs tracking-wide mb-6"
+                    >
+                        currently working on{' '}
+                        <a
+                            href={latestRepo.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-accent hover:underline underline-offset-4 transition-colors duration-200"
+                        >
+                            {latestRepo.name}
+                        </a>
+                    </motion.p>
+                )}
 
                 {/* One-liner */}
                 <motion.p
