@@ -2,7 +2,7 @@
 
 A personal portfolio for Parthiv Paul, CS Specialist at the University of Toronto, built as a single-page React application with enough interactive surface to serve as a project demonstration in its own right.
 
-[![Live Site](https://img.shields.io/badge/Live%20Site-portfolio-E2A04E?style=flat-square)](https://github.com/parthiv-2006/portfolio)
+[![Live Site](https://img.shields.io/badge/Live%20Site-parthivpaul.me-E2A04E?style=flat-square)](https://www.parthivpaul.me/)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react)](https://react.dev)
 [![Vite](https://img.shields.io/badge/Vite-7-646CFF?style=flat-square&logo=vite)](https://vitejs.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
@@ -19,7 +19,7 @@ The site has no server-side component. Every interactive element runs in the bro
 
 ## Live Site
 
-Visit: **[https://github.com/parthiv-2006/portfolio](https://github.com/parthiv-2006/portfolio)**
+Visit: **[https://www.parthivpaul.me/](https://www.parthivpaul.me/)**
 
 ---
 
