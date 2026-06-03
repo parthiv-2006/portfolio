@@ -43,6 +43,18 @@ const projects = [
         devpost: 'https://devpost.com/software/palate-3uic5p',
     },
     {
+        id: 'leaseguard',
+        title: 'LeaseGuard',
+        tagline: 'AI Legal Agent for Ontario Tenants',
+        description:
+            'An AI agent that reads Ontario residential lease PDFs and produces a grounded risk analysis backed by real statute and tribunal text — not training-data hallucinations. A custom MCP server exposes 12 tools to a Claude AI orchestrator: parse the PDF, retrieve matching RTA sections via pgvector RAG, score clause risk deterministically, detect cross-clause contradictions, benchmark against real leases in the corpus, and generate negotiation guidance. Every legal claim is traceable to a retrieved source.',
+        tech: ['Next.js', 'TypeScript', 'Claude AI', 'Supabase', 'Python', 'Gemini AI'],
+        year: '2026',
+        role: 'AI Agent',
+        github: 'https://github.com/parthiv-2006/lease-guard',
+        live: 'https://leaseguard-sigma.vercel.app/',
+    },
+    {
         id: 'gist',
         title: 'Gist',
         tagline: 'AI-Powered Knowledge Capture',
