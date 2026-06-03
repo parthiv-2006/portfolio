@@ -55,6 +55,17 @@ const projects = [
         live: 'https://leaseguard-sigma.vercel.app/',
     },
     {
+        id: 'reflecta',
+        title: 'Reflecta',
+        tagline: 'Self-Improving Test Coverage Agent',
+        description:
+            'An autonomous CLI agent that finds untested Python code and writes targeted pytest tests for it — then proves they work. Reflecta parses coverage.json to surface uncovered functions, generates full test files with Gemini Flash, executes them in an isolated subprocess, and uses Groq (Llama 3.1 8B → 3.3 70B escalation) to repair failures. Every kept test must clear two gates: an AST-level assertion check and a strict coverage-delta gate — tests that pass but add no coverage are discarded. Free-tier LLM routing keeps the loop within daily caps while running autonomously against any Python repo.',
+        tech: ['Python', 'pytest', 'Gemini AI', 'Groq', 'coverage.py', 'Typer'],
+        year: '2026',
+        role: 'Dev Tool',
+        github: 'https://github.com/parthiv-2006/Reflecta-Ai-Agent',
+    },
+    {
         id: 'gist',
         title: 'Gist',
         tagline: 'AI-Powered Knowledge Capture',
