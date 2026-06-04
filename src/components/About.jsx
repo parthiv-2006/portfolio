@@ -134,7 +134,7 @@ export default function About() {
                                         initial="hidden"
                                         whileInView="visible"
                                         viewport={{ once: true }}
-                                        className="group/fact rounded-xl border border-white/[0.06] bg-surface/40 p-4 hover:border-accent/20 hover:bg-surface transition-all duration-300"
+                                        className="group/fact rounded-xl border border-white/[0.06] bg-accent/[0.03] p-4 hover:border-accent/25 hover:bg-accent/[0.07] transition-all duration-300"
                                     >
                                         <fact.icon
                                             size={16}
