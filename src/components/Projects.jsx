@@ -192,12 +192,15 @@ export default function Projects() {
                                 <div className="p-6 md:p-8 relative z-10 flex flex-col md:flex-row md:items-start gap-6">
                                     <div className="flex-1 flex flex-col min-h-full">
                                         {/* Number + year badge */}
-                                        <div className="flex items-center gap-3 mb-4">
+                                        <div className="flex items-center gap-3 mb-4 flex-wrap">
                                             <span className="font-mono text-accent text-xs tracking-widest">
                                                 {String(projects.findIndex(p => p.id === project.id) + 1).padStart(2, '0')}
                                             </span>
                                             <span className="w-8 h-px bg-accent/30" />
                                             <span className="font-mono text-text-dim text-xs">{project.year}</span>
+                                            <span className="font-mono text-xs px-2 py-0.5 rounded-full bg-surface text-text-dim border border-white/[0.08]">
+                                                {project.role}
+                                            </span>
                                             {project.hasDemo && (
                                                 <span className="font-mono text-xs px-2 py-0.5 rounded-full bg-accent/10 text-accent border border-accent/20">
                                                     Live Demo
@@ -214,7 +217,7 @@ export default function Projects() {
                                         </p>
 
                                         {/* Description excerpt */}
-                                        <p className="text-text-dim text-sm md:text-base leading-relaxed mb-6 max-w-3xl">
+                                        <p className="text-text-dim text-sm md:text-base leading-relaxed mb-6 max-w-3xl line-clamp-3">
                                             {project.description}
                                         </p>
 

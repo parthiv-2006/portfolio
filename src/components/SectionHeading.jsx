@@ -6,15 +6,18 @@ export default function SectionHeading({ label, title, subtitle }) {
     return (
         <div className="mb-16">
             {label && (
-                <motion.span
+                <motion.div
                     initial={{ opacity: 0, x: -30 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true, margin: '-80px' }}
                     transition={{ duration: 0.5, ease: 'easeOut' }}
-                    className="text-accent text-xs md:text-sm font-mono tracking-widest uppercase mb-4 block"
+                    className="flex items-center gap-3 mb-4"
                 >
-                    {label}
-                </motion.span>
+                    <span className="block w-6 h-px bg-accent/70 shrink-0" />
+                    <span className="text-accent text-xs md:text-sm font-mono tracking-widest uppercase">
+                        {label}
+                    </span>
+                </motion.div>
             )}
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-text">
                 {words.map((word, i) => (
