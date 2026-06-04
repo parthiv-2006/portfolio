@@ -1,4 +1,5 @@
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import {
     SiPython,
     SiJavascript,
@@ -73,114 +74,131 @@ const skills = [
 
 const categories = ['Languages', 'Frameworks', 'AI Tools', 'Dev Tools & Concepts'];
 
-const containerVariants = {
-    hidden: {},
-    visible: {
-        transition: {
-            staggerChildren: 0.06,
-            delayChildren: 0.1,
-        },
-    },
-};
+function SkillCard({ skill, index }) {
+    const glowControls = useAnimation();
+    const Icon = skill.icon;
 
-const cardVariants = {
-    hidden: { opacity: 0, y: 20, scale: 0.95 },
-    visible: {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        transition: {
-            type: 'spring',
-            stiffness: 200,
-            damping: 20,
-        },
-    },
-};
+    const handleHoverStart = () => {
+        if (!skill.core) return;
+        glowControls.start({
+            opacity: [0, 1, 0],
+            transition: { duration: 0.8, ease: 'easeInOut' },
+        });
+    };
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+                delay: index * 0.04,
+                type: 'spring',
+                stiffness: 200,
+                damping: 20,
+            }}
+            whileHover={{
+                scale: 1.04,
+                transition: { type: 'spring', stiffness: 400, damping: 15 },
+            }}
+            onHoverStart={handleHoverStart}
+            className={`group relative flex items-center gap-3 px-4 py-3.5 rounded-xl border transition-colors duration-300 cursor-default overflow-hidden
+                ${skill.core
+                    ? 'bg-surface border-accent/20 hover:border-accent/50'
+                    : 'bg-surface border-white/[0.06] hover:border-white/[0.15] hover:bg-surface-light'
+                }`}
+        >
+            {/* Amber glow pulse overlay — core skills only, triggered on hover via animate prop */}
+            {skill.core && (
+                <motion.div
+                    animate={glowControls}
+                    initial={{ opacity: 0 }}
+                    className="absolute inset-0 pointer-events-none rounded-xl"
+                    style={{
+                        background:
+                            'radial-gradient(ellipse at center, rgba(226,160,78,0.22) 0%, transparent 70%)',
+                    }}
+                />
+            )}
+
+            {/* Core stack indicator dot */}
+            {skill.core && (
+                <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-accent" />
+            )}
+
+            <Icon
+                className={`shrink-0 transition-colors duration-300 ${
+                    skill.core
+                        ? 'text-accent'
+                        : 'text-text-dim group-hover:text-text-muted'
+                }`}
+                size={20}
+            />
+
+            <span
+                className={`text-sm font-medium transition-colors duration-300 ${
+                    skill.core
+                        ? 'text-text'
+                        : 'text-text-muted group-hover:text-text'
+                }`}
+            >
+                {skill.name}
+            </span>
+        </motion.div>
+    );
+}
 
 export default function SkillsGrid() {
+    const [activeTab, setActiveTab] = useState('Languages');
+
+    const tabSkills = skills.filter((s) => s.category === activeTab);
+
     return (
         <section id="skills" className="w-full">
             <div className="w-full">
-                <SectionHeading
-                    label="Toolkit"
-                    title="Skills & Technologies"
-                />
+                <SectionHeading label="Toolkit" title="Skills & Technologies" />
 
-                <div className="space-y-12">
-                    {categories.map((category, catIndex) => {
-                        const categorySkills = skills.filter(
-                            (s) => s.category === category
-                        );
-
-                        return (
-                            <div key={category}>
-                                <motion.h3
-                                    initial={{ opacity: 0, x: -15 }}
-                                    whileInView={{ opacity: 1, x: 0 }}
-                                    viewport={{ once: true, margin: '-60px' }}
-                                    transition={{
-                                        duration: 0.4,
-                                        delay: catIndex * 0.08,
-                                    }}
-                                    className="font-mono text-accent text-xs tracking-[0.15em] uppercase mb-5"
-                                >
-                                    {category}
-                                </motion.h3>
-
+                {/* ── Tab bar ── */}
+                <div
+                    className="flex overflow-x-auto mb-8 border-b border-white/[0.06]"
+                    style={{ scrollbarWidth: 'none' }}
+                >
+                    {categories.map((cat) => (
+                        <button
+                            key={cat}
+                            onClick={() => setActiveTab(cat)}
+                            className={`relative flex-shrink-0 px-5 py-3 text-sm font-mono transition-colors duration-200 cursor-pointer ${
+                                activeTab === cat
+                                    ? 'text-text'
+                                    : 'text-text-dim hover:text-text-muted'
+                            }`}
+                        >
+                            {cat}
+                            {activeTab === cat && (
                                 <motion.div
-                                    variants={containerVariants}
-                                    initial="hidden"
-                                    whileInView="visible"
-                                    viewport={{ once: true, margin: '-40px' }}
-                                    className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"
-                                >
-                                    {categorySkills.map((skill) => {
-                                        const Icon = skill.icon;
-                                        return (
-                                            <motion.div
-                                                key={skill.name}
-                                                variants={cardVariants}
-                                                whileHover={{
-                                                    scale: 1.04,
-                                                    transition: { type: 'spring', stiffness: 400, damping: 15 },
-                                                }}
-                                                className={`group relative flex items-center gap-3 px-4 py-3.5 rounded-xl border transition-all duration-300 cursor-default
-                                                    ${skill.core
-                                                        ? 'bg-surface border-accent/20 hover:border-accent/50 hover:shadow-[0_0_20px_rgba(226,160,78,0.1)]'
-                                                        : 'bg-surface border-white/[0.06] hover:border-white/[0.15] hover:bg-surface-light'
-                                                    }`}
-                                            >
-                                                {/* Core stack indicator dot */}
-                                                {skill.core && (
-                                                    <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-accent" />
-                                                )}
-
-                                                <Icon
-                                                    className={`shrink-0 transition-colors duration-300
-                                                        ${skill.core
-                                                            ? 'text-accent group-hover:text-accent'
-                                                            : 'text-text-dim group-hover:text-text-muted'
-                                                        }`}
-                                                    size={20}
-                                                />
-
-                                                <span
-                                                    className={`text-sm font-medium transition-colors duration-300
-                                                        ${skill.core
-                                                            ? 'text-text group-hover:text-text'
-                                                            : 'text-text-muted group-hover:text-text'
-                                                        }`}
-                                                >
-                                                    {skill.name}
-                                                </span>
-                                            </motion.div>
-                                        );
-                                    })}
-                                </motion.div>
-                            </div>
-                        );
-                    })}
+                                    layoutId="tab-indicator"
+                                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"
+                                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                                />
+                            )}
+                        </button>
+                    ))}
                 </div>
+
+                {/* ── Tab content — exit left, enter right ── */}
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={activeTab}
+                        initial={{ opacity: 0, x: 24 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -24 }}
+                        transition={{ duration: 0.18, ease: 'easeInOut' }}
+                        className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"
+                    >
+                        {tabSkills.map((skill, i) => (
+                            <SkillCard key={skill.name} skill={skill} index={i} />
+                        ))}
+                    </motion.div>
+                </AnimatePresence>
             </div>
         </section>
     );
