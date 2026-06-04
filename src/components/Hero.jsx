@@ -32,6 +32,14 @@ export default function Hero() {
             ref={containerRef}
             className="relative min-h-screen flex items-center justify-center overflow-hidden snap-section"
         >
+            {/* Ambient warm glow — depth behind the name */}
+            <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                    background:
+                        'radial-gradient(ellipse 70% 55% at 50% 38%, rgba(226,160,78,0.07) 0%, transparent 65%)',
+                }}
+            />
             <motion.div
                 className="relative z-10 w-full max-w-5xl mx-auto px-6 text-center"
                 style={{ y: contentY, opacity: contentOpacity }}
@@ -77,7 +85,7 @@ export default function Hero() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.6, delay: 0.6 }}
-                    className="font-mono text-accent text-sm tracking-wide mb-6 cursor-blink"
+                    className="font-mono text-accent text-base tracking-wide mb-6 cursor-blink"
                 >
                     cs @ uoft · full-stack & ai engineer
                 </motion.p>
