@@ -117,7 +117,7 @@ export default function LandingSummary({ onEnter }) {
                     <p className="text-[10px] font-mono text-text-dim uppercase tracking-[0.15em] mb-3">
                         Core Stack
                     </p>
-                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-6 gap-2">
                         {TOP_SKILLS.map(({ name, icon: Icon }) => (
                             <div
                                 key={name}
@@ -143,7 +143,7 @@ export default function LandingSummary({ onEnter }) {
                     {/* Email — copies to clipboard */}
                     <button
                         onClick={handleEmailClick}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg bg-surface border text-sm transition-all duration-200 ${
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg bg-surface border text-sm transition-all duration-200 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 ${
                             emailCopied
                                 ? 'border-accent/40 text-accent'
                                 : 'border-white/[0.06] text-text-muted hover:text-accent hover:border-accent/30'
@@ -157,7 +157,7 @@ export default function LandingSummary({ onEnter }) {
                         href="https://github.com/parthiv-2006"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface border border-white/[0.06] text-text-muted text-sm hover:text-accent hover:border-accent/30 transition-all duration-200"
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface border border-white/[0.06] text-text-muted text-sm hover:text-accent hover:border-accent/30 transition-all duration-200 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
                     >
                         <Github size={14} />
                         GitHub
@@ -167,7 +167,7 @@ export default function LandingSummary({ onEnter }) {
                         href="https://www.linkedin.com/in/parthiv-paul"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface border border-white/[0.06] text-text-muted text-sm hover:text-accent hover:border-accent/30 transition-all duration-200"
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface border border-white/[0.06] text-text-muted text-sm hover:text-accent hover:border-accent/30 transition-all duration-200 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
                     >
                         <Linkedin size={14} />
                         LinkedIn
@@ -176,7 +176,7 @@ export default function LandingSummary({ onEnter }) {
                     <a
                         href="newresume.pdf"
                         download="Parthiv_Paul_Resume.pdf"
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg border border-accent/25 bg-accent/[0.07] text-accent text-sm hover:bg-accent/15 hover:border-accent/40 transition-all duration-300"
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg border border-accent/25 bg-accent/[0.07] text-accent text-sm hover:bg-accent/15 hover:border-accent/40 transition-all duration-300 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
                     >
                         <Download size={14} />
                         Resume
@@ -187,7 +187,7 @@ export default function LandingSummary({ onEnter }) {
                 <motion.div variants={fadeUp} className="flex justify-center">
                     <button
                         onClick={onEnter}
-                        className="group relative inline-flex items-center gap-3 px-8 py-3.5 rounded-full text-base font-medium bg-accent text-bg hover:bg-accent/90 transition-all duration-300 shadow-[0_0_30px_rgba(226,160,78,0.25)] hover:shadow-[0_0_40px_rgba(226,160,78,0.35)]"
+                        className="group relative inline-flex items-center justify-center gap-3 px-8 py-3.5 rounded-full text-base font-medium bg-accent text-bg hover:bg-accent/90 transition-all duration-300 shadow-[0_0_30px_rgba(226,160,78,0.25)] hover:shadow-[0_0_40px_rgba(226,160,78,0.35)] w-full sm:w-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
                     >
                         View Full Portfolio
                         <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">
