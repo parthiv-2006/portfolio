@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Download, Mail, Github, Linkedin } from 'lucide-react';
+import { Download, Mail, Github, Linkedin, Brain, Check } from 'lucide-react';
 import {
     SiPython,
     SiJavascript,
@@ -9,40 +10,29 @@ import {
     SiNextdotjs,
     SiFastapi,
     SiGit,
+    SiMongodb,
+    SiTailwindcss,
+    SiDocker,
+    SiOpenai,
 } from 'react-icons/si';
 import GitHubGraph from './GitHubGraph';
 
 const TOP_SKILLS = [
-    { name: 'Python', icon: SiPython },
-    { name: 'JavaScript', icon: SiJavascript },
-    { name: 'TypeScript', icon: SiTypescript },
-    { name: 'React', icon: SiReact },
-    { name: 'Node.js', icon: SiNodedotjs },
-    { name: 'Next.js', icon: SiNextdotjs },
-    { name: 'FastAPI', icon: SiFastapi },
-    { name: 'Git/GitHub', icon: SiGit },
+    { name: 'Python',       icon: SiPython },
+    { name: 'JavaScript',   icon: SiJavascript },
+    { name: 'TypeScript',   icon: SiTypescript },
+    { name: 'React',        icon: SiReact },
+    { name: 'Node.js',      icon: SiNodedotjs },
+    { name: 'Next.js',      icon: SiNextdotjs },
+    { name: 'FastAPI',      icon: SiFastapi },
+    { name: 'MongoDB',      icon: SiMongodb },
+    { name: 'Tailwind CSS', icon: SiTailwindcss },
+    { name: 'Claude Code',  icon: Brain },
+    { name: 'Docker',       icon: SiDocker },
+    { name: 'Git/GitHub',   icon: SiGit },
 ];
 
-const CONTACT_LINKS = [
-    {
-        label: 'Email',
-        href: 'mailto:parthiv.paul@mail.utoronto.ca',
-        icon: Mail,
-        external: false,
-    },
-    {
-        label: 'GitHub',
-        href: 'https://github.com/parthiv-2006',
-        icon: Github,
-        external: true,
-    },
-    {
-        label: 'LinkedIn',
-        href: 'https://www.linkedin.com/in/parthiv-paul',
-        icon: Linkedin,
-        external: true,
-    },
-];
+const EMAIL = 'parthiv.paul@mail.utoronto.ca';
 
 const container = {
     hidden: { opacity: 0 },
@@ -58,6 +48,15 @@ const fadeUp = {
 };
 
 export default function LandingSummary({ onEnter }) {
+    const [emailCopied, setEmailCopied] = useState(false);
+
+    const handleEmailClick = (e) => {
+        e.preventDefault();
+        navigator.clipboard.writeText(EMAIL);
+        setEmailCopied(true);
+        setTimeout(() => setEmailCopied(false), 2000);
+    };
+
     return (
         <div className="min-h-screen bg-bg text-text flex items-start justify-center py-16 px-4 sm:px-6 relative overflow-hidden">
             {/* Ambient warm glow */}
@@ -113,19 +112,19 @@ export default function LandingSummary({ onEnter }) {
                     </p>
                 </motion.div>
 
-                {/* ── Core Skills ── */}
+                {/* ── Core Skills — 6 × 2 grid ── */}
                 <motion.div variants={fadeUp} className="mb-6">
                     <p className="text-[10px] font-mono text-text-dim uppercase tracking-[0.15em] mb-3">
                         Core Stack
                     </p>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                         {TOP_SKILLS.map(({ name, icon: Icon }) => (
                             <div
                                 key={name}
                                 className="flex items-center gap-2 px-3 py-2 rounded-lg border border-accent/20 bg-surface text-sm"
                             >
                                 <Icon size={14} className="text-accent shrink-0" />
-                                <span className="text-text font-medium">{name}</span>
+                                <span className="text-text font-medium text-xs truncate">{name}</span>
                             </div>
                         ))}
                     </div>
@@ -141,19 +140,38 @@ export default function LandingSummary({ onEnter }) {
                     variants={fadeUp}
                     className="mb-8 flex flex-wrap items-center gap-2.5 justify-center"
                 >
-                    {CONTACT_LINKS.map(({ label, href, icon: Icon, external }) => (
-                        <a
-                            key={label}
-                            href={href}
-                            {...(external
-                                ? { target: '_blank', rel: 'noopener noreferrer' }
-                                : {})}
-                            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface border border-white/[0.06] text-text-muted text-sm hover:text-accent hover:border-accent/30 transition-all duration-200"
-                        >
-                            <Icon size={14} />
-                            {label}
-                        </a>
-                    ))}
+                    {/* Email — copies to clipboard */}
+                    <button
+                        onClick={handleEmailClick}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg bg-surface border text-sm transition-all duration-200 ${
+                            emailCopied
+                                ? 'border-accent/40 text-accent'
+                                : 'border-white/[0.06] text-text-muted hover:text-accent hover:border-accent/30'
+                        }`}
+                    >
+                        {emailCopied ? <Check size={14} /> : <Mail size={14} />}
+                        {emailCopied ? 'Copied!' : 'Email'}
+                    </button>
+
+                    <a
+                        href="https://github.com/parthiv-2006"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface border border-white/[0.06] text-text-muted text-sm hover:text-accent hover:border-accent/30 transition-all duration-200"
+                    >
+                        <Github size={14} />
+                        GitHub
+                    </a>
+
+                    <a
+                        href="https://www.linkedin.com/in/parthiv-paul"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface border border-white/[0.06] text-text-muted text-sm hover:text-accent hover:border-accent/30 transition-all duration-200"
+                    >
+                        <Linkedin size={14} />
+                        LinkedIn
+                    </a>
 
                     <a
                         href="newresume.pdf"
