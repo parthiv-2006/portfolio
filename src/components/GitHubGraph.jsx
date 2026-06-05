@@ -149,7 +149,7 @@ export default function GitHubGraph() {
                             <button
                                 key={days}
                                 onClick={() => setActiveDays(days)}
-                                className={`relative px-2.5 py-1 text-[10px] font-mono rounded-full transition-all duration-300 cursor-pointer ${activeDays === days
+                                className={`relative px-2.5 py-2 text-[10px] font-mono rounded-full transition-all duration-300 cursor-pointer min-h-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 ${activeDays === days
                                     ? 'text-accent'
                                     : 'text-text-dim hover:text-text-muted'
                                     }`}
@@ -201,7 +201,7 @@ export default function GitHubGraph() {
             ) : (
                 <>
                     {/* Grid of day cells */}
-                    <div className="relative">
+                    <div className="relative overflow-x-auto">
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key={activeDays}
@@ -210,7 +210,12 @@ export default function GitHubGraph() {
                                 exit={{ opacity: 0, y: -4 }}
                                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                                 className="flex flex-wrap"
-                                style={{ gap: `${cellGap}px` }}
+                                style={{
+                                    gap: `${cellGap}px`,
+                                    minWidth: activeDays > 30
+                                        ? `${activeDays * ((activeDays <= 90 ? 6 : 3) + cellGap)}px`
+                                        : undefined,
+                                }}
                             >
                                 {data.map((day, i) => {
                                     const level = getLevel(day.count, maxCount);

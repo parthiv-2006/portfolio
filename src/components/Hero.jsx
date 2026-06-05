@@ -134,7 +134,7 @@ export default function Hero() {
                             e.preventDefault();
                             document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' });
                         }}
-                        className="inline-flex items-center gap-2 text-text-muted text-sm hover:text-accent transition-colors duration-300 group"
+                        className="inline-flex items-center gap-2 text-text-muted text-sm hover:text-accent transition-colors duration-300 group min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 rounded px-2 -mx-2"
                     >
                         See my work
                         <span className="inline-block transition-transform duration-300 group-hover:translate-y-0.5">
@@ -149,7 +149,7 @@ export default function Hero() {
                     <a
                         href="newresume.pdf"
                         download="Parthiv_Paul_Resume.pdf"
-                        className="group/resume relative inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-medium text-accent border border-accent/25 bg-accent/[0.07] hover:bg-accent/15 hover:border-accent/40 transition-all duration-300 hover:shadow-[0_0_20px_rgba(226,160,78,0.15)]"
+                        className="group/resume relative inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-medium text-accent border border-accent/25 bg-accent/[0.07] hover:bg-accent/15 hover:border-accent/40 transition-all duration-300 hover:shadow-[0_0_20px_rgba(226,160,78,0.15)] min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
                     >
                         {/* Animated glow ring */}
                         <span className="absolute inset-0 rounded-full border border-accent/10 animate-[pulse_3s_ease-in-out_infinite]" />

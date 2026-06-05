@@ -383,7 +383,7 @@ export default function Terminal() {
                                             ];
                                             setLines(newLines);
                                         }}
-                                        className="px-3 py-1.5 rounded-lg bg-surface-light border border-border text-text-dim text-xs font-mono hover:border-accent/30 hover:text-accent transition-all duration-200"
+                                        className="px-3 py-1.5 rounded-lg bg-surface-light border border-border text-text-dim text-xs font-mono hover:border-accent/30 hover:text-accent transition-all duration-200 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
                                     >
                                         {cmd}
                                     </button>
@@ -399,7 +399,7 @@ export default function Terminal() {
                                     ];
                                     setLines(newLines);
                                 }}
-                                className="px-3 py-1.5 rounded-lg bg-accent/10 border border-accent/25 text-accent text-xs font-mono hover:bg-accent/20 hover:border-accent/40 transition-all duration-200"
+                                className="px-3 py-1.5 rounded-lg bg-accent/10 border border-accent/25 text-accent text-xs font-mono hover:bg-accent/20 hover:border-accent/40 transition-all duration-200 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
                             >
                                 resume
                             </button>
@@ -422,7 +422,7 @@ export default function Terminal() {
                                 enterAdventure();
                             }
                         }}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all duration-300 flex items-center gap-1.5 ${adventureMode
+                        className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all duration-300 flex items-center gap-1.5 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 ${adventureMode
                                 ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25 hover:border-emerald-500/50 shadow-[0_0_12px_rgba(16,185,129,0.15)]'
                                 : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/40'
                             }`}

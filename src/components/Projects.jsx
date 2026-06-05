@@ -368,7 +368,7 @@ export default function Projects() {
                             whileInView="visible"
                             viewport={{ once: true }}
                             onClick={() => setActiveFilter('All')}
-                            className={`px-4 py-1.5 text-xs font-mono rounded-full border transition-all duration-300 cursor-pointer ${
+                            className={`px-4 py-1.5 text-xs font-mono rounded-full border transition-all duration-300 cursor-pointer min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 ${
                                 activeFilter === 'All'
                                     ? 'bg-accent/15 text-accent border-accent/30 shadow-[0_0_12px_rgba(226,160,78,0.15)]'
                                     : 'bg-surface/40 text-text-muted border-white/6 hover:border-white/15 hover:text-text'
@@ -385,7 +385,7 @@ export default function Projects() {
                                 whileInView="visible"
                                 viewport={{ once: true }}
                                 onClick={() => setActiveFilter(tech)}
-                                className={`px-4 py-1.5 text-xs font-mono rounded-full border transition-all duration-300 cursor-pointer ${
+                                className={`px-4 py-1.5 text-xs font-mono rounded-full border transition-all duration-300 cursor-pointer min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 ${
                                     activeFilter === tech
                                         ? 'bg-accent/15 text-accent border-accent/30 shadow-[0_0_12px_rgba(226,160,78,0.15)]'
                                         : 'bg-surface/40 text-text-muted border-white/6 hover:border-white/15 hover:text-text'
@@ -413,7 +413,7 @@ export default function Projects() {
                             onClick={() => goToCard(activeIndex - 1)}
                             disabled={activeIndex === 0}
                             aria-label="Previous project"
-                            className="hidden sm:flex absolute -left-5 top-[50%] -translate-y-10 z-10 w-10 h-10 items-center justify-center rounded-full bg-surface border border-white/10 text-text-muted hover:text-text hover:border-accent/30 transition-all duration-200 disabled:opacity-25 disabled:cursor-not-allowed"
+                            className="hidden sm:flex absolute -left-5 top-[50%] -translate-y-[22px] z-10 w-11 h-11 items-center justify-center rounded-full bg-surface border border-white/10 text-text-muted hover:text-text hover:border-accent/30 transition-all duration-200 disabled:opacity-25 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
                         >
                             <ChevronLeft size={18} />
                         </button>
@@ -423,7 +423,7 @@ export default function Projects() {
                             onClick={() => goToCard(activeIndex + 1)}
                             disabled={activeIndex >= filtered.length - 1}
                             aria-label="Next project"
-                            className="hidden sm:flex absolute -right-5 top-[50%] -translate-y-10 z-10 w-10 h-10 items-center justify-center rounded-full bg-surface border border-white/10 text-text-muted hover:text-text hover:border-accent/30 transition-all duration-200 disabled:opacity-25 disabled:cursor-not-allowed"
+                            className="hidden sm:flex absolute -right-5 top-[50%] -translate-y-[22px] z-10 w-11 h-11 items-center justify-center rounded-full bg-surface border border-white/10 text-text-muted hover:text-text hover:border-accent/30 transition-all duration-200 disabled:opacity-25 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
                         >
                             <ChevronRight size={18} />
                         </button>
@@ -472,12 +472,14 @@ export default function Projects() {
                                     key={i}
                                     onClick={() => goToCard(i)}
                                     aria-label={`Go to project ${i + 1}`}
-                                    className={`rounded-full transition-all duration-300 ${
+                                    className="min-w-[44px] min-h-[44px] flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 rounded"
+                                >
+                                    <span className={`rounded-full transition-all duration-300 ${
                                         i === activeIndex
                                             ? 'w-6 h-1.5 bg-accent'
                                             : 'w-1.5 h-1.5 bg-white/20 hover:bg-white/40'
-                                    }`}
-                                />
+                                    }`} />
+                                </button>
                             ))}
                         </div>
                     </div>

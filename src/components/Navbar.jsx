@@ -159,7 +159,7 @@ export default function Navbar({ activeSection }) {
                         {/* Mobile toggle */}
                         <button
                             onClick={() => setMobileOpen(!mobileOpen)}
-                            className="md:hidden text-text-muted hover:text-accent transition-colors"
+                            className="md:hidden min-w-[44px] min-h-[44px] flex items-center justify-center text-text-muted hover:text-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 rounded-lg"
                             aria-label="Toggle menu"
                         >
                             {mobileOpen ? <X size={20} /> : <Menu size={20} />}

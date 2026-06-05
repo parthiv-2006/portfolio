@@ -166,7 +166,7 @@ export default function SkillsGrid() {
                         <button
                             key={cat}
                             onClick={() => setActiveTab(cat)}
-                            className={`relative flex-shrink-0 px-5 py-3 text-sm font-mono transition-colors duration-200 cursor-pointer ${
+                            className={`relative flex-shrink-0 px-5 py-3 text-sm font-mono transition-colors duration-200 cursor-pointer min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-inset rounded-t ${
                                 activeTab === cat
                                     ? 'text-text'
                                     : 'text-text-dim hover:text-text-muted'
