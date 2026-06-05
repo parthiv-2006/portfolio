@@ -33,7 +33,7 @@ export default function About() {
                                 <img
                                     src="/headshot.png"
                                     alt="Parthiv Paul"
-                                    className="w-full h-full object-cover group-hover/photo:scale-105 transition-transform duration-700 ease-out"
+                                    className="w-full h-full object-cover scale-[1.12] group-hover/photo:scale-[1.18] transition-transform duration-700 ease-out"
                                     onError={(e) => {
                                         e.target.style.display = 'none';
                                         e.target.nextElementSibling.style.display = 'flex';
