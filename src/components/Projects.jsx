@@ -40,6 +40,7 @@ const projects = [
         year: '2026',
         role: 'Dev Tool',
         github: 'https://github.com/parthiv-2006/Reflecta-Ai-Agent',
+        wip: true,
     },
     {
         id: 'anima',
@@ -136,6 +137,12 @@ function ProjectCard({ project, activeFilter, onClick, indexInFiltered, activeIn
                     {project.hasDemo && (
                         <span className="font-mono text-xs px-2 py-0.5 rounded-full bg-accent/10 text-accent border border-accent/20">
                             Live Demo
+                        </span>
+                    )}
+                    {project.wip && (
+                        <span className="font-mono text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/25 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                            In Development
                         </span>
                     )}
                 </div>
