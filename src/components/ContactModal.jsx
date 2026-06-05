@@ -85,8 +85,8 @@ export default function ContactModal({ open, onClose, form, setForm, status, set
                 import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
                 {
                     from_email: form.email,
+                    email: form.email,
                     message: form.message,
-                    reply_to: form.email,
                 },
                 import.meta.env.VITE_EMAILJS_PUBLIC_KEY
             );
