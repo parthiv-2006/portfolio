@@ -328,7 +328,7 @@ export default function Projects() {
             if (isHovering.current) return;
             const { activeIndex: idx, filteredLength: len, goToCard: go } = liveRef.current;
             go?.((idx + 1) % len);
-        }, 3500);
+        }, 2500);
     }, []);
 
     useEffect(() => {

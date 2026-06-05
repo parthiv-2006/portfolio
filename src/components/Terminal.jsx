@@ -29,13 +29,13 @@ const COMMANDS = {
         { type: 'info', text: '  help                Show this menu' },
     ],
     'contact --email': () => [
-        { type: 'success', text: '📧 parthiv.paul@mail.utoronto.ca' },
+        { type: 'success', text: '📧 parthiv.paul@mail.utoronto.ca', action: 'copy', value: 'parthiv.paul@mail.utoronto.ca' },
     ],
     'contact --github': () => [
-        { type: 'success', text: '🔗 github.com/parthiv-2006' },
+        { type: 'success', text: '🔗 github.com/parthiv-2006', href: 'https://github.com/parthiv-2006' },
     ],
     'contact --linkedin': () => [
-        { type: 'success', text: '🔗 linkedin.com/in/parthiv-paul' },
+        { type: 'success', text: '🔗 linkedin.com/in/parthiv-paul', href: 'https://www.linkedin.com/in/parthiv-paul' },
     ],
     resume: () => {
         downloadResume();
@@ -77,6 +77,7 @@ export default function Terminal() {
     const [historyIndex, setHistoryIndex] = useState(-1);
     const [booted, setBooted] = useState(false);
     const [bootText, setBootText] = useState('');
+    const [copiedIndex, setCopiedIndex] = useState(null);
 
     /* ── Adventure mode state ── */
     const [adventureMode, setAdventureMode] = useState(false);
@@ -293,7 +294,32 @@ export default function Terminal() {
                                     className={lineColors[line.type] || 'text-text'}
                                     style={{ whiteSpace: 'pre-wrap' }}
                                 >
-                                    {line.text}
+                                    {line.href ? (
+                                        <a
+                                            href={line.href}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="underline underline-offset-2 hover:opacity-80 transition-opacity duration-150 cursor-pointer"
+                                        >
+                                            {line.text}
+                                        </a>
+                                    ) : line.action === 'copy' ? (
+                                        <button
+                                            onClick={() => {
+                                                navigator.clipboard.writeText(line.value);
+                                                setCopiedIndex(i);
+                                                setTimeout(() => setCopiedIndex(null), 2000);
+                                            }}
+                                            className="underline underline-offset-2 hover:opacity-80 transition-opacity duration-150 cursor-pointer text-left"
+                                        >
+                                            {line.text}
+                                            {copiedIndex === i && (
+                                                <span className="ml-2 text-accent text-xs no-underline">✓ copied</span>
+                                            )}
+                                        </button>
+                                    ) : (
+                                        line.text
+                                    )}
                                 </motion.div>
                             ))}
 
