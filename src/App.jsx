@@ -7,6 +7,7 @@ import SkillsGrid from './components/SkillsGrid';
 import Projects from './components/Projects';
 import Timeline from './components/Timeline';
 import Terminal from './components/Terminal';
+import ContactSection from './components/ContactSection';
 import ScrollProgress from './components/ScrollProgress';
 import SectionDivider from './components/SectionDivider';
 import CursorTrail from './components/CursorTrail';
@@ -88,6 +89,12 @@ export default function App() {
 
                                 <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-16">
                                     <Terminal />
+                                </div>
+
+                                <SectionDivider variant="line" label="get in touch" />
+
+                                <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-16">
+                                    <ContactSection />
                                 </div>
                             </main>
 

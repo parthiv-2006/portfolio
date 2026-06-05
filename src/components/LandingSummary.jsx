@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Download, Mail, Github, Linkedin, Brain, Check } from 'lucide-react';
+import { Download, Mail, Github, Linkedin, Brain, Check, Send } from 'lucide-react';
+import ContactModal, { DEFAULT_MESSAGE } from './ContactModal';
 import {
     SiPython,
     SiJavascript,
@@ -49,12 +50,21 @@ const fadeUp = {
 
 export default function LandingSummary({ onEnter }) {
     const [emailCopied, setEmailCopied] = useState(false);
+    const [contactOpen, setContactOpen] = useState(false);
+    const [contactForm, setContactForm] = useState({ email: '', message: DEFAULT_MESSAGE, _hp: '' });
+    const [contactStatus, setContactStatus] = useState('idle');
 
     const handleEmailClick = (e) => {
         e.preventDefault();
         navigator.clipboard.writeText(EMAIL);
         setEmailCopied(true);
         setTimeout(() => setEmailCopied(false), 2000);
+    };
+
+    const handleContactOpen = () => {
+        setContactStatus('idle');
+        setContactForm({ email: '', message: DEFAULT_MESSAGE, _hp: '' });
+        setContactOpen(true);
     };
 
     return (
@@ -140,6 +150,16 @@ export default function LandingSummary({ onEnter }) {
                     variants={fadeUp}
                     className="mb-8 flex flex-wrap items-center gap-2.5 justify-center"
                 >
+                    {/* Send message — opens ContactModal */}
+                    <button
+                        onClick={handleContactOpen}
+                        aria-haspopup="dialog"
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg border border-accent/25 bg-accent/[0.07] text-accent text-sm hover:bg-accent/15 hover:border-accent/40 transition-all duration-200 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+                    >
+                        <Send size={14} />
+                        Get in Touch
+                    </button>
+
                     {/* Email — copies to clipboard */}
                     <button
                         onClick={handleEmailClick}
@@ -203,6 +223,15 @@ export default function LandingSummary({ onEnter }) {
                     © {new Date().getFullYear()} Parthiv Paul
                 </motion.p>
             </motion.div>
+
+            <ContactModal
+                open={contactOpen}
+                onClose={() => setContactOpen(false)}
+                form={contactForm}
+                setForm={setContactForm}
+                status={contactStatus}
+                setStatus={setContactStatus}
+            />
         </div>
     );
 }
