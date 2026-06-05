@@ -194,8 +194,8 @@ export default function LandingSummary({ onEnter }) {
                     </a>
 
                     <a
-                        href="newresume.pdf"
-                        download="Parthiv_Paul_Resume.pdf"
+                        href="parthiv_paul_swe.pdf"
+                        download="parthiv_paul_swe.pdf"
                         className="flex items-center gap-2 px-4 py-2 rounded-lg border border-accent/25 bg-accent/[0.07] text-accent text-sm hover:bg-accent/15 hover:border-accent/40 transition-all duration-300 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
                     >
                         <Download size={14} />
