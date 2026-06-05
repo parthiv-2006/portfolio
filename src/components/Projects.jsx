@@ -3,6 +3,7 @@ import { motion, AnimatePresence, useMotionValue, animate, useInView } from 'fra
 import { ExternalLink, Github, X, ArrowUpRight, Video, ChevronLeft, ChevronRight } from 'lucide-react';
 import SectionHeading from './SectionHeading';
 import GistDemoWrapper from './GistDemo/index';
+import { CircularGallery } from './CircularGallery';
 
 const projects = [
     {
@@ -79,6 +80,15 @@ const projects = [
         live: 'https://palate-self.vercel.app/',
         devpost: 'https://devpost.com/software/palate-3uic5p',
     },
+];
+
+const galleryItems = [
+    { id: 'leaseguard', title: 'LeaseGuard', tagline: 'AI Legal Agent for Ontario Tenants', image: '', github: 'https://github.com/parthiv-2006/lease-guard', live: 'https://leaseguard-sigma.vercel.app/' },
+    { id: 'gist', title: 'Gist', tagline: 'AI-Powered Knowledge Capture', image: '', github: 'https://github.com/parthiv-2006/Gist', live: null },
+    { id: 'reflecta', title: 'Reflecta', tagline: 'Self-Improving Test Coverage Agent', image: '', github: 'https://github.com/parthiv-2006/Reflecta-Ai-Agent', live: null },
+    { id: 'anima', title: 'Anima', tagline: 'Gamified Habit Tracking', image: '', github: 'https://github.com/parthiv-2006/Anima', live: 'https://anima-client.vercel.app/' },
+    { id: 'macromatch', title: 'MacroMatch', tagline: 'Intelligent Nutrition Platform', image: '', github: 'https://github.com/parthiv-2006/MacroMatch', live: 'https://macro-match-cyan.vercel.app/' },
+    { id: 'palate', title: 'Palate', tagline: 'AI Restaurant Recommender', image: '', github: 'https://github.com/parthiv-2006/palate', live: 'https://palate-self.vercel.app/' },
 ];
 
 const allTechs = [...new Set(projects.flatMap((p) => p.tech))].sort();
@@ -357,6 +367,16 @@ export default function Projects() {
         <section id="projects" className="w-full" ref={sectionRef}>
             <div className="w-full">
                 <SectionHeading label="Work" title="Featured Projects" />
+
+                {/* ── 3D Circular Gallery ── */}
+                <div className="w-full h-[500px] mb-12 relative">
+                    <CircularGallery
+                        items={galleryItems}
+                        radius={500}
+                        autoRotateSpeed={0.015}
+                        onItemClick={(id) => setSelected(projects.find((p) => p.id === id) ?? null)}
+                    />
+                </div>
 
                 {/* ── Filter pills ── */}
                 <div className="mb-8 -mt-2">
