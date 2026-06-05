@@ -200,44 +200,46 @@ export default function GitHubGraph() {
                 </div>
             ) : (
                 <>
-                    {/* Grid of day cells */}
-                    <div className="relative overflow-x-auto">
-                        <AnimatePresence mode="wait">
-                            <motion.div
-                                key={activeDays}
-                                initial={{ opacity: 0, y: 6 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -4 }}
-                                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                                className="flex flex-wrap"
-                                style={{
-                                    gap: `${cellGap}px`,
-                                    minWidth: activeDays > 30
-                                        ? `${activeDays * ((activeDays <= 90 ? 6 : 3) + cellGap)}px`
-                                        : undefined,
-                                }}
-                            >
-                                {data.map((day, i) => {
-                                    const level = getLevel(day.count, maxCount);
-                                    return (
-                                        <div
-                                            key={day.date}
-                                            onMouseEnter={() => setHoveredDay(day)}
-                                            onMouseLeave={() => setHoveredDay(null)}
-                                            className={`aspect-square border cursor-default transition-all duration-200 hover:scale-[1.4] hover:z-10 ${levelColors[level]}`}
-                                            style={{
-                                                width: `calc((100% - ${(activeDays - 1) * cellGap}px) / ${activeDays})`,
-                                                minWidth: activeDays <= 90 ? '6px' : '3px',
-                                                maxWidth: activeDays <= 30 ? '18px' : activeDays <= 90 ? '10px' : '6px',
-                                                borderRadius: cellRadius,
-                                            }}
-                                        />
-                                    );
-                                })}
-                            </motion.div>
-                        </AnimatePresence>
+                    {/* Grid of day cells — outer div is relative for tooltip; inner div scrolls */}
+                    <div className="relative">
+                        <div className="overflow-x-auto">
+                            <AnimatePresence mode="wait">
+                                <motion.div
+                                    key={activeDays}
+                                    initial={{ opacity: 0, y: 6 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -4 }}
+                                    transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                                    className="flex flex-wrap"
+                                    style={{
+                                        gap: `${cellGap}px`,
+                                        minWidth: activeDays > 30
+                                            ? `${activeDays * ((activeDays <= 90 ? 6 : 3) + cellGap)}px`
+                                            : undefined,
+                                    }}
+                                >
+                                    {data.map((day, i) => {
+                                        const level = getLevel(day.count, maxCount);
+                                        return (
+                                            <div
+                                                key={day.date}
+                                                onMouseEnter={() => setHoveredDay(day)}
+                                                onMouseLeave={() => setHoveredDay(null)}
+                                                className={`aspect-square border cursor-default transition-all duration-200 hover:scale-[1.4] hover:z-10 ${levelColors[level]}`}
+                                                style={{
+                                                    width: `calc((100% - ${(activeDays - 1) * cellGap}px) / ${activeDays})`,
+                                                    minWidth: activeDays <= 90 ? '6px' : '3px',
+                                                    maxWidth: activeDays <= 30 ? '18px' : activeDays <= 90 ? '10px' : '6px',
+                                                    borderRadius: cellRadius,
+                                                }}
+                                            />
+                                        );
+                                    })}
+                                </motion.div>
+                            </AnimatePresence>
+                        </div>
 
-                        {/* Tooltip */}
+                        {/* Tooltip — outside scroll container so whitespace-nowrap doesn't trigger scrollbar */}
                         {hoveredDay && (
                             <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-lg bg-surface border border-white/[0.08] shadow-lg shadow-black/30 whitespace-nowrap z-20 pointer-events-none">
                                 <span className="text-text text-xs font-medium">
