@@ -138,7 +138,7 @@ export default function GitHubGraph() {
                 <div className="flex items-center gap-2.5">
                     <GitCommit size={14} className="text-accent" />
                     <span className="text-[10px] font-mono text-text-dim uppercase tracking-[0.15em]">
-                        Activity
+                        GitHub Contributions
                     </span>
                 </div>
 
