@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import About from './components/About';
@@ -8,10 +9,21 @@ import Terminal from './components/Terminal';
 import ScrollProgress from './components/ScrollProgress';
 import SectionDivider from './components/SectionDivider';
 import CursorTrail from './components/CursorTrail';
+import LandingSummary from './components/LandingSummary';
 import useActiveSection from './hooks/useActiveSection';
 
 export default function App() {
+    const [showFullSite, setShowFullSite] = useState(false);
     const { activeSection } = useActiveSection();
+
+    if (!showFullSite) {
+        return (
+            <>
+                <CursorTrail />
+                <LandingSummary onEnter={() => setShowFullSite(true)} />
+            </>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-bg text-text">
