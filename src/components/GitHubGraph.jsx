@@ -24,12 +24,17 @@ async function fetchContributions(username) {
         // The API returns a 2D array of weeks/days. Flatten it to a 1D array.
         const flatData = data.contributions.flat();
 
-        // Map to our expected format
+        // Build today's date string in local timezone (not UTC) to avoid
+        // the API returning tomorrow's date when local time is behind UTC
+        const now = new Date();
+        const localToday = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
         return flatData
             .map((day) => ({
                 date: day.date,
                 count: day.contributionCount,
             }))
+            .filter((day) => day.date <= localToday)
             .sort((a, b) => a.date.localeCompare(b.date));
     } catch {
         return [];
