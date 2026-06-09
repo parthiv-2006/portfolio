@@ -6,7 +6,7 @@ import { GistRecallView }  from './GistRecallView';
 import { GistSettingsView } from './GistSettingsView';
 import styles from './GistDashboard.module.css';
 
-const BACKEND = 'https://gist-vc8m.onrender.com';
+const BACKEND = 'https://parthiv-2006-gist-backend.hf.space';
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
 

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styles from './GistSynapseView.module.css';
 
-const BACKEND = 'https://gist-vc8m.onrender.com';
+const BACKEND = 'https://parthiv-2006-gist-backend.hf.space';
 
 const CLUSTER_PALETTE = [
   '#10b981', '#6366f1', '#f59e0b', '#ef4444',

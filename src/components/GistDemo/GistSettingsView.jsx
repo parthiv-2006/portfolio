@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styles from './GistSettingsView.module.css';
 
-const BACKEND = 'https://gist-vc8m.onrender.com';
+const BACKEND = 'https://parthiv-2006-gist-backend.hf.space';
 
 function useToast() {
   const [msg, setMsg] = useState(null);

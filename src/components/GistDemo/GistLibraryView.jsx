@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { GistCard } from './GistCard';
 
-const BACKEND = 'https://gist-vc8m.onrender.com';
+const BACKEND = 'https://parthiv-2006-gist-backend.hf.space';
 
 const T = {
   bg: 'var(--bg)', bgElevated: 'var(--surface)', bgHover: 'var(--surface-2)',

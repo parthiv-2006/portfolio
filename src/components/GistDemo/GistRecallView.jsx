@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import styles from './GistRecallView.module.css';
 
-const BACKEND = 'https://gist-vc8m.onrender.com';
+const BACKEND = 'https://parthiv-2006-gist-backend.hf.space';
 
 const CATEGORY_COLORS = {
   Code:    '#6b9dd4',

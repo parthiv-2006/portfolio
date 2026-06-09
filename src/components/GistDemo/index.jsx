@@ -6,7 +6,7 @@ import { GistFloatingPopover }   from './GistFloatingPopover';
 import { GistAutoGistWidget }    from './GistAutoGistWidget';
 import './gist-tokens.css';
 
-const BACKEND = 'https://gist-vc8m.onrender.com';
+const BACKEND = 'https://parthiv-2006-gist-backend.hf.space';
 
 // Retry fetch up to `retries` times on network error (handles Render cold-start timeouts)
 async function fetchWithRetry(url, options, retries = 2, baseDelayMs = 2000) {
@@ -120,9 +120,9 @@ export default function GistDemoWrapper() {
   const [popoverError,       setPopoverError]       = useState(null);
   const [popoverErrorCode,   setPopoverErrorCode]   = useState(null);
 
-  /* ── Backend warm-up: ping once on mount so Render dyno is awake ── */
+  /* ── Backend warm-up: ping once on mount ── */
   useEffect(() => {
-    fetch(`${BACKEND}/library`).catch(() => {/* silent — just waking the dyno */});
+    fetch(`${BACKEND}/library`).catch(() => {/* silent */});
   }, []);
 
   /* ── Theme ── */

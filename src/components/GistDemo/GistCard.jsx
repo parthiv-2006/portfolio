@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styles from './GistCard.module.css';
 
-const BACKEND = 'https://gist-vc8m.onrender.com';
+const BACKEND = 'https://parthiv-2006-gist-backend.hf.space';
 const MONO = '"JetBrains Mono", ui-monospace, monospace';
 
 const CATEGORY_COLORS = {
