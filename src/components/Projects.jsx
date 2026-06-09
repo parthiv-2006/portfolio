@@ -17,6 +17,7 @@ const projects = [
         role: 'AI Agent',
         github: 'https://github.com/parthiv-2006/lease-guard',
         live: 'https://leaseguard-sigma.vercel.app/',
+        image: '/projects/leaseguard.png',
     },
     {
         id: 'gist',
@@ -30,6 +31,7 @@ const projects = [
         github: 'https://github.com/parthiv-2006/Gist',
         live: null,
         hasDemo: true,
+        image: '/projects/gist.png',
     },
     {
         id: 'reflecta',
@@ -42,6 +44,7 @@ const projects = [
         role: 'Dev Tool',
         github: 'https://github.com/parthiv-2006/Reflecta-Ai-Agent',
         wip: true,
+        image: '/projects/Reflecta.png',
     },
     {
         id: 'anima',
@@ -53,7 +56,8 @@ const projects = [
         year: '2025',
         role: 'Full-Stack',
         github: 'https://github.com/parthiv-2006/Anima',
-        live: 'https://anima-client.vercel.app/'
+        live: 'https://anima-client.vercel.app/',
+        image: '/projects/animaProject.png',
     },
     {
         id: 'macromatch',
@@ -65,7 +69,8 @@ const projects = [
         year: '2025',
         role: 'Full-Stack',
         github: 'https://github.com/parthiv-2006/MacroMatch',
-        live: 'https://macro-match-cyan.vercel.app/'
+        live: 'https://macro-match-cyan.vercel.app/',
+        image: '/projects/macromatch.png',
     },
     {
         id: 'palate',
@@ -79,17 +84,18 @@ const projects = [
         github: 'https://github.com/parthiv-2006/palate',
         live: 'https://palate-self.vercel.app/',
         devpost: 'https://devpost.com/software/palate-3uic5p',
+        image: '/projects/palate.png',
     },
 ];
 
-const galleryItems = [
-    { id: 'leaseguard', title: 'LeaseGuard', tagline: 'AI Legal Agent for Ontario Tenants', image: '', github: 'https://github.com/parthiv-2006/lease-guard', live: 'https://leaseguard-sigma.vercel.app/' },
-    { id: 'gist', title: 'Gist', tagline: 'AI-Powered Knowledge Capture', image: '', github: 'https://github.com/parthiv-2006/Gist', live: null },
-    { id: 'reflecta', title: 'Reflecta', tagline: 'Self-Improving Test Coverage Agent', image: '', github: 'https://github.com/parthiv-2006/Reflecta-Ai-Agent', live: null },
-    { id: 'anima', title: 'Anima', tagline: 'Gamified Habit Tracking', image: '', github: 'https://github.com/parthiv-2006/Anima', live: 'https://anima-client.vercel.app/' },
-    { id: 'macromatch', title: 'MacroMatch', tagline: 'Intelligent Nutrition Platform', image: '', github: 'https://github.com/parthiv-2006/MacroMatch', live: 'https://macro-match-cyan.vercel.app/' },
-    { id: 'palate', title: 'Palate', tagline: 'AI Restaurant Recommender', image: '', github: 'https://github.com/parthiv-2006/palate', live: 'https://palate-self.vercel.app/' },
-];
+const galleryItems = projects.map((p) => ({
+    id: p.id,
+    title: p.title,
+    tagline: p.tagline,
+    image: p.image,
+    github: p.github,
+    live: p.live ?? null,
+}));
 
 const allTechs = [...new Set(projects.flatMap((p) => p.tech))].sort();
 
@@ -134,7 +140,18 @@ function ProjectCard({ project, activeFilter, onClick, indexInFiltered, activeIn
             className="group relative flex-shrink-0 w-[calc(100vw-3rem)] sm:w-[390px] rounded-2xl border border-white/6 bg-surface/40 overflow-hidden cursor-pointer hover:border-accent/25 hover:bg-surface transition-colors duration-300 flex flex-col"
             style={{ minHeight: '340px' }}
         >
-            <div className="p-6 flex flex-col h-full">
+                {project.image && (
+                <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
+                    <img
+                        src={project.image}
+                        alt=""
+                        aria-hidden="true"
+                        className="w-full h-full object-cover opacity-[0.07] group-hover:opacity-[0.12] transition-opacity duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-surface/30 via-transparent to-surface/80" />
+                </div>
+            )}
+        <div className="p-6 flex flex-col h-full relative z-10">
                 <div className="flex items-center gap-2.5 mb-4 flex-wrap">
                     <span className="font-mono text-accent text-xs tracking-widest">
                         {String(globalIndex + 1).padStart(2, '0')}
