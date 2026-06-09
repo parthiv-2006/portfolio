@@ -55,29 +55,29 @@ const CircularGallery = React.forwardRef(
                 tabIndex={0}
                 onClick={() => onItemClick?.(item.id)}
                 onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onItemClick?.(item.id)}
-                className="absolute w-[300px] h-[400px] cursor-pointer"
+                className="absolute w-[360px] h-[220px] cursor-pointer"
                 style={{
                   transform: `rotateY(${itemAngle}deg) translateZ(${radius}px)`,
                   left: '50%',
                   top: '50%',
-                  marginLeft: '-150px',
-                  marginTop: '-200px',
+                  marginLeft: '-180px',
+                  marginTop: '-110px',
                   opacity,
                   transition: 'opacity 0.3s linear',
                 }}
               >
-                <div className="relative w-full h-full rounded-lg shadow-2xl overflow-hidden group border border-white/10 bg-surface/70 backdrop-blur-lg hover:border-accent/40 transition-colors duration-300">
+                <div className="relative w-full h-full rounded-xl shadow-2xl overflow-hidden group border border-white/10 bg-[#0d0d0c] hover:border-accent/40 transition-colors duration-300">
                   {item.image && (
                     <img
                       src={item.image}
                       alt={item.title}
-                      className="absolute inset-0 w-full h-full object-cover"
+                      className="absolute inset-0 w-full h-full object-cover object-top"
                     />
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent" />
-                  <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/80 to-transparent text-white">
-                    <h2 className="text-xl font-bold">{item.title}</h2>
-                    <p className="text-sm opacity-80">{item.tagline}</p>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+                  <div className="absolute bottom-0 left-0 w-full px-4 py-3">
+                    <h2 className="text-base font-bold text-white leading-tight">{item.title}</h2>
+                    <p className="text-xs text-white/70 mt-0.5 leading-snug">{item.tagline}</p>
                   </div>
                 </div>
               </div>

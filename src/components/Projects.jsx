@@ -140,18 +140,7 @@ function ProjectCard({ project, activeFilter, onClick, indexInFiltered, activeIn
             className="group relative flex-shrink-0 w-[calc(100vw-3rem)] sm:w-[390px] rounded-2xl border border-white/6 bg-surface/40 overflow-hidden cursor-pointer hover:border-accent/25 hover:bg-surface transition-colors duration-300 flex flex-col"
             style={{ minHeight: '340px' }}
         >
-                {project.image && (
-                <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
-                    <img
-                        src={project.image}
-                        alt=""
-                        aria-hidden="true"
-                        className="w-full h-full object-cover opacity-[0.07] group-hover:opacity-[0.12] transition-opacity duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-surface/30 via-transparent to-surface/80" />
-                </div>
-            )}
-        <div className="p-6 flex flex-col h-full relative z-10">
+            <div className="p-6 flex flex-col h-full">
                 <div className="flex items-center gap-2.5 mb-4 flex-wrap">
                     <span className="font-mono text-accent text-xs tracking-widest">
                         {String(globalIndex + 1).padStart(2, '0')}
@@ -386,7 +375,7 @@ export default function Projects() {
                 <SectionHeading label="Work" title="Featured Projects" />
 
                 {/* ── 3D Circular Gallery ── */}
-                <div className="w-full h-[500px] mb-12 relative">
+                <div className="w-full h-[360px] mb-12 relative">
                     <CircularGallery
                         items={galleryItems}
                         radius={500}
