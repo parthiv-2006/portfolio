@@ -89,6 +89,13 @@
   }
 }
 
+/* Streak spark particles */
+@keyframes streak-spark {
+    0%   { opacity: 0; transform: translateY(0) scale(1); }
+    20%  { opacity: 0.8; }
+    100% { opacity: 0; transform: translateY(-28px) scale(0.4); }
+}
+
 /* Scroll-snap container */
 @media (min-width: 1024px) {
   .snap-container {
