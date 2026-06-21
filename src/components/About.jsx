@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { MapPin, GraduationCap, Footprints, Globe, BookOpen, Dumbbell } from 'lucide-react';
 import SectionHeading from './SectionHeading';
 import GitHubGraph from './GitHubGraph';
+import GitHubStreak from './GitHubStreak';
 
 const funFacts = [
     { icon: Footprints, value: 'Avg 12k+ steps/day for the past 2 years' },
@@ -102,7 +103,8 @@ export default function About() {
                             ))}
                         </motion.div>
 
-                        {/* GitHub contribution graph */}
+                        {/* Builder streak + contribution graph */}
+                        <GitHubStreak />
                         <GitHubGraph />
                     </div>
                 </div>

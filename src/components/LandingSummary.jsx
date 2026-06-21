@@ -17,6 +17,7 @@ import {
     SiOpenai,
 } from 'react-icons/si';
 import GitHubGraph from './GitHubGraph';
+import GitHubStreak from './GitHubStreak';
 
 const TOP_SKILLS = [
     { name: 'Python',       icon: SiPython },
@@ -141,8 +142,13 @@ export default function LandingSummary({ onEnter }) {
                 </motion.div>
 
                 {/* ── GitHub Activity ── */}
-                <motion.div variants={fadeUp} className="mb-6">
+                <motion.div variants={fadeUp} className="mb-4">
                     <GitHubGraph />
+                </motion.div>
+
+                {/* ── Streak pill ── */}
+                <motion.div variants={fadeUp} className="mb-6">
+                    <GitHubStreak compact />
                 </motion.div>
 
                 {/* ── Contact + Resume ── */}
