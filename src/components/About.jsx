@@ -1,8 +1,6 @@
 import { motion } from 'framer-motion';
 import { MapPin, GraduationCap, Footprints, Globe, BookOpen, Dumbbell } from 'lucide-react';
 import SectionHeading from './SectionHeading';
-import GitHubGraph from './GitHubGraph';
-import GitHubStreak from './GitHubStreak';
 
 const funFacts = [
     { icon: Footprints, value: 'Avg 12k+ steps/day for the past 2 years' },
@@ -74,7 +72,7 @@ export default function About() {
                             className="mb-10"
                         >
                             <p className="text-text text-base md:text-lg leading-relaxed mb-5">
-                                I'm a <span className="text-accent font-medium">CS Specialist at the University of Toronto</span>. I care more about the problem than the tools, which is probably why I end up building everything from AI agents to full-stack web products.
+                                I'm a <span className="text-accent font-medium">CS Specialist at the University of Toronto</span>. I care more about the problem than the tools, so I end up working on whatever it calls for.
                             </p>
                             <p className="text-text-muted text-base leading-relaxed mb-5">
                                 Looking for software engineering internships for{' '}
@@ -103,9 +101,15 @@ export default function About() {
                             ))}
                         </motion.div>
 
-                        {/* Builder streak + contribution graph */}
-                        <GitHubStreak />
-                        <GitHubGraph />
+                        {/* Activity lives in the dedicated Activity section below */}
+                        <a
+                            href="#lab"
+                            onClick={(e) => { e.preventDefault(); document.getElementById('lab')?.scrollIntoView({ behavior: 'smooth' }); }}
+                            className="inline-flex items-center gap-2 px-4 py-3 border border-white/[0.06] rounded-xl bg-surface font-mono text-xs text-text-muted hover:border-accent/40 hover:text-text transition-all duration-250"
+                        >
+                            <span className="text-accent">✦</span>
+                            fun facts live in the terminal · run <span className="text-accent ml-1">facts</span> ↓
+                        </a>
                     </div>
                 </div>
             </div>

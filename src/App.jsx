@@ -12,6 +12,10 @@ import ScrollProgress from './components/ScrollProgress';
 import SectionDivider from './components/SectionDivider';
 import CursorTrail from './components/CursorTrail';
 import LandingSummary from './components/LandingSummary';
+import Marquee from './components/Marquee';
+import GitHubGraph from './components/GitHubGraph';
+import GitHubStreak from './components/GitHubStreak';
+import SectionHeading from './components/SectionHeading';
 import useActiveSection from './hooks/useActiveSection';
 
 export default function App() {
@@ -59,74 +63,72 @@ export default function App() {
                             <ScrollProgress activeSection={activeSection} />
 
                             <main>
+                                {/* ── Hero ── */}
                                 <Hero />
 
-                                <SectionDivider variant="line" label="a bit about me" />
+                                {/* ── Marquee ── */}
+                                <Marquee />
 
-                                <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-16">
+                                {/* ── About ── */}
+                                <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-24">
                                     <About />
                                 </div>
 
-                                <SectionDivider variant="line" label="what I work with" />
+                                <SectionDivider variant="line" label="toolkit" />
 
-                                <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-16">
+                                {/* ── Skills ── */}
+                                <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-20">
                                     <SkillsGrid />
                                 </div>
 
+                                <SectionDivider variant="line" label="activity" />
+
+                                {/* ── Activity ── */}
+                                <section id="activity" className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-20">
+                                    <SectionHeading label="Activity" title="Always Building" subtitle="Live from GitHub. Every cell and bar is a real day of work." />
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                        <GitHubStreak />
+                                        <GitHubGraph />
+                                    </div>
+                                </section>
+
                                 <SectionDivider variant="code" label="selected work" />
 
-                                <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-16">
+                                {/* ── Work / Projects ── */}
+                                <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-20">
                                     <Projects />
                                 </div>
 
                                 <SectionDivider variant="line" label="journey" />
 
-                                <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-16">
+                                {/* ── Journey / Timeline ── */}
+                                <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-20">
                                     <Timeline />
                                 </div>
 
-                                <SectionDivider variant="code" label="let's connect" />
+                                <SectionDivider variant="code" label="the lab" />
 
-                                <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-16">
+                                {/* ── Terminal ── */}
+                                <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-20">
                                     <Terminal />
                                 </div>
 
                                 <SectionDivider variant="line" label="get in touch" />
 
-                                <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-16">
+                                {/* ── Contact ── */}
+                                <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-24">
                                     <ContactSection />
                                 </div>
                             </main>
 
                             <footer className="border-t border-white/[0.06] py-10 px-6">
                                 <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-4 flex-wrap">
-                                    <span className="text-text-dim text-sm">
-                                        © {new Date().getFullYear()} Parthiv Paul. Built with React & Framer Motion.
+                                    <span className="text-text-dim text-sm font-mono">
+                                        © {new Date().getFullYear()} Parthiv Paul
                                     </span>
-                                    <div className="flex items-center gap-6 flex-wrap">
-                                        <a
-                                            href="https://github.com/parthiv-2006"
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-text-dim text-sm hover:text-accent transition-colors min-h-[44px] flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 rounded"
-                                        >
-                                            GitHub
-                                        </a>
-                                        <a
-                                            href="https://linkedin.com/in/parthiv-paul"
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-text-dim text-sm hover:text-accent transition-colors min-h-[44px] flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 rounded"
-                                        >
-                                            LinkedIn
-                                        </a>
-                                        <a
-                                            href="mailto:parthiv.paul@mail.utoronto.ca"
-                                            className="text-text-dim text-sm hover:text-accent transition-colors min-h-[44px] flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 rounded"
-                                        >
-                                            Email
-                                        </a>
-                                    </div>
+                                    <span className="text-text-dim text-xs font-mono">
+                                        ↑↑↓↓←→←→ B A · open the console
+                                    </span>
                                 </div>
                             </footer>
                         </div>

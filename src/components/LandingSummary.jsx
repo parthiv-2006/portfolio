@@ -75,7 +75,17 @@ export default function LandingSummary({ onEnter }) {
                 className="absolute inset-0 pointer-events-none"
                 style={{
                     background:
-                        'radial-gradient(ellipse 70% 55% at 50% 28%, rgba(226,160,78,0.07) 0%, transparent 65%)',
+                        'radial-gradient(ellipse 72% 56% at 50% 26%, rgba(226,160,78,0.10) 0%, transparent 64%)',
+                }}
+            />
+            {/* Grid lines */}
+            <div
+                className="absolute inset-0 pointer-events-none opacity-50"
+                style={{
+                    backgroundImage: 'linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)',
+                    backgroundSize: '64px 64px',
+                    WebkitMaskImage: 'radial-gradient(ellipse 70% 60% at 50% 30%, #000, transparent 75%)',
+                    maskImage: 'radial-gradient(ellipse 70% 60% at 50% 30%, #000, transparent 75%)',
                 }}
             />
 
@@ -98,7 +108,7 @@ export default function LandingSummary({ onEnter }) {
                         cs @ uoft · full-stack &amp; ai engineer
                     </p>
                     <p className="text-text-muted text-sm mt-2 leading-relaxed">
-                        Always Learning. Always Building. Sometimes it works out.
+                        Always learning. Always building. Sometimes it works out.
                     </p>
                 </motion.div>
 
@@ -118,8 +128,8 @@ export default function LandingSummary({ onEnter }) {
                         , building everything from AI agents to full-stack web products. Looking for{' '}
                         <span className="text-accent font-medium">Fall 2026</span> and{' '}
                         <span className="text-accent font-medium">Winter 2027</span> software
-                        engineering internships — if you're building something worth working on, I'm
-                        open to a conversation.
+                        engineering internships. If you're building something worth working on, let's
+                        talk.
                     </p>
                 </motion.div>
 
@@ -210,16 +220,39 @@ export default function LandingSummary({ onEnter }) {
                 </motion.div>
 
                 {/* ── CTA ── */}
-                <motion.div variants={fadeUp} className="flex justify-center">
-                    <button
-                        onClick={onEnter}
-                        className="group relative inline-flex items-center justify-center gap-3 px-8 py-3.5 rounded-full text-base font-medium bg-accent text-bg hover:bg-accent/90 transition-all duration-300 shadow-[0_0_30px_rgba(226,160,78,0.25)] hover:shadow-[0_0_40px_rgba(226,160,78,0.35)] w-full sm:w-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
-                    >
-                        View Full Portfolio
-                        <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">
-                            →
-                        </span>
-                    </button>
+                <motion.div variants={fadeUp} className="flex flex-col items-center gap-4">
+                    <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-text-dim">
+                        Step inside the full experience
+                    </p>
+                    <div className="flex flex-wrap gap-2 justify-center mb-2">
+                        {[
+                            { prefix: '06', label: 'shipped projects' },
+                            { prefix: '$_', label: 'interactive terminal' },
+                            { prefix: '↗', label: 'full journey & lab' },
+                        ].map(({ prefix, label }) => (
+                            <span
+                                key={label}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/[0.06] bg-surface font-mono text-xs text-text-muted"
+                            >
+                                <span className="text-accent">{prefix}</span> {label}
+                            </span>
+                        ))}
+                    </div>
+                    <div className="relative inline-flex">
+                        <span className="absolute inset-0 rounded-full border border-accent/50 animate-[ring-pulse_2.6s_ease-out_infinite] pointer-events-none" />
+                        <span className="absolute inset-0 rounded-full border border-accent/50 animate-[ring-pulse_2.6s_ease-out_infinite_1.3s] pointer-events-none" />
+                        <button
+                            onClick={onEnter}
+                            className="group relative inline-flex items-center justify-center gap-3 px-8 py-3.5 rounded-full text-base font-medium bg-accent text-bg hover:bg-accent/90 transition-all duration-300 shadow-[0_0_30px_rgba(226,160,78,0.25)] hover:shadow-[0_0_50px_rgba(226,160,78,0.45)] overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+                        >
+                            <span className="absolute top-0 bottom-0 left-0 w-[45%] bg-gradient-to-r from-transparent via-white/30 to-transparent animate-[sheen_3.4s_ease-in-out_infinite] pointer-events-none" />
+                            <span className="relative z-10">View Full Portfolio</span>
+                            <span className="relative z-10 inline-block transition-transform duration-300 group-hover:translate-x-1 animate-[arrow-nudge_1.5s_ease-in-out_infinite]">→</span>
+                        </button>
+                    </div>
+                    <p className="font-mono text-[10px] text-text-dim tracking-[0.05em]">
+                        no scroll-jacking · just craft
+                    </p>
                 </motion.div>
 
                 <motion.p

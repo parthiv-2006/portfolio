@@ -212,3 +212,41 @@
     clip-path: inset(0 0 0 0);
   }
 }
+
+/* Marquee scroll */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Pulsing ring for CTA button */
+@keyframes ring-pulse {
+  0%   { transform: scale(0.96); opacity: 0.55; }
+  100% { transform: scale(1.5);  opacity: 0; }
+}
+
+/* Sheen sweep across button */
+@keyframes sheen {
+  0%       { transform: translateX(-130%) skewX(-18deg); }
+  55%, 100% { transform: translateX(260%) skewX(-18deg); }
+}
+
+/* Arrow nudge for CTA */
+@keyframes arrow-nudge {
+  0%, 100% { transform: translateX(0); }
+  50%       { transform: translateX(6px); }
+}
+
+/* Glow pulse for dots/indicators */
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.45; transform: scale(1); }
+  50%       { opacity: 0.85; transform: scale(1.07); }
+}
+
+/* Scroll dot for hero */
+@keyframes scroll-dot {
+  0%        { transform: translateY(0);    opacity: 0; }
+  30%        { opacity: 1; }
+  65%        { transform: translateY(15px); opacity: 0; }
+  100%       { opacity: 0; }
+}
