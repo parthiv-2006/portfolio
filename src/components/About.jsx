@@ -1,13 +1,6 @@
 import { motion } from 'framer-motion';
-import { MapPin, GraduationCap, Footprints, Globe, BookOpen, Dumbbell } from 'lucide-react';
+import { MapPin, GraduationCap } from 'lucide-react';
 import SectionHeading from './SectionHeading';
-
-const funFacts = [
-    { icon: Footprints, value: 'Avg 12k+ steps/day for the past 2 years' },
-    { icon: Globe, value: '15+ cities visited across the world' },
-    { icon: BookOpen, value: 'Red Rising series is unmatched' },
-    { icon: Dumbbell, value: 'Combined squat/bench/deadlift over 1,000 lbs' },
-];
 
 export default function About() {
     return (
@@ -85,23 +78,6 @@ export default function About() {
                             </p>
                         </motion.div>
 
-                        {/* Fun facts — compact, low-key */}
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            whileInView={{ opacity: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.3, duration: 0.5 }}
-                            className="flex flex-col gap-2 mb-2"
-                        >
-                            {funFacts.map((fact) => (
-                                <div key={fact.value} className="flex items-center gap-2.5 text-text-dim text-sm">
-                                    <fact.icon size={13} className="text-accent/50 shrink-0" />
-                                    <span>{fact.value}</span>
-                                </div>
-                            ))}
-                        </motion.div>
-
-                        {/* Activity lives in the dedicated Activity section below */}
                         <a
                             href="#lab"
                             onClick={(e) => { e.preventDefault(); document.getElementById('lab')?.scrollIntoView({ behavior: 'smooth' }); }}
