@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useMagnetic } from '../hooks/useMagnetic';
 import { Download, Mail, Github, Linkedin, Brain, Check, Send } from 'lucide-react';
 import ContactModal, { DEFAULT_MESSAGE } from './ContactModal';
 import {
@@ -51,6 +52,7 @@ const fadeUp = {
 
 export default function LandingSummary({ onEnter }) {
     const [emailCopied, setEmailCopied] = useState(false);
+    const magnetic = useMagnetic(0.38);
     const [contactOpen, setContactOpen] = useState(false);
     const [contactForm, setContactForm] = useState({ email: '', message: DEFAULT_MESSAGE, _hp: '' });
     const [contactStatus, setContactStatus] = useState('idle');
@@ -133,19 +135,19 @@ export default function LandingSummary({ onEnter }) {
                     </p>
                 </motion.div>
 
-                {/* ── Core Skills — 6 × 2 grid ── */}
+                {/* ── Core Skills — 2-col grid ── */}
                 <motion.div variants={fadeUp} className="mb-6">
-                    <p className="text-[10px] font-mono text-text-dim uppercase tracking-[0.15em] mb-3">
-                        Core Stack
+                    <p className="text-[10px] font-mono text-text-dim uppercase tracking-[0.18em] mb-3">
+                        Core stack
                     </p>
-                    <div className="grid grid-cols-2 sm:grid-cols-6 gap-2">
+                    <div className="grid grid-cols-2 gap-2">
                         {TOP_SKILLS.map(({ name, icon: Icon }) => (
                             <div
                                 key={name}
-                                className="flex items-center gap-2 px-3 py-2 rounded-lg border border-accent/20 bg-surface text-sm"
+                                className="flex items-center gap-2.5 px-3 py-[9px] rounded-[11px] border border-white/[0.06] bg-surface transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/35"
                             >
-                                <Icon size={14} className="text-accent shrink-0" />
-                                <span className="text-text font-medium text-xs truncate">{name}</span>
+                                <Icon size={16} className="text-accent shrink-0" />
+                                <span className="text-text font-medium text-[13px] truncate">{name}</span>
                             </div>
                         ))}
                     </div>
@@ -241,14 +243,18 @@ export default function LandingSummary({ onEnter }) {
                     <div className="relative inline-flex">
                         <span className="absolute inset-0 rounded-full border border-accent/50 animate-[ring-pulse_2.6s_ease-out_infinite] pointer-events-none" />
                         <span className="absolute inset-0 rounded-full border border-accent/50 animate-[ring-pulse_2.6s_ease-out_infinite_1.3s] pointer-events-none" />
-                        <button
+                        <motion.button
+                            ref={magnetic.ref}
+                            style={magnetic.motionStyle}
+                            onMouseMove={magnetic.onMouseMove}
+                            onMouseLeave={magnetic.onMouseLeave}
                             onClick={onEnter}
-                            className="group relative inline-flex items-center justify-center gap-3 px-8 py-3.5 rounded-full text-base font-medium bg-accent text-bg hover:bg-accent/90 transition-all duration-300 shadow-[0_0_30px_rgba(226,160,78,0.25)] hover:shadow-[0_0_50px_rgba(226,160,78,0.45)] overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+                            className="group relative inline-flex items-center justify-center gap-3 px-[42px] py-[17px] rounded-full text-base font-semibold bg-accent text-bg transition-[box-shadow] duration-300 shadow-[0_0_36px_rgba(226,160,78,0.10)] hover:shadow-[0_0_56px_rgba(226,160,78,0.55)] overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
                         >
                             <span className="absolute top-0 bottom-0 left-0 w-[45%] bg-gradient-to-r from-transparent via-white/30 to-transparent animate-[sheen_3.4s_ease-in-out_infinite] pointer-events-none" />
                             <span className="relative z-10">View Full Portfolio</span>
                             <span className="relative z-10 inline-block transition-transform duration-300 group-hover:translate-x-1 animate-[arrow-nudge_1.5s_ease-in-out_infinite]">→</span>
-                        </button>
+                        </motion.button>
                     </div>
                     <p className="font-mono text-[10px] text-text-dim tracking-[0.05em]">
                         no scroll-jacking · just craft
