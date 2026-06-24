@@ -90,7 +90,7 @@ export default function ContactSection() {
                         download="parthiv_paul_swe.pdf"
                         className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm border border-accent/25 bg-accent/[0.07] text-accent hover:bg-accent/15 transition-all duration-250 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
                     >
-                        ↓ Résumé
+                        ↓ Resume
                     </a>
                 </div>
             </motion.div>

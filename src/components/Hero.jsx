@@ -254,7 +254,7 @@ export default function Hero() {
                     >
                         <span className="absolute inset-0 rounded-full border border-accent/10 animate-[pulse_3s_ease-in-out_infinite]" />
                         <Download size={14} className="transition-transform duration-300 group-hover/resume:translate-y-0.5" />
-                        Résumé
+                        Resume
                     </a>
                 </motion.div>
             </motion.div>
