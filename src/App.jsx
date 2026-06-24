@@ -20,11 +20,12 @@ import useActiveSection from './hooks/useActiveSection';
 function EnteringOverlay({ onDone }) {
     const [curtainsOpen, setCurtainsOpen] = useState(false);
     const [seamVisible, setSeamVisible] = useState(true);
+    const [contentVisible, setContentVisible] = useState(true);
     const timerRef = useRef(null);
 
     useEffect(() => {
-        // Start curtains after content is visible
-        const t1 = setTimeout(() => { setCurtainsOpen(true); setSeamVisible(false); }, 550);
+        // Fade center content out and open curtains simultaneously
+        const t1 = setTimeout(() => { setCurtainsOpen(true); setSeamVisible(false); setContentVisible(false); }, 550);
         // Notify parent after curtains fully open
         const t2 = setTimeout(onDone, 1700);
         timerRef.current = [t1, t2];
@@ -58,7 +59,7 @@ function EnteringOverlay({ onDone }) {
                 pointerEvents: 'none',
             }} />
             {/* Center content */}
-            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', opacity: contentVisible ? 1 : 0, transition: 'opacity 0.25s ease' }}>
                 <motion.div
                     initial={{ opacity: 0, y: 16, scale: 0.98, filter: 'blur(6px)' }}
                     animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}

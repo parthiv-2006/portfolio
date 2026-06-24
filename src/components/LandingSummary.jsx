@@ -112,6 +112,22 @@ export default function LandingSummary({ onEnter }) {
                     <p className="text-text-muted text-sm mt-2 leading-relaxed">
                         Always learning. Always building. Sometimes it works out.
                     </p>
+                    <div className="relative inline-flex mt-6">
+                        <span className="absolute inset-0 rounded-full border border-accent/50 animate-[ring-pulse_2.6s_ease-out_infinite] pointer-events-none" />
+                        <span className="absolute inset-0 rounded-full border border-accent/50 animate-[ring-pulse_2.6s_ease-out_infinite_1.3s] pointer-events-none" />
+                        <motion.button
+                            ref={magnetic.ref}
+                            style={magnetic.motionStyle}
+                            onMouseMove={magnetic.onMouseMove}
+                            onMouseLeave={magnetic.onMouseLeave}
+                            onClick={onEnter}
+                            className="group relative inline-flex items-center justify-center gap-3 px-[42px] py-[17px] rounded-full text-base font-semibold bg-accent text-bg transition-[box-shadow] duration-300 shadow-[0_0_36px_rgba(226,160,78,0.10)] hover:shadow-[0_0_56px_rgba(226,160,78,0.55)] overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+                        >
+                            <span className="absolute top-0 bottom-0 left-0 w-[45%] bg-gradient-to-r from-transparent via-white/30 to-transparent animate-[sheen_3.4s_ease-in-out_infinite] pointer-events-none" />
+                            <span className="relative z-10">View Full Portfolio</span>
+                            <span className="relative z-10 inline-block transition-transform duration-300 group-hover:translate-x-1 animate-[arrow-nudge_1.5s_ease-in-out_infinite]">→</span>
+                        </motion.button>
+                    </div>
                 </motion.div>
 
                 {/* ── About blurb ── */}
@@ -219,46 +235,6 @@ export default function LandingSummary({ onEnter }) {
                         <Download size={14} />
                         Resume
                     </a>
-                </motion.div>
-
-                {/* ── CTA ── */}
-                <motion.div variants={fadeUp} className="flex flex-col items-center gap-4">
-                    <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-text-dim">
-                        Step inside the full experience
-                    </p>
-                    <div className="flex flex-wrap gap-2 justify-center mb-2">
-                        {[
-                            { prefix: '06', label: 'shipped projects' },
-                            { prefix: '$_', label: 'interactive terminal' },
-                            { prefix: '↗', label: 'full journey & lab' },
-                        ].map(({ prefix, label }) => (
-                            <span
-                                key={label}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/[0.06] bg-surface font-mono text-xs text-text-muted"
-                            >
-                                <span className="text-accent">{prefix}</span> {label}
-                            </span>
-                        ))}
-                    </div>
-                    <div className="relative inline-flex">
-                        <span className="absolute inset-0 rounded-full border border-accent/50 animate-[ring-pulse_2.6s_ease-out_infinite] pointer-events-none" />
-                        <span className="absolute inset-0 rounded-full border border-accent/50 animate-[ring-pulse_2.6s_ease-out_infinite_1.3s] pointer-events-none" />
-                        <motion.button
-                            ref={magnetic.ref}
-                            style={magnetic.motionStyle}
-                            onMouseMove={magnetic.onMouseMove}
-                            onMouseLeave={magnetic.onMouseLeave}
-                            onClick={onEnter}
-                            className="group relative inline-flex items-center justify-center gap-3 px-[42px] py-[17px] rounded-full text-base font-semibold bg-accent text-bg transition-[box-shadow] duration-300 shadow-[0_0_36px_rgba(226,160,78,0.10)] hover:shadow-[0_0_56px_rgba(226,160,78,0.55)] overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
-                        >
-                            <span className="absolute top-0 bottom-0 left-0 w-[45%] bg-gradient-to-r from-transparent via-white/30 to-transparent animate-[sheen_3.4s_ease-in-out_infinite] pointer-events-none" />
-                            <span className="relative z-10">View Full Portfolio</span>
-                            <span className="relative z-10 inline-block transition-transform duration-300 group-hover:translate-x-1 animate-[arrow-nudge_1.5s_ease-in-out_infinite]">→</span>
-                        </motion.button>
-                    </div>
-                    <p className="font-mono text-[10px] text-text-dim tracking-[0.05em]">
-                        no scroll-jacking · just craft
-                    </p>
                 </motion.div>
 
                 <motion.p
