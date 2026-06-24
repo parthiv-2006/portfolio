@@ -1,9 +1,8 @@
-import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence, useMotionValue, animate, useInView } from 'framer-motion';
-import { ExternalLink, Github, X, ArrowUpRight, Video, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ExternalLink, Github, X, Video } from 'lucide-react';
 import SectionHeading from './SectionHeading';
 import GistDemoWrapper from './GistDemo/index';
-import { CircularGallery } from './CircularGallery';
 
 const projects = [
     {
@@ -88,158 +87,88 @@ const projects = [
     },
 ];
 
-const galleryItems = projects.map((p) => ({
-    id: p.id,
-    title: p.title,
-    tagline: p.tagline,
-    image: p.image,
-    github: p.github,
-    live: p.live ?? null,
-}));
-
 const allTechs = [...new Set(projects.flatMap((p) => p.tech))].sort();
 
-const pillVariants = {
-    hidden: { opacity: 0, y: 8, scale: 0.9 },
-    visible: (i) => ({
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        transition: { duration: 0.35, delay: i * 0.03, ease: [0.22, 1, 0.36, 1] },
-    }),
-};
-
-function ProjectCard({ project, activeFilter, onClick, indexInFiltered, activeIndex }) {
-    const globalIndex = projects.findIndex((p) => p.id === project.id);
-    const offset = indexInFiltered - activeIndex;
-    const absOffset = Math.min(Math.abs(offset), 2);
-
-    // 3D depth values: active card pops forward, others recede and angle away
-    const rotateY = Math.sign(offset) * absOffset * 12;
-    const z = absOffset === 0 ? 50 : absOffset === 1 ? -15 : -30;
-    const scale3d = absOffset === 0 ? 1.04 : absOffset === 1 ? 0.96 : 0.92;
-    const cardOpacity = absOffset === 0 ? 1 : absOffset === 1 ? 0.82 : 0.6;
+function ProjectCard({ project, index, activeFilter, onClick }) {
+    const displayNum = String(index + 1).padStart(2, '0');
+    const cta = project.hasDemo ? 'Demo' : 'View';
 
     return (
         <motion.div
-            initial={{ opacity: 0, scale: 0.9, rotateY, z }}
-            animate={{ opacity: cardOpacity, scale: scale3d, rotateY, z }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{
-                opacity: { duration: 0.25 },
-                scale: { type: 'spring', stiffness: 200, damping: 25 },
-                rotateY: { type: 'spring', stiffness: 200, damping: 25 },
-                z: { type: 'spring', stiffness: 200, damping: 25 },
-            }}
-            whileHover={{
-                y: -6,
-                boxShadow: '0 0 30px rgba(226,160,78,0.15)',
-                transition: { type: 'spring', stiffness: 300, damping: 20 },
-            }}
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-60px' }}
+            transition={{ duration: 0.5, delay: (index % 3) * 0.08, ease: [0.22, 1, 0.36, 1] }}
             onClick={onClick}
-            className="group relative flex-shrink-0 w-[calc(100vw-3rem)] sm:w-[390px] rounded-2xl border border-white/6 bg-surface/40 overflow-hidden cursor-pointer hover:border-accent/25 hover:bg-surface transition-colors duration-300 flex flex-col"
-            style={{ minHeight: '340px' }}
+            className="relative border border-white/[0.06] rounded-[18px] overflow-hidden bg-surface cursor-pointer flex flex-col p-6 pb-5 transition-all duration-400 hover:-translate-y-[7px] hover:border-accent/40 hover:shadow-[0_24px_50px_-20px_rgba(0,0,0,0.6)]"
         >
-            <div className="p-6 flex flex-col h-full">
-                <div className="flex items-center gap-2.5 mb-4 flex-wrap">
-                    <span className="font-mono text-accent text-xs tracking-widest">
-                        {String(globalIndex + 1).padStart(2, '0')}
-                    </span>
-                    <span className="w-6 h-px bg-accent/30" />
-                    <span className="font-mono text-text-dim text-xs">{project.year}</span>
-                    <span className="font-mono text-xs px-2 py-0.5 rounded-full bg-surface text-text-dim border border-white/[0.08]">
-                        {project.role}
-                    </span>
+            {/* Ghost number watermark */}
+            <span
+                className="absolute top-[-10px] right-[14px] font-display italic text-[100px] leading-none text-surface2 pointer-events-none select-none z-0"
+                aria-hidden="true"
+            >
+                {displayNum}
+            </span>
+
+            {/* Header: role + year + badge */}
+            <div className="relative z-[1] flex items-center justify-between mb-[18px]">
+                <span className="font-mono text-[11px] tracking-[0.12em] text-accent uppercase">
+                    {project.role}
+                </span>
+                <div className="flex items-center gap-2">
+                    <span className="font-mono text-[11px] text-text-dim">{project.year}</span>
                     {project.hasDemo && (
-                        <span className="font-mono text-xs px-2 py-0.5 rounded-full bg-accent/10 text-accent border border-accent/20">
+                        <span className="font-mono text-[11px] text-accent bg-accent/10 border border-accent/30 px-2 py-0.5 rounded-full">
                             Live Demo
                         </span>
                     )}
                     {project.wip && (
-                        <span className="font-mono text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/25 flex items-center gap-1">
+                        <span className="font-mono text-[11px] text-amber-400 bg-amber-500/10 border border-amber-500/25 px-2 py-0.5 rounded-full flex items-center gap-1">
                             <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                            In Development
+                            In Dev
                         </span>
                     )}
                 </div>
+            </div>
 
-                <h3 className="text-2xl font-bold text-text tracking-tight group-hover:text-accent transition-colors duration-300 mb-1.5">
-                    {project.title}
-                </h3>
-                <p className="text-text-muted text-sm mb-5 font-medium leading-snug">
-                    {project.tagline}
-                </p>
+            {/* Title */}
+            <h3 className="relative z-[1] font-display italic text-[2rem] font-normal leading-[1.05] tracking-[-0.01em] mb-[10px]">
+                {project.title}<span className="text-accent">.</span>
+            </h3>
 
-                <div className="flex flex-wrap gap-2 mb-6">
-                    {project.tech.slice(0, 5).map((t) => (
+            {/* Tagline */}
+            <p className="relative z-[1] text-[14px] text-text-muted leading-[1.55] mb-auto pb-[22px]">
+                {project.tagline}
+            </p>
+
+            {/* Divider */}
+            <div className="h-px bg-white/[0.06] mb-4" />
+
+            {/* Bottom: tech + cta */}
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex flex-wrap gap-1.5">
+                    {project.tech.slice(0, 3).map((t) => (
                         <span
                             key={t}
-                            className={`px-2.5 py-1 text-xs rounded-lg font-mono border transition-colors duration-300 ${
+                            className={`font-mono text-[11px] border px-2 py-0.5 rounded-md transition-colors duration-200 ${
                                 activeFilter === t
-                                    ? 'bg-accent/15 text-accent border-accent/25'
-                                    : 'bg-surface-light/50 text-text-muted border-white/8 group-hover:border-white/15'
+                                    ? 'text-accent bg-accent/10 border-accent/25'
+                                    : 'text-text-muted bg-surface2/60 border-white/[0.06]'
                             }`}
                         >
                             {t}
                         </span>
                     ))}
-                    {project.tech.length > 5 && (
-                        <span className="px-2.5 py-1 text-xs rounded-lg font-mono border border-white/8 bg-surface-light/50 text-text-dim">
-                            +{project.tech.length - 5}
+                    {project.tech.length > 3 && (
+                        <span className="font-mono text-[11px] text-text-dim px-1">
+                            +{project.tech.length - 3}
                         </span>
                     )}
                 </div>
-
-                <div className="flex items-center flex-wrap gap-2 mt-auto">
-                    {project.github && (
-                        <a
-                            href={project.github}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-light text-text-muted text-xs font-mono border border-white/6 hover:border-white/20 hover:text-text transition-all duration-200"
-                        >
-                            <Github size={13} /> Source
-                        </a>
-                    )}
-                    {project.hasDemo && (
-                        <button
-                            onClick={(e) => { e.stopPropagation(); onClick(); }}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent/10 text-accent text-xs font-mono border border-accent/20 hover:bg-accent/20 transition-all duration-200 cursor-pointer"
-                        >
-                            <ExternalLink size={13} /> Live Demo
-                        </button>
-                    )}
-                    {project.live && !project.hasDemo && (
-                        <a
-                            href={project.live}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent/10 text-accent text-xs font-mono border border-accent/20 hover:bg-accent/20 transition-all duration-200"
-                        >
-                            <ExternalLink size={13} /> Live
-                        </a>
-                    )}
-                    {project.devpost && (
-                        <a
-                            href={project.devpost}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-light text-text-muted text-xs font-mono border border-white/6 hover:border-white/20 hover:text-text transition-all duration-200"
-                        >
-                            <Video size={13} /> Devpost
-                        </a>
-                    )}
-                    <div className="ml-auto flex items-center gap-1 text-text-dim text-xs font-mono group-hover:text-accent transition-colors duration-300">
-                        <span>{project.hasDemo ? 'Demo' : 'Details'}</span>
-                        <ArrowUpRight size={13} className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                    </div>
-                </div>
+                <span className="font-mono text-[12px] text-accent whitespace-nowrap shrink-0">
+                    {cta} ↗
+                </span>
             </div>
-
-            <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         </motion.div>
     );
 }
@@ -247,30 +176,11 @@ function ProjectCard({ project, activeFilter, onClick, indexInFiltered, activeIn
 export default function Projects() {
     const [selected, setSelected] = useState(null);
     const [activeFilter, setActiveFilter] = useState('All');
-    const [activeIndex, setActiveIndex] = useState(0);
-    const [constraints, setConstraints] = useState({ left: 0, right: 0 });
-
-    const sectionRef = useRef(null);
-    const containerRef = useRef(null);
-    const trackRef = useRef(null);
-    const stepRef = useRef(414);
-    const autoScrollRef = useRef(null);
-    const isHovering = useRef(false);
-    const x = useMotionValue(0);
-
-    // Stable ref for interval closure — avoids stale captures
-    const liveRef = useRef({ activeIndex: 0, filteredLength: 0, goToCard: null });
-
-    const inView = useInView(sectionRef, { once: false, amount: 0.3 });
 
     const filtered = useMemo(() => {
         if (activeFilter === 'All') return projects;
         return projects.filter((p) => p.tech.includes(activeFilter));
     }, [activeFilter]);
-
-    // Keep liveRef in sync on every render (cheap assignment)
-    liveRef.current.activeIndex = activeIndex;
-    liveRef.current.filteredLength = filtered.length;
 
     const isDemo = selected?.hasDemo;
 
@@ -283,236 +193,47 @@ export default function Projects() {
         return () => { delete document.body.dataset.demoOpen; };
     }, [isDemo, selected]);
 
-    const measureLayout = useCallback(() => {
-        if (!containerRef.current || !trackRef.current) return;
-        const containerWidth = containerRef.current.offsetWidth;
-        const trackWidth = trackRef.current.scrollWidth;
-        setConstraints({ left: -Math.max(0, trackWidth - containerWidth), right: 0 });
-        const cards = Array.from(trackRef.current.children);
-        if (cards.length >= 2) {
-            stepRef.current = cards[1].offsetLeft - cards[0].offsetLeft;
-        } else if (cards.length === 1) {
-            stepRef.current = cards[0].offsetWidth + 24;
-        }
-    }, []);
-
-    useEffect(() => {
-        const raf = requestAnimationFrame(measureLayout);
-        window.addEventListener('resize', measureLayout);
-        return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', measureLayout); };
-    }, [filtered, measureLayout]);
-
-    const goToCard = useCallback((index) => {
-        const clamped = Math.max(0, Math.min(index, filtered.length - 1));
-        const step = stepRef.current;
-        const maxDrag = Math.abs(constraints.left);
-        const targetX = -Math.min(clamped * step, maxDrag);
-        animate(x, targetX, { type: 'spring', stiffness: 300, damping: 30 });
-        setActiveIndex(clamped);
-    }, [filtered.length, constraints.left, x]);
-
-    // Keep goToCard in liveRef so the interval always calls the latest version
-    liveRef.current.goToCard = goToCard;
-
-    const handleDragEnd = useCallback((_, info) => {
-        const currentX = x.get();
-        const step = stepRef.current;
-        const velocity = info.velocity.x;
-        const posIdx = -currentX / step;
-        let targetIndex;
-        if (velocity < -300) targetIndex = Math.ceil(posIdx);
-        else if (velocity > 300) targetIndex = Math.floor(posIdx);
-        else targetIndex = Math.round(posIdx);
-        goToCard(targetIndex);
-    }, [x, goToCard]);
-
-    // Dot sync during drag — guard against elastic overshoot
-    useEffect(() => {
-        return x.on('change', (val) => {
-            const step = stepRef.current;
-            if (step <= 0) return;
-            const rawIdx = -val / step;
-            // Ignore positions outside valid card range (elastic overshoot)
-            if (rawIdx < -0.5 || rawIdx > liveRef.current.filteredLength - 0.5) return;
-            setActiveIndex(Math.max(0, Math.min(Math.round(rawIdx), liveRef.current.filteredLength - 1)));
-        });
-    }, [x]);
-
-    // Reset position on filter change
-    useEffect(() => {
-        animate(x, 0, { type: 'spring', stiffness: 300, damping: 30 });
-        setActiveIndex(0);
-    }, [activeFilter, x]);
-
-    // Auto-scroll
-    const startAutoScroll = useCallback(() => {
-        clearInterval(autoScrollRef.current);
-        autoScrollRef.current = setInterval(() => {
-            if (isHovering.current) return;
-            const { activeIndex: idx, filteredLength: len, goToCard: go } = liveRef.current;
-            go?.((idx + 1) % len);
-        }, 2500);
-    }, []);
-
-    useEffect(() => {
-        if (inView) {
-            startAutoScroll();
-        } else {
-            clearInterval(autoScrollRef.current);
-        }
-        return () => clearInterval(autoScrollRef.current);
-    }, [inView, startAutoScroll]);
-
-    // Restart auto-scroll when filter changes filtered.length
-    useEffect(() => {
-        if (inView) startAutoScroll();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [filtered.length]);
-
     return (
-        <section id="work" className="w-full" ref={sectionRef}>
-            <div className="w-full">
-                <SectionHeading label="Work" title="Featured Projects" />
+        <section id="work" className="w-full">
+            <SectionHeading label="Selected work" title="Things I've built" />
 
-                {/* ── 3D Circular Gallery ── */}
-                <div className="w-full h-[360px] mb-12 relative">
-                    <CircularGallery
-                        items={galleryItems}
-                        radius={500}
-                        autoRotateSpeed={0.015}
-                        onItemClick={(id) => setSelected(projects.find((p) => p.id === id) ?? null)}
-                    />
-                </div>
-
-                {/* ── Filter pills ── */}
-                <div className="mb-8 -mt-2">
-                    <div className="flex gap-2 flex-wrap">
-                        <motion.button
-                            custom={0}
-                            variants={pillVariants}
-                            initial="hidden"
-                            whileInView="visible"
-                            viewport={{ once: true }}
-                            onClick={() => setActiveFilter('All')}
-                            className={`px-4 py-1.5 text-xs font-mono rounded-full border transition-all duration-300 cursor-pointer min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 ${
-                                activeFilter === 'All'
-                                    ? 'bg-accent/15 text-accent border-accent/30 shadow-[0_0_12px_rgba(226,160,78,0.15)]'
-                                    : 'bg-surface/40 text-text-muted border-white/6 hover:border-white/15 hover:text-text'
-                            }`}
-                        >
-                            All
-                        </motion.button>
-                        {allTechs.map((tech, i) => (
-                            <motion.button
-                                key={tech}
-                                custom={i + 1}
-                                variants={pillVariants}
-                                initial="hidden"
-                                whileInView="visible"
-                                viewport={{ once: true }}
-                                onClick={() => setActiveFilter(tech)}
-                                className={`px-4 py-1.5 text-xs font-mono rounded-full border transition-all duration-300 cursor-pointer min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 ${
-                                    activeFilter === tech
-                                        ? 'bg-accent/15 text-accent border-accent/30 shadow-[0_0_12px_rgba(226,160,78,0.15)]'
-                                        : 'bg-surface/40 text-text-muted border-white/6 hover:border-white/15 hover:text-text'
-                                }`}
-                            >
-                                {tech}
-                            </motion.button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* ── Carousel ── */}
-                {filtered.length === 0 ? (
-                    <div className="text-center py-20 text-text-dim font-mono text-sm">
-                        No projects match this filter.
-                    </div>
-                ) : (
-                    <div
-                        className="relative"
-                        onMouseEnter={() => { isHovering.current = true; }}
-                        onMouseLeave={() => { isHovering.current = false; }}
+            {/* Filter pills */}
+            <div className="flex gap-2 flex-wrap mb-8">
+                {['All', ...allTechs].map((tech) => (
+                    <button
+                        key={tech}
+                        onClick={() => setActiveFilter(tech)}
+                        className={`px-4 py-1.5 text-xs font-mono rounded-full border transition-all duration-250 cursor-pointer min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 ${
+                            activeFilter === tech
+                                ? 'bg-accent/15 text-accent border-accent/30 shadow-[0_0_12px_rgba(226,160,78,0.15)]'
+                                : 'bg-surface/40 text-text-muted border-white/[0.06] hover:border-white/[0.15] hover:text-text'
+                        }`}
                     >
-                        {/* Left arrow — desktop only */}
-                        <button
-                            onClick={() => goToCard(activeIndex - 1)}
-                            disabled={activeIndex === 0}
-                            aria-label="Previous project"
-                            className="hidden sm:flex absolute -left-5 top-[50%] -translate-y-[22px] z-10 w-11 h-11 items-center justify-center rounded-full bg-surface border border-white/10 text-text-muted hover:text-text hover:border-accent/30 transition-all duration-200 disabled:opacity-25 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
-                        >
-                            <ChevronLeft size={18} />
-                        </button>
-
-                        {/* Right arrow — desktop only */}
-                        <button
-                            onClick={() => goToCard(activeIndex + 1)}
-                            disabled={activeIndex >= filtered.length - 1}
-                            aria-label="Next project"
-                            className="hidden sm:flex absolute -right-5 top-[50%] -translate-y-[22px] z-10 w-11 h-11 items-center justify-center rounded-full bg-surface border border-white/10 text-text-muted hover:text-text hover:border-accent/30 transition-all duration-200 disabled:opacity-25 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
-                        >
-                            <ChevronRight size={18} />
-                        </button>
-
-                        {/*
-                          Perspective wrapper (no overflow here — overflow:hidden would create a
-                          stacking context that flattens preserve-3d children).
-                          overflow:clip clips in X/Y without creating a stacking context.
-                        */}
-                        <div style={{ perspective: '1400px', perspectiveOrigin: 'center 50%' }}>
-                            <div
-                                ref={containerRef}
-                                style={{ overflow: 'clip', position: 'relative' }}
-                            >
-                                <motion.div
-                                    ref={trackRef}
-                                    drag="x"
-                                    dragConstraints={constraints}
-                                    dragElastic={0.08}
-                                    dragMomentum={false}
-                                    onDragStart={() => { isHovering.current = true; }}
-                                    onDragEnd={(e, info) => { isHovering.current = false; handleDragEnd(e, info); }}
-                                    style={{ x, willChange: 'transform', transformStyle: 'preserve-3d' }}
-                                    className="flex gap-6 cursor-grab active:cursor-grabbing pb-2"
-                                >
-                                    <AnimatePresence>
-                                        {filtered.map((project, index) => (
-                                            <ProjectCard
-                                                key={project.id}
-                                                project={project}
-                                                activeFilter={activeFilter}
-                                                onClick={() => setSelected(project)}
-                                                indexInFiltered={index}
-                                                activeIndex={activeIndex}
-                                            />
-                                        ))}
-                                    </AnimatePresence>
-                                </motion.div>
-                            </div>
-                        </div>
-
-                        {/* Pagination dots */}
-                        <div className="flex justify-center items-center gap-2 mt-5">
-                            {filtered.map((_, i) => (
-                                <button
-                                    key={i}
-                                    onClick={() => goToCard(i)}
-                                    aria-label={`Go to project ${i + 1}`}
-                                    className="min-w-[44px] min-h-[44px] flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 rounded"
-                                >
-                                    <span className={`rounded-full transition-all duration-300 ${
-                                        i === activeIndex
-                                            ? 'w-6 h-1.5 bg-accent'
-                                            : 'w-1.5 h-1.5 bg-white/20 hover:bg-white/40'
-                                    }`} />
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                )}
+                        {tech}
+                    </button>
+                ))}
             </div>
 
-            {/* ── Modals ── */}
+            {/* Grid */}
+            {filtered.length === 0 ? (
+                <p className="text-text-dim font-mono text-sm text-center py-16">
+                    No projects match this filter.
+                </p>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[22px]">
+                    {filtered.map((project) => (
+                        <ProjectCard
+                            key={project.id}
+                            project={project}
+                            index={projects.findIndex((p) => p.id === project.id)}
+                            activeFilter={activeFilter}
+                            onClick={() => setSelected(project)}
+                        />
+                    ))}
+                </div>
+            )}
+
+            {/* Modals */}
             <AnimatePresence>
                 {selected && (
                     <>
@@ -525,7 +246,7 @@ export default function Projects() {
                             className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm"
                         />
 
-                        {/* ── Gist interactive demo modal ── */}
+                        {/* Gist interactive demo modal */}
                         {isDemo ? (
                             <div className="fixed inset-4 md:inset-6 z-50 flex flex-col">
                                 <motion.div
@@ -538,14 +259,12 @@ export default function Projects() {
                                 >
                                     <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.06] flex-shrink-0">
                                         <div className="flex items-center gap-3">
-                                            <div className="flex items-center gap-2">
-                                                <svg width="18" height="18" viewBox="0 0 32 32" fill="none">
-                                                    <rect width="32" height="32" rx="6" fill="oklch(0.75 0.11 150)" />
-                                                    <path d="M 20.8 11.5 A 7 7 0 1 0 20.8 15.2 H 24 V 21.5 Q 24 26.2 18.4 26.2 Q 13.8 26.2 13.4 22.7" stroke="oklch(0.22 0.03 150)" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-                                                    <path d="M 14 7.5 C 19 9.2 20 17 14 19.5 C 8 17 9 9.2 14 7.5 Z" fill="oklch(0.30 0.07 150)" />
-                                                </svg>
-                                                <span className="text-sm font-semibold text-text font-mono">Gist</span>
-                                            </div>
+                                            <svg width="18" height="18" viewBox="0 0 32 32" fill="none">
+                                                <rect width="32" height="32" rx="6" fill="oklch(0.75 0.11 150)" />
+                                                <path d="M 20.8 11.5 A 7 7 0 1 0 20.8 15.2 H 24 V 21.5 Q 24 26.2 18.4 26.2 Q 13.8 26.2 13.4 22.7" stroke="oklch(0.22 0.03 150)" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                                                <path d="M 14 7.5 C 19 9.2 20 17 14 19.5 C 8 17 9 9.2 14 7.5 Z" fill="oklch(0.30 0.07 150)" />
+                                            </svg>
+                                            <span className="text-sm font-semibold text-text font-mono">Gist</span>
                                             <span className="text-text-dim text-xs font-mono">—</span>
                                             <span className="text-text-dim text-xs font-mono">Interactive Demo</span>
                                         </div>
@@ -555,7 +274,7 @@ export default function Projects() {
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 onClick={(e) => e.stopPropagation()}
-                                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-light text-text-muted text-xs font-mono border border-white/6 hover:border-white/20 hover:text-text transition-all duration-200"
+                                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-light text-text-muted text-xs font-mono border border-white/[0.06] hover:border-white/20 hover:text-text transition-all duration-200"
                                             >
                                                 <Github size={13} /> GitHub
                                             </a>
@@ -574,7 +293,7 @@ export default function Projects() {
                                 </motion.div>
                             </div>
                         ) : (
-                            /* ── Standard project detail modal ── */
+                            /* Standard project detail modal */
                             <div
                                 className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6"
                                 onClick={() => setSelected(null)}
@@ -585,74 +304,60 @@ export default function Projects() {
                                     exit={{ opacity: 0, y: 10, scale: 0.98 }}
                                     transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                                     onClick={(e) => e.stopPropagation()}
-                                    className="relative w-full max-w-2xl rounded-2xl border border-white/[0.08] bg-surface overflow-hidden shadow-2xl shadow-black/40 flex flex-col max-h-[90vh]"
+                                    className="relative w-full max-w-[620px] rounded-2xl border border-white/[0.08] bg-surface overflow-hidden shadow-2xl shadow-black/40 flex flex-col max-h-[88vh]"
                                 >
-                                    <div className="p-6 md:p-8 pb-0 relative z-10 flex-shrink-0">
-                                        <div className="flex items-start justify-between">
-                                            <div>
-                                                <p className="font-mono text-accent text-xs tracking-wide mb-3">
-                                                    {selected.role} · {selected.year}
-                                                </p>
-                                                <h3 className="text-3xl md:text-4xl font-bold tracking-tight text-text mb-2">
-                                                    {selected.title}
-                                                </h3>
-                                                <p className="text-text-muted text-base">{selected.tagline}</p>
-                                            </div>
-                                            <button
-                                                onClick={() => setSelected(null)}
-                                                className="min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-lg text-text-dim hover:text-text hover:bg-surface-light transition-colors shrink-0 ml-4 border border-transparent hover:border-white/[0.08]"
-                                                aria-label="Close"
-                                            >
-                                                <X size={20} />
-                                            </button>
-                                        </div>
+                                    {/* Modal header */}
+                                    <div className="relative p-7 pb-0 flex-shrink-0 overflow-hidden">
+                                        {/* Ghost number */}
+                                        <span className="absolute bottom-[-24px] right-[18px] font-display italic text-[130px] leading-none text-surface2 pointer-events-none select-none" aria-hidden="true">
+                                            {String(projects.findIndex(p => p.id === selected.id) + 1).padStart(2, '0')}
+                                        </span>
+                                        <button
+                                            onClick={() => setSelected(null)}
+                                            className="absolute top-3.5 right-3.5 w-9 h-9 rounded-full flex items-center justify-center border border-white/[0.08] bg-surface2 text-text-muted hover:text-text cursor-pointer transition-colors"
+                                            aria-label="Close"
+                                        >
+                                            <X size={15} />
+                                        </button>
+                                        <p className="relative z-[1] font-mono text-[11px] tracking-[0.14em] uppercase text-accent mb-3">
+                                            {selected.role} · {selected.year}
+                                        </p>
+                                        <h3 className="relative z-[1] font-display italic text-[clamp(2rem,5vw,2.8rem)] font-normal leading-[1.05] tracking-[-0.01em] mb-2">
+                                            {selected.title}<span className="text-accent">.</span>
+                                        </h3>
+                                        <p className="relative z-[1] text-text-muted text-[15px] leading-[1.5]">{selected.tagline}</p>
                                     </div>
-                                    <div className="mx-6 md:mx-8 my-6 h-px bg-white/[0.06] flex-shrink-0" />
-                                    <div className="px-6 md:px-8 pb-6 md:pb-8 flex-1 overflow-y-auto">
-                                        <div className="prose prose-invert prose-sm md:prose-base max-w-none text-text-muted leading-relaxed mb-8">
-                                            <p>{selected.description}</p>
-                                        </div>
-                                        <h4 className="text-[10px] font-mono text-text-dim uppercase tracking-[0.15em] mb-4">
-                                            Tech Stack
-                                        </h4>
-                                        <div className="flex flex-wrap gap-2.5 mb-8">
+
+                                    <div className="mx-7 my-6 h-px bg-white/[0.06] flex-shrink-0" />
+
+                                    <div className="px-7 pb-7 flex-1 overflow-y-auto">
+                                        <p className="text-text-muted text-sm leading-relaxed mb-7">{selected.description}</p>
+
+                                        <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-dim mb-3">Tech Stack</p>
+                                        <div className="flex flex-wrap gap-2 mb-7">
                                             {selected.tech.map((t) => (
-                                                <span
-                                                    key={t}
-                                                    className="px-3.5 py-1.5 text-xs rounded-lg bg-surface-light text-text-muted font-mono border border-white/[0.08]"
-                                                >
+                                                <span key={t} className="font-mono text-xs text-text-muted bg-surface2 border border-white/[0.08] px-3 py-1.5 rounded-lg">
                                                     {t}
                                                 </span>
                                             ))}
                                         </div>
-                                        <div className="flex flex-wrap gap-4">
+
+                                        <div className="flex flex-wrap gap-3">
                                             {selected.github && (
-                                                <a
-                                                    href={selected.github}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-surface-light text-text-muted text-sm font-medium border border-white/[0.08] hover:border-white/[0.2] hover:text-text transition-all duration-300"
-                                                >
+                                                <a href={selected.github} target="_blank" rel="noopener noreferrer"
+                                                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-surface2 text-text-muted text-sm border border-white/[0.08] hover:border-white/20 hover:text-text transition-all duration-250">
                                                     <Github size={16} /> Source Code
                                                 </a>
                                             )}
                                             {selected.live && (
-                                                <a
-                                                    href={selected.live}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-accent/10 text-accent text-sm font-medium border border-accent/20 hover:bg-accent/20 hover:shadow-[0_0_15px_rgba(226,160,78,0.15)] transition-all duration-300"
-                                                >
+                                                <a href={selected.live} target="_blank" rel="noopener noreferrer"
+                                                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-accent/10 text-accent text-sm border border-accent/20 hover:bg-accent/20 transition-all duration-250">
                                                     <ExternalLink size={16} /> Live Demo
                                                 </a>
                                             )}
                                             {selected.devpost && (
-                                                <a
-                                                    href={selected.devpost}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-surface-light text-text-muted text-sm font-medium border border-white/[0.08] hover:border-white/[0.2] hover:text-text transition-all duration-300"
-                                                >
+                                                <a href={selected.devpost} target="_blank" rel="noopener noreferrer"
+                                                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-surface2 text-text-muted text-sm border border-white/[0.08] hover:border-white/20 hover:text-text transition-all duration-250">
                                                     <Video size={16} /> Demo Video
                                                 </a>
                                             )}
