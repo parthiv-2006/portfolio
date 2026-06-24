@@ -248,7 +248,7 @@ export default function Projects() {
 
                         {/* Gist interactive demo modal */}
                         {isDemo ? (
-                            <div className="fixed inset-4 md:inset-6 z-50 flex flex-col">
+                            <div className="fixed inset-2 sm:inset-4 md:inset-6 z-50 flex flex-col">
                                 <motion.div
                                     initial={{ opacity: 0, y: 16, scale: 0.97 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -265,8 +265,8 @@ export default function Projects() {
                                                 <path d="M 14 7.5 C 19 9.2 20 17 14 19.5 C 8 17 9 9.2 14 7.5 Z" fill="oklch(0.30 0.07 150)" />
                                             </svg>
                                             <span className="text-sm font-semibold text-text font-mono">Gist</span>
-                                            <span className="text-text-dim text-xs font-mono">—</span>
-                                            <span className="text-text-dim text-xs font-mono">Interactive Demo</span>
+                                            <span className="text-text-dim text-xs font-mono hidden sm:inline">—</span>
+                                            <span className="text-text-dim text-xs font-mono hidden sm:inline">Interactive Demo</span>
                                         </div>
                                         <div className="flex items-center gap-3">
                                             <a
@@ -322,7 +322,7 @@ export default function Projects() {
                                         <p className="relative z-[1] font-mono text-[11px] tracking-[0.14em] uppercase text-accent mb-3">
                                             {selected.role} · {selected.year}
                                         </p>
-                                        <h3 className="relative z-[1] font-display italic text-[clamp(2rem,5vw,2.8rem)] font-normal leading-[1.05] tracking-[-0.01em] mb-2">
+                                        <h3 className="relative z-[1] font-display italic text-[clamp(1.6rem,5vw,2.8rem)] font-normal leading-[1.05] tracking-[-0.01em] mb-2">
                                             {selected.title}<span className="text-accent">.</span>
                                         </h3>
                                         <p className="relative z-[1] text-text-muted text-[15px] leading-[1.5]">{selected.tagline}</p>

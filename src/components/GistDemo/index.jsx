@@ -4,6 +4,7 @@ import { GistCaptureOverlay }    from './GistCaptureOverlay';
 import { GistDashboard }         from './GistDashboard';
 import { GistFloatingPopover }   from './GistFloatingPopover';
 import { GistAutoGistWidget }    from './GistAutoGistWidget';
+import useIsTouch                from '../../hooks/useIsTouch';
 import './gist-tokens.css';
 
 const BACKEND = 'https://parthiv-2006-gist-backend.hf.space';
@@ -124,6 +125,9 @@ export default function GistDemoWrapper() {
   useEffect(() => {
     fetch(`${BACKEND}/library`).catch(() => {/* silent */});
   }, []);
+
+  /* ── Touch / narrow detection ── */
+  const isTouch = useIsTouch();
 
   /* ── Theme ── */
   const getEffectiveTheme = (pref) => {
@@ -691,9 +695,9 @@ export default function GistDemoWrapper() {
                 }}
                 style={{
                   flex: 1, overflowY: 'auto',
-                  padding: '40px 48px',
-                  /* Shrink right padding to give sidebar breathing room */
-                  paddingRight: sidebarMode && popoverOpen ? '388px' : '48px',
+                  padding: isTouch ? '16px 18px' : '40px 48px',
+                  /* Shrink right padding to give sidebar breathing room (desktop only) */
+                  paddingRight: !isTouch && sidebarMode && popoverOpen ? '388px' : (isTouch ? '18px' : '48px'),
                   background: '#f8f6f1', color: '#1a1a18',
                   fontFamily: '"Inter", Georgia, serif',
                   scrollbarWidth: 'thin', scrollbarColor: '#c8c4b8 transparent',
@@ -713,7 +717,10 @@ export default function GistDemoWrapper() {
                     <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
                   </svg>
                   <span>
-                    <strong>Interactive demo:</strong> Select any text then click <strong>"Gist it!"</strong> for a live AI explanation with chat. Click <strong>⊞</strong> to open the extension popup, or <strong>"Full library →"</strong> to open the full dashboard.
+                    {isTouch
+                      ? <><strong>Interactive demo:</strong> Tap any paragraph for a live AI explanation with chat. Click <strong>⊞</strong> to open the extension popup.</>
+                      : <><strong>Interactive demo:</strong> Select any text then click <strong>"Gist it!"</strong> for a live AI explanation with chat. Click <strong>⊞</strong> to open the extension popup, or <strong>"Full library →"</strong> to open the full dashboard.</>
+                    }
                   </span>
                 </div>
 
@@ -728,7 +735,20 @@ export default function GistDemoWrapper() {
                 </div>
 
                 {ARTICLE.paragraphs.map((para, i) => (
-                  <p key={i} style={{ fontSize: '15px', lineHeight: 1.75, color: '#2a2a28', margin: '0 0 20px', fontFamily: 'Georgia, "Times New Roman", serif', cursor: 'text' }}>
+                  <p
+                    key={i}
+                    style={{
+                      fontSize: '15px', lineHeight: 1.75, color: '#2a2a28', margin: '0 0 20px',
+                      fontFamily: 'Georgia, "Times New Roman", serif',
+                      cursor: isTouch ? 'pointer' : 'text',
+                      WebkitTapHighlightColor: isTouch ? 'rgba(16,185,129,0.12)' : undefined,
+                    }}
+                    onClick={isTouch ? () => {
+                      selectedTextRef.current = para;
+                      anchorRectRef.current = { x: 20, y: 60, width: 0, height: 0 };
+                      handleGistIt();
+                    } : undefined}
+                  >
                     {para}
                   </p>
                 ))}
@@ -743,7 +763,8 @@ export default function GistDemoWrapper() {
               {/* ── Extension popup (toolbar button) ── */}
               {popupOpen && !captureMode && (
                 <div style={{
-                  position: 'absolute', top: '8px', right: '8px', zIndex: 55,
+                  position: 'absolute', top: '8px', zIndex: 55,
+                  ...(isTouch ? { left: '8px', right: '8px' } : { right: '8px' }),
                   maxHeight: 'calc(100% - 16px)',
                   display: 'flex', flexDirection: 'column',
                   animation: 'gistPopupIn 180ms cubic-bezier(0.22, 1, 0.36, 1) both',
@@ -772,6 +793,7 @@ export default function GistDemoWrapper() {
                   anchorRect={popoverAnchorRect}
                   mode={popoverMode}
                   isSidebarMode={sidebarMode}
+                  isNarrow={isTouch}
                   saveStatus={saveStatus}
                   onClose={() => { setPopoverOpen(false); setSidebarMode(false); }}
                   onModeChange={handleModeChange}
@@ -799,6 +821,7 @@ export default function GistDemoWrapper() {
                 <GistAutoGistWidget
                   state={widgetState}
                   takeaways={widgetTakeaways}
+                  isNarrow={isTouch}
                   onDismiss={() => {
                     setWidgetState('idle');
                     setWidgetTakeaways([]);

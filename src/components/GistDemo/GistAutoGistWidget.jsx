@@ -5,7 +5,7 @@ import React from 'react';
 
 const ACCENT = '#10b981';
 
-export function GistAutoGistWidget({ state, takeaways, onDismiss }) {
+export function GistAutoGistWidget({ state, takeaways, isNarrow = false, onDismiss }) {
   const isPulsing = state === 'loading';
 
   return (
@@ -41,9 +41,8 @@ export function GistAutoGistWidget({ state, takeaways, onDismiss }) {
         className="ag-widget"
         style={{
           position: 'absolute',
-          bottom: '20px',
-          right: '20px',
-          width: '228px',
+          bottom: isNarrow ? '12px' : '20px',
+          ...(isNarrow ? { left: '12px', right: '12px', width: 'auto' } : { right: '20px', width: '228px' }),
           pointerEvents: 'auto',
           fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
           userSelect: 'none',

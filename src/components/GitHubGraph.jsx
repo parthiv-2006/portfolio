@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GitCommit, ExternalLink } from 'lucide-react';
 
@@ -90,6 +90,7 @@ export default function GitHubGraph() {
     const [activeDays, setActiveDays] = useState(30);
     const [hoveredDay, setHoveredDay] = useState(null);
     const [hasAutoSelected, setHasAutoSelected] = useState(false);
+    const touchTimerRef = useRef(null);
 
     useEffect(() => {
         fetchContributions(GITHUB_USERNAME).then((d) => {
@@ -98,10 +99,12 @@ export default function GitHubGraph() {
         });
     }, []);
 
-    // Auto-select the best range once data loads
+    // Auto-select the best range once data loads, capped to 90d on narrow screens
     useEffect(() => {
         if (!loading && allData.length > 0 && !hasAutoSelected) {
-            const best = findBestRange(allData);
+            let best = findBestRange(allData);
+            if (window.innerWidth < 480 && best === 365) best = 90;
+            if (window.innerWidth < 360 && best > 30) best = 30;
             setActiveDays(best);
             setHasAutoSelected(true);
         }
@@ -139,7 +142,7 @@ export default function GitHubGraph() {
             className="rounded-xl border border-white/[0.06] bg-surface/40 p-5 md:p-6"
         >
             {/* Header with range toggle */}
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between flex-wrap gap-y-2 mb-4">
                 <div className="flex items-center gap-2.5">
                     <GitCommit size={14} className="text-accent" />
                     <span className="text-[10px] font-mono text-text-dim uppercase tracking-[0.15em]">
@@ -224,6 +227,12 @@ export default function GitHubGraph() {
                                             key={day.date}
                                             onMouseEnter={() => setHoveredDay(day)}
                                             onMouseLeave={() => setHoveredDay(null)}
+                                            onClick={() => {
+                                                clearTimeout(touchTimerRef.current);
+                                                if (hoveredDay?.date === day.date) { setHoveredDay(null); return; }
+                                                setHoveredDay(day);
+                                                touchTimerRef.current = setTimeout(() => setHoveredDay(null), 1500);
+                                            }}
                                             className={`aspect-square border cursor-default transition-all duration-200 hover:scale-[1.4] hover:z-10 ${levelColors[level]}`}
                                             style={{
                                                 width: `calc((100% - ${(activeDays - 1) * cellGap}px) / ${activeDays})`,
@@ -237,9 +246,9 @@ export default function GitHubGraph() {
                             </motion.div>
                         </AnimatePresence>
 
-                        {/* Tooltip — outside scroll container so whitespace-nowrap doesn't trigger scrollbar */}
+                        {/* Tooltip — clamped to 90vw on narrow screens */}
                         {hoveredDay && (
-                            <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-lg bg-surface border border-white/[0.08] shadow-lg shadow-black/30 whitespace-nowrap z-20 pointer-events-none">
+                            <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-lg bg-surface border border-white/[0.08] shadow-lg shadow-black/30 whitespace-nowrap z-20 pointer-events-none max-w-[90vw]">
                                 <span className="text-text text-xs font-medium">
                                     {hoveredDay.count} contribution{hoveredDay.count !== 1 ? 's' : ''}
                                 </span>

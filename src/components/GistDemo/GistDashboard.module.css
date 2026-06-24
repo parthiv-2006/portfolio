@@ -343,3 +343,13 @@
 @media (prefers-reduced-motion: reduce) {
   .sidebarFooterDot { animation: none; }
 }
+
+@media (max-width: 640px) {
+  .layout { flex-direction: column; }
+  .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--hairline); padding: 10px 12px; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .sidebarLogo { padding-bottom: 0; }
+  .navList { flex-direction: row; flex-wrap: wrap; gap: 2px; }
+  .sidebarSpacer { display: none; }
+  .streakCard { display: none; }
+  .sidebarFooter { display: none; }
+}

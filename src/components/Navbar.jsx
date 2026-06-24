@@ -100,9 +100,10 @@ export default function Navbar({ activeSection, theme, toggleTheme }) {
                 initial={{ y: -20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.6, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 pt-4"
+                className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4"
+                style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
             >
-                <div className="flex items-center justify-between gap-4 w-full max-w-[1120px] px-5 py-2.5 rounded-full border border-border bg-nav-bg backdrop-blur-xl shadow-lg shadow-black/20">
+                <div className="flex items-center justify-between gap-4 w-full max-w-[1120px] px-4 sm:px-5 py-2.5 rounded-full border border-border bg-nav-bg backdrop-blur-xl shadow-lg shadow-black/20">
                     {/* Logo */}
                     <a
                         href="#hero"
@@ -158,7 +159,7 @@ export default function Navbar({ activeSection, theme, toggleTheme }) {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.3 }}
-                        className="fixed inset-0 z-40 bg-bg/95 backdrop-blur-xl flex flex-col items-center justify-center gap-8"
+                        className="fixed inset-0 z-40 bg-bg/95 backdrop-blur-xl flex flex-col items-center justify-center gap-8 overflow-y-auto py-16"
                     >
                         {navLinks.map((link, i) => (
                             <motion.a

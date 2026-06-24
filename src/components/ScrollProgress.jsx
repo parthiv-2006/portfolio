@@ -97,7 +97,7 @@ export default function ScrollProgress({ activeSection }) {
                         animate={{ opacity: 1, y: 0, x: '-50%' }}
                         exit={{ opacity: 0, y: -20, x: '-50%' }}
                         transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-                        className="fixed bottom-8 left-1/2 z-50 px-5 py-2.5 rounded-full bg-surface/90 backdrop-blur-xl border border-accent/20 shadow-lg shadow-black/30"
+                        className="fixed bottom-8 left-1/2 z-50 px-5 py-2.5 rounded-full bg-surface/90 backdrop-blur-xl border border-accent/20 shadow-lg shadow-black/30 max-w-[90vw]"
                     >
                         <span className="font-mono text-xs text-text-dim">
                             Section unlocked:{' '}

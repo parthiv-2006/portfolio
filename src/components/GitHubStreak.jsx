@@ -156,15 +156,15 @@ export default function GitHubStreak({ compact = false }) {
                 {loading ? (
                     <div className="h-9 w-56 rounded-lg bg-surface-light/30 animate-pulse" />
                 ) : (
-                    <div className="inline-flex items-center gap-3 px-4 py-2.5 rounded-lg border border-white/[0.06] bg-surface/60">
+                    <div className="inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4 py-2.5 rounded-lg border border-white/[0.06] bg-surface/60">
                         <span className="font-mono font-semibold text-text text-sm tabular-nums">
                             <Counter value={current} />d streak
                         </span>
-                        <span className="w-px h-3.5 bg-white/[0.06] shrink-0" />
+                        <span className="w-px h-3.5 bg-white/[0.06] shrink-0 hidden sm:block" />
                         <span className="font-mono text-text-dim text-xs tabular-nums">
                             best {longest}d
                         </span>
-                        <span className="w-px h-3.5 bg-white/[0.06] shrink-0" />
+                        <span className="w-px h-3.5 bg-white/[0.06] shrink-0 hidden sm:block" />
                         <span className={`flex items-center gap-1.5 text-xs font-mono ${statusColor}`}>
                             <span
                                 className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotColor}`}

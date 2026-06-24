@@ -195,6 +195,7 @@ export function GistFloatingPopover({
   anchorRect,          // { x, y, width, height } — relative to the viewport container
   mode = 'standard',
   isSidebarMode = false,
+  isNarrow = false,    // true on touch/narrow screens → renders as bottom sheet
   saveStatus = 'unsaved',
   onClose,
   onModeChange,
@@ -220,13 +221,13 @@ export function GistFloatingPopover({
 
   const accentColor = MODE_COLORS[mode] || MODE_COLORS.standard;
 
-  // Re-anchor on new selection
+  // Re-anchor on new selection (skip when narrow — bottom sheet has no anchor pos)
   useEffect(() => {
-    if (anchorRect && !isSidebarMode) {
+    if (anchorRect && !isSidebarMode && !isNarrow) {
       setPos(calcInitPos(anchorRect));
       setMinimized(false);
     }
-  }, [anchorRect, isSidebarMode]);
+  }, [anchorRect, isSidebarMode, isNarrow]);
 
   // Auto-scroll chat on new content
   useEffect(() => {
@@ -244,7 +245,7 @@ export function GistFloatingPopover({
 
   // ── Drag ────────────────────────────────────────────────────────────────────
   const onHeaderMouseDown = useCallback((e) => {
-    if (e.target.closest('button') || e.button !== 0 || isSidebarMode) return;
+    if (e.target.closest('button') || e.button !== 0 || isSidebarMode || isNarrow) return;
     e.preventDefault();
     const ox = e.clientX - posRef.current.x;
     const oy = e.clientY - posRef.current.y;
@@ -331,7 +332,15 @@ export function GistFloatingPopover({
   }
 
   // ── Popover shell ─────────────────────────────────────────────────────────────
-  const shellStyle = isSidebarMode
+  const shellStyle = isNarrow
+    ? {
+        position: 'absolute', left: 0, right: 0, bottom: 0,
+        width: '100%', maxHeight: '70%',
+        borderRadius: '12px 12px 0 0',
+        border: 'none',
+        borderTop: `1px solid ${HAIRLINE}`,
+      }
+    : isSidebarMode
     ? {
         position: 'absolute', top: 0, right: 0,
         width: 360, height: '100%',
@@ -423,7 +432,7 @@ export function GistFloatingPopover({
             <Btn onClick={onToggleSidebar} title={isSidebarMode ? 'Float' : 'Sidebar mode'} active={isSidebarMode}>
               <IcoSidebar />
             </Btn>
-            {!isSidebarMode && (
+            {!isSidebarMode && !isNarrow && (
               <Btn onClick={() => setMinimized(true)} title="Minimize">
                 <IcoMinus />
               </Btn>
@@ -652,7 +661,7 @@ export function GistFloatingPopover({
         </div>
 
         {/* ── Resize handle ── */}
-        {!isSidebarMode && (
+        {!isSidebarMode && !isNarrow && (
           <div
             onMouseDown={onResizeMouseDown}
             data-resize=""

@@ -88,7 +88,7 @@ export function GistPopup({
           fontFamily: FONT,
           background: T.bg,
           color: T.text,
-          width: '340px',
+          width: 'min(340px, calc(100vw - 40px))',
           display: 'flex',
           flexDirection: 'column',
           borderRadius: '12px',

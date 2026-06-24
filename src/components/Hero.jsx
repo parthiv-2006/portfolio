@@ -136,7 +136,7 @@ export default function Hero() {
             />
 
             <motion.div
-                className="relative z-[2] w-full max-w-5xl mx-auto px-6 text-center"
+                className="relative z-[2] w-full max-w-5xl mx-auto px-5 sm:px-6 text-center"
                 style={{ y: contentY, opacity: contentOpacity }}
             >
                 {/* Greeting */}
@@ -144,7 +144,7 @@ export default function Hero() {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                    className="font-mono text-text-dim text-sm tracking-[0.28em] uppercase mb-6"
+                    className="font-mono text-text-dim text-sm tracking-[0.2em] sm:tracking-[0.28em] uppercase mb-6"
                 >
                     {greeting}
                 </motion.p>
@@ -155,7 +155,7 @@ export default function Hero() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
                     className="font-display text-text leading-[0.9] tracking-tight mb-6 select-none"
-                    style={{ fontSize: 'clamp(4rem, 10vw, 9rem)', fontStyle: 'italic' }}
+                    style={{ fontSize: 'clamp(3.25rem, 12vw, 9rem)', fontStyle: 'italic' }}
                 >
                     <span className="block">
                         {firstLine.split('').map((ch, i) => <HoverLetter key={i} char={ch} />)}
@@ -231,7 +231,7 @@ export default function Hero() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.5, delay: 1.0 }}
-                    className="flex items-center justify-center gap-5"
+                    className="flex items-center justify-center flex-wrap gap-x-5 gap-y-3"
                 >
                     <a
                         href="#work"

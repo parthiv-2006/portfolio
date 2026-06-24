@@ -276,7 +276,7 @@ export default function Terminal() {
                     {/* Terminal content */}
                     <div
                         ref={scrollRef}
-                        className="p-5 h-80 overflow-y-auto font-mono text-sm space-y-1"
+                        className="p-5 h-80 overflow-y-auto overflow-x-hidden font-mono text-sm space-y-1"
                         onClick={() => inputRef.current?.focus()}
                     >
                         {/* Boot-up typing animation */}
