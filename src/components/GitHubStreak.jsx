@@ -185,7 +185,7 @@ export default function GitHubStreak({ compact = false }) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-60px' }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="rounded-xl border border-white/[0.06] bg-surface/40 p-5 md:p-6 mb-4"
+            className="rounded-xl border border-white/[0.06] bg-surface/40 p-5 md:p-6"
         >
             {/* Header */}
             <div className="flex items-center justify-between mb-5">

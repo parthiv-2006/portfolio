@@ -136,7 +136,7 @@ export default function GitHubGraph() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-60px' }}
             transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="mt-10 rounded-xl border border-white/[0.06] bg-surface/40 p-5 md:p-6"
+            className="rounded-xl border border-white/[0.06] bg-surface/40 p-5 md:p-6"
         >
             {/* Header with range toggle */}
             <div className="flex items-center justify-between mb-4">
