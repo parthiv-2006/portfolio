@@ -9,7 +9,6 @@ import Timeline from './components/Timeline';
 import Terminal from './components/Terminal';
 import ContactSection from './components/ContactSection';
 import ScrollProgress from './components/ScrollProgress';
-import SectionDivider from './components/SectionDivider';
 import CursorTrail from './components/CursorTrail';
 import LandingSummary from './components/LandingSummary';
 import Marquee from './components/Marquee';
@@ -70,53 +69,41 @@ export default function App() {
                                 <Marquee />
 
                                 {/* ── About ── */}
-                                <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-24">
+                                <div className="max-w-[1120px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-24">
                                     <About />
                                 </div>
 
-                                <SectionDivider variant="line" label="toolkit" />
-
                                 {/* ── Skills ── */}
-                                <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-20">
+                                <div className="max-w-[1120px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-20">
                                     <SkillsGrid />
                                 </div>
 
-                                <SectionDivider variant="line" label="activity" />
-
                                 {/* ── Activity ── */}
-                                <section id="activity" className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-20">
-                                    <SectionHeading label="Activity" title="Always Building" subtitle="Live from GitHub. Every cell and bar is a real day of work." />
+                                <section id="activity" className="max-w-[1120px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-20">
+                                    <SectionHeading label="Activity" title="Always building" subtitle="Live from GitHub. Every cell and bar is a real day of work." />
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                         <GitHubStreak />
                                         <GitHubGraph />
                                     </div>
                                 </section>
 
-                                <SectionDivider variant="code" label="selected work" />
-
                                 {/* ── Work / Projects ── */}
-                                <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-20">
+                                <div className="max-w-[1120px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-20">
                                     <Projects />
                                 </div>
 
-                                <SectionDivider variant="line" label="journey" />
-
                                 {/* ── Journey / Timeline ── */}
-                                <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-20">
+                                <div className="max-w-[1120px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-20">
                                     <Timeline />
                                 </div>
 
-                                <SectionDivider variant="code" label="the lab" />
-
                                 {/* ── Terminal ── */}
-                                <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-20">
+                                <div className="max-w-[1120px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-20">
                                     <Terminal />
                                 </div>
 
-                                <SectionDivider variant="line" label="get in touch" />
-
                                 {/* ── Contact ── */}
-                                <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-24">
+                                <div className="max-w-[1120px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-24">
                                     <ContactSection />
                                 </div>
                             </main>

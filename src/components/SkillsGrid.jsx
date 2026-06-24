@@ -155,7 +155,7 @@ export default function SkillsGrid() {
     return (
         <section id="skills" className="w-full">
             <div className="w-full">
-                <SectionHeading label="Toolkit" title="Skills & Technologies" />
+                <SectionHeading label="Toolkit" title="What I work with" />
 
                 {/* ── Tab bar ── */}
                 <div
