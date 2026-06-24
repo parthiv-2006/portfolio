@@ -23,6 +23,7 @@ const COMMANDS = {
         { type: 'info', text: '  contact --linkedin  Show LinkedIn profile' },
         { type: 'info', text: '  resume              Download my resume' },
         { type: 'info', text: '  about               About me' },
+        { type: 'info', text: '  facts               Random facts' },
         { type: 'info', text: '  skills              List skills' },
         { type: 'info', text: '  explore             🗺️  Enter the Portfolio Realm' },
         { type: 'info', text: '  clear               Clear terminal' },
@@ -47,16 +48,23 @@ const COMMANDS = {
     about: () => [
         {
             type: 'system',
-            text: "Hi! I'm Parthiv — a Computer Science Specialist at UofT.",
+            text: "Hi! I'm Parthiv, a CS Specialist at UofT.",
         },
         {
             type: 'info',
-            text: 'I build full-stack systems with the MERN stack and Python.',
+            text: 'I build full-stack apps and AI agents. MERN stack + Python.',
         },
         {
             type: 'info',
-            text: "Dean's List 2024-2025. Passionate about clean code & great UX.",
+            text: "Dean's List 2024-2025. I care about code that actually ships.",
         },
+    ],
+    facts: () => [
+        { type: 'system', text: 'Random facts about me:' },
+        { type: 'info', text: '  Avg 12k+ steps/day for the past 2 years' },
+        { type: 'info', text: '  15+ cities visited' },
+        { type: 'info', text: '  Red Rising series is unmatched' },
+        { type: 'info', text: '  Combined squat/bench/deadlift over 1,000 lbs' },
     ],
     skills: () => [
         { type: 'system', text: '⚡ Core Stack:' },
@@ -219,12 +227,12 @@ export default function Terminal() {
     const promptChar = adventureMode ? '⚔' : '$';
 
     return (
-        <section id="contact" className="w-full">
+        <section id="lab" className="w-full">
             <div className="max-w-3xl mx-auto w-full" ref={terminalRef}>
                 <SectionHeading
-                    label="Connect"
-                    title="Get in Touch"
-                    subtitle="Use the terminal below to find my contact info, or just say hi."
+                    label="The Lab"
+                    title="Talk to the Terminal"
+                    subtitle="Find my contact info, or type explore to enter a text adventure built into this site."
                 />
 
                 <motion.div

@@ -38,7 +38,7 @@ const projects = [
         title: 'Reflecta',
         tagline: 'Self-Improving Test Coverage Agent',
         description:
-            'An autonomous CLI agent that finds untested Python code and writes targeted pytest tests for it — then proves they work. Reflecta parses coverage.json to surface uncovered functions, generates full test files with Gemini Flash, executes them in an isolated subprocess, and uses Groq (Llama 3.1 8B → 3.3 70B escalation) to repair failures. Every kept test must clear two gates: an AST-level assertion check and a strict coverage-delta gate — tests that pass but add no coverage are discarded.',
+            'An autonomous CLI agent that finds untested Python code and writes targeted pytest tests for it, then proves they work. Reflecta parses coverage.json to surface uncovered functions, generates full test files with Gemini Flash, executes them in an isolated subprocess, and uses Groq (Llama 3.1 8B to 3.3 70B escalation) to repair failures. Every kept test clears two gates: an AST-level assertion check and a strict coverage-delta gate. Tests that pass but add no coverage are discarded.',
         tech: ['Python', 'pytest', 'Gemini AI', 'Groq', 'coverage.py', 'Typer'],
         year: '2026',
         role: 'Dev Tool',
@@ -51,7 +51,7 @@ const projects = [
         title: 'Anima',
         tagline: 'Gamified Habit Tracking',
         description:
-            '"Your Tamagotchi for Productivity." Anima transforms daily routines into an engaging journey by turning habit tracking into a game. Instead of just checking boxes, users build consistency by caring for a virtual pet that evolves and grows based on their real-world productivity.',
+            '"Your Tamagotchi for Productivity." Anima turns habit tracking into a game. Instead of checking boxes, users keep a streak by caring for a virtual pet that grows with their consistency.',
         tech: ['React', 'Vite', 'Zustand', 'Framer Motion', 'MongoDB'],
         year: '2025',
         role: 'Full-Stack',
@@ -77,7 +77,7 @@ const projects = [
         title: 'Palate',
         tagline: 'AI Restaurant Recommender',
         description:
-            'An AI-powered social dining app built for UofTHacks 2026 to eliminate the friction of group restaurant decisions. Combining behavioral analytics with Google Gemini AI, Palate acts as an impartial mediator that provides hyper-personalized recommendations, all secured seamlessly via passkey-first authentication.',
+            'An AI-powered social dining app built for UofTHacks 2026. Combining behavioral analytics with Google Gemini AI, Palate cuts through group indecision with personalized recommendations, authenticated via passkey-first WebAuthn.',
         tech: ['Next.js', 'TypeScript', 'MongoDB', 'Gemini AI', 'WebAuthn'],
         year: '2026',
         role: 'Full-Stack',
@@ -370,7 +370,7 @@ export default function Projects() {
     }, [filtered.length]);
 
     return (
-        <section id="projects" className="w-full" ref={sectionRef}>
+        <section id="work" className="w-full" ref={sectionRef}>
             <div className="w-full">
                 <SectionHeading label="Work" title="Featured Projects" />
 

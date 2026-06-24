@@ -46,7 +46,7 @@ const entries = [
         subtitle: 'Frontend Developer',
         date: 'May 2023 – Sept 2023',
         description:
-            'Architected efficient React components and optimized Redux state management. Refactored legacy CSS into modular Sass architectures and enforced WCAG 2.1 compliance to increase engagement metrics.',
+            'Built React components and optimized Redux state management. Refactored legacy CSS into modular Sass and enforced WCAG 2.1 compliance, improving page performance and accessibility scores.',
         type: 'experience',
     },
 ];
@@ -79,7 +79,7 @@ export default function Timeline() {
     const lineScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
     return (
-        <section id="timeline" className="w-full">
+        <section id="journey" className="w-full">
             <div className="max-w-5xl mx-auto w-full">
                 <SectionHeading
                     label="Journey"
