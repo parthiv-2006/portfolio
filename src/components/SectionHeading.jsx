@@ -1,49 +1,37 @@
 import { motion } from 'framer-motion';
 
 export default function SectionHeading({ label, title, subtitle }) {
-    const words = title.split(' ');
-
     return (
-        <div className="mb-16">
+        <div className="mb-12">
             {label && (
                 <motion.div
-                    initial={{ opacity: 0, x: -30 }}
+                    initial={{ opacity: 0, x: -20 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true, margin: '-80px' }}
                     transition={{ duration: 0.5, ease: 'easeOut' }}
                     className="flex items-center gap-3 mb-4"
                 >
-                    <span className="block w-6 h-px bg-accent/70 shrink-0" />
-                    <span className="text-accent text-xs md:text-sm font-mono tracking-widest uppercase">
-                        {label}
-                    </span>
+                    <span className="font-mono text-xs tracking-[0.28em] uppercase text-accent">{label}</span>
+                    <span className="h-px flex-1 max-w-[120px] bg-white/[0.12]" />
                 </motion.div>
             )}
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-text">
-                {words.map((word, i) => (
-                    <motion.span
-                        key={i}
-                        className="inline-block mr-[0.3em]"
-                        initial={{ opacity: 0, y: 30, filter: 'blur(4px)' }}
-                        whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                        viewport={{ once: true, margin: '-80px' }}
-                        transition={{
-                            duration: 0.5,
-                            delay: 0.1 + i * 0.08,
-                            ease: [0.22, 1, 0.36, 1],
-                        }}
-                    >
-                        {word}
-                    </motion.span>
-                ))}
-            </h2>
+            <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-80px' }}
+                transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+                className="font-display text-text leading-[1.02] tracking-[-0.01em]"
+                style={{ fontSize: 'clamp(2.4rem, 5vw, 3.6rem)', fontStyle: 'italic', fontWeight: 400 }}
+            >
+                {title}
+            </motion.h2>
             {subtitle && (
                 <motion.p
-                    initial={{ opacity: 0, y: 15 }}
+                    initial={{ opacity: 0, y: 12 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: '-80px' }}
-                    transition={{ duration: 0.5, delay: 0.3 }}
-                    className="mt-4 text-text-muted text-lg max-w-2xl leading-relaxed"
+                    transition={{ duration: 0.5, delay: 0.25 }}
+                    className="mt-3 text-text-muted text-[15px] max-w-[480px] leading-relaxed"
                 >
                     {subtitle}
                 </motion.p>

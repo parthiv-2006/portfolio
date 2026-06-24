@@ -25,7 +25,7 @@ const entries = [
     {
         icon: GraduationCap,
         title: 'University of Toronto, St. George',
-        subtitle: "Computer Science Specialist Co-op",
+        subtitle: 'Computer Science Specialist Co-op',
         date: '2024 – 2028',
         description:
             "Pursuing a Bachelor of Computer Science. Dean's List Scholar. Coursework includes Data Structures & Analysis, Software Design, Systems Programming, and Computer Organization.",
@@ -51,117 +51,63 @@ const entries = [
     },
 ];
 
-/* Clip-path reveal: card expands from the timeline dot outward */
-const cardVariants = {
-    hidden: (isLeft) => ({
-        opacity: 0,
-        clipPath: isLeft ? 'inset(0 0 0 100%)' : 'inset(0 100% 0 0)',
-    }),
-    visible: {
-        opacity: 1,
-        clipPath: 'inset(0 0 0 0)',
-        transition: {
-            duration: 0.6,
-            ease: [0.22, 1, 0.36, 1],
-            delay: 0.15,
-        },
-    },
-};
+function TimelineEntry({ entry, index }) {
+    const ref = useRef(null);
+    const inView = useInView(ref, { once: true, margin: '-60px' });
+
+    return (
+        <motion.div
+            ref={ref}
+            initial={{ opacity: 0, x: -16 }}
+            animate={inView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.5, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+            className="relative"
+        >
+            {/* Dot */}
+            <span className="absolute left-[-38px] top-[6px] w-3 h-3 rounded-full bg-accent ring-4 ring-bg shadow-[0_0_14px_rgba(226,160,78,0.4)]" />
+
+            {/* Card */}
+            <div className="border border-white/[0.06] rounded-2xl bg-surface p-5 transition-all duration-300 hover:border-white/[0.12] hover:translate-x-1">
+                <p className="font-mono text-xs text-accent mb-2">{entry.date}</p>
+                <h3 className="text-[17px] font-semibold text-text mb-1">{entry.title}</h3>
+                <p className="text-[13.5px] text-accent mb-2">{entry.subtitle}</p>
+                <p className="text-sm text-text-muted leading-relaxed">{entry.description}</p>
+            </div>
+        </motion.div>
+    );
+}
 
 export default function Timeline() {
     const containerRef = useRef(null);
-    const isInView = useInView(containerRef, { once: true, margin: '-100px' });
 
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: ['start 80%', 'end 60%'],
     });
-    const lineScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
+    const lineHeight = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
 
     return (
         <section id="journey" className="w-full">
-            <div className="max-w-5xl mx-auto w-full">
-                <SectionHeading
-                    label="Journey"
-                    title="Experience & Education"
-                    subtitle="Key milestones in my development as a software engineer."
+            <SectionHeading
+                label="Journey"
+                title="Experience & education"
+                subtitle="Key milestones in my development as a software engineer."
+            />
+
+            <div ref={containerRef} className="relative pl-[38px]">
+                {/* Background line */}
+                <div className="absolute left-[5px] top-[6px] bottom-[6px] w-0.5 bg-white/[0.06]" />
+
+                {/* Accent fill line */}
+                <motion.div
+                    className="absolute left-[5px] top-[6px] w-0.5 bg-accent origin-top shadow-[0_0_10px_rgba(226,160,78,0.3)]"
+                    style={{ height: lineHeight }}
                 />
 
-                <div ref={containerRef} className="relative w-full">
-                    {/* Background line */}
-                    <div className="absolute left-6 md:left-1/2 md:-translate-x-px top-0 bottom-0 w-0.5 bg-white/[0.06]" />
-
-                    {/* Typewriter line — draws itself downward */}
-                    <motion.div
-                        className="absolute left-6 md:left-1/2 md:-translate-x-px top-0 bottom-0 w-0.5 bg-accent origin-top"
-                        style={{ scaleY: lineScale }}
-                    />
-
-                    <div className="space-y-12">
-                        {entries.map((entry, i) => {
-                            const isLeft = i % 2 === 0;
-                            return (
-                                <div
-                                    key={i}
-                                    className={`relative flex items-start gap-6 md:gap-0 ${isLeft ? 'md:flex-row' : 'md:flex-row-reverse'
-                                        }`}
-                                >
-                                    {/* Timeline node */}
-                                    <div className="absolute left-6 md:left-1/2 -translate-x-1/2 z-10">
-                                        <motion.div
-                                            initial={{ scale: 0 }}
-                                            whileInView={{ scale: 1 }}
-                                            viewport={{ once: true }}
-                                            transition={{
-                                                type: 'spring',
-                                                stiffness: 300,
-                                                damping: 15,
-                                                delay: 0.1 + i * 0.1,
-                                            }}
-                                            className="w-3 h-3 rounded-full bg-accent shadow-[0_0_12px_rgba(0,229,255,0.4)] ring-4 ring-bg"
-                                        />
-                                    </div>
-
-                                    {/* Content — clip-path reveal from the timeline dot */}
-                                    <motion.div
-                                        custom={isLeft}
-                                        variants={cardVariants}
-                                        initial="hidden"
-                                        whileInView="visible"
-                                        viewport={{ once: true, margin: '-60px' }}
-                                        className={`ml-14 md:ml-0 md:w-[calc(50%-2rem)] ${isLeft ? 'md:pr-12 md:text-right' : 'md:pl-12'
-                                            }`}
-                                    >
-                                        <div className="p-5 rounded-2xl border border-white/[0.08] bg-surface/60 backdrop-blur-sm shadow-lg shadow-black/20 hover:border-white/20 hover:shadow-xl hover:shadow-accent/5 transition-all duration-300">
-                                            <div
-                                                className={`flex items-center gap-3 mb-3 ${isLeft ? 'md:flex-row-reverse' : ''
-                                                    }`}
-                                            >
-                                                <div className="p-2 rounded-lg bg-accent/10 text-accent">
-                                                    <entry.icon size={18} />
-                                                </div>
-                                                <span className="text-xs font-mono text-accent tracking-wider">
-                                                    {entry.date}
-                                                </span>
-                                            </div>
-                                            <h3 className="font-semibold text-text text-base mb-1">
-                                                {entry.title}
-                                            </h3>
-                                            <p className="text-accent text-xs font-medium mb-2">
-                                                {entry.subtitle}
-                                            </p>
-                                            <p className="text-text-muted text-sm leading-relaxed">
-                                                {entry.description}
-                                            </p>
-                                        </div>
-                                    </motion.div>
-
-                                    {/* Spacer for other side */}
-                                    <div className="hidden md:block md:w-[calc(50%-2rem)]" />
-                                </div>
-                            );
-                        })}
-                    </div>
+                <div className="flex flex-col gap-[30px]">
+                    {entries.map((entry, i) => (
+                        <TimelineEntry key={i} entry={entry} index={i} />
+                    ))}
                 </div>
             </div>
         </section>
