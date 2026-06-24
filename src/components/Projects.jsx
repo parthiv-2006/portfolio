@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ExternalLink, Github, X, Video } from 'lucide-react';
 import SectionHeading from './SectionHeading';
 import GistDemoWrapper from './GistDemo/index';
+import useIsTouch from '../hooks/useIsTouch';
 
 const projects = [
     {
@@ -89,9 +90,9 @@ const projects = [
 
 const allTechs = [...new Set(projects.flatMap((p) => p.tech))].sort();
 
-function ProjectCard({ project, index, activeFilter, onClick }) {
+function ProjectCard({ project, index, activeFilter, isTouch, onClick }) {
     const displayNum = String(index + 1).padStart(2, '0');
-    const cta = project.hasDemo ? 'Demo' : 'View';
+    const cta = project.hasDemo && !isTouch ? 'Demo' : 'View';
 
     return (
         <motion.div
@@ -117,7 +118,7 @@ function ProjectCard({ project, index, activeFilter, onClick }) {
                 </span>
                 <div className="flex items-center gap-2">
                     <span className="font-mono text-[11px] text-text-dim">{project.year}</span>
-                    {project.hasDemo && (
+                    {project.hasDemo && !isTouch && (
                         <span className="font-mono text-[11px] text-accent bg-accent/10 border border-accent/30 px-2 py-0.5 rounded-full">
                             Live Demo
                         </span>
@@ -176,13 +177,16 @@ function ProjectCard({ project, index, activeFilter, onClick }) {
 export default function Projects() {
     const [selected, setSelected] = useState(null);
     const [activeFilter, setActiveFilter] = useState('All');
+    const isTouch = useIsTouch();
 
     const filtered = useMemo(() => {
         if (activeFilter === 'All') return projects;
         return projects.filter((p) => p.tech.includes(activeFilter));
     }, [activeFilter]);
 
-    const isDemo = selected?.hasDemo;
+    // On touch/mobile devices, show the standard project modal instead of the interactive demo
+    // (the demo is a Chrome extension UI — desktop only makes sense)
+    const isDemo = selected?.hasDemo && !isTouch;
 
     useEffect(() => {
         if (isDemo && selected) {
@@ -227,6 +231,7 @@ export default function Projects() {
                             project={project}
                             index={projects.findIndex((p) => p.id === project.id)}
                             activeFilter={activeFilter}
+                            isTouch={isTouch}
                             onClick={() => setSelected(project)}
                         />
                     ))}
