@@ -24,9 +24,9 @@ function EnteringOverlay({ onDone }) {
 
     useEffect(() => {
         // Start curtains after content is visible
-        const t1 = setTimeout(() => { setCurtainsOpen(true); setSeamVisible(false); }, 900);
+        const t1 = setTimeout(() => { setCurtainsOpen(true); setSeamVisible(false); }, 550);
         // Notify parent after curtains fully open
-        const t2 = setTimeout(onDone, 2100);
+        const t2 = setTimeout(onDone, 1700);
         timerRef.current = [t1, t2];
         return () => timerRef.current.forEach(clearTimeout);
     }, [onDone]);
