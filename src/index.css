@@ -18,6 +18,7 @@
   --color-action-primary: var(--color-accent);
   --color-action-hover: var(--color-accent-glow);
   --color-border-interactive: var(--color-border-hover);
+  --color-nav-bg: rgba(20,19,17,0.62);
   --font-sans: "Inter", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", monospace;
   --font-display: "Instrument Serif", "Georgia", serif;
@@ -62,6 +63,24 @@
     background: var(--color-accent);
     color: var(--color-bg);
   }
+}
+
+/* Light (day) theme overrides */
+[data-theme="day"] {
+  --color-bg: #EFE9DD;
+  --color-surface: #F8F3E9;
+  --color-surface-light: #E9E1D1;
+  --color-surface2: #E9E1D1;
+  --color-border: rgba(40,34,26,0.10);
+  --color-border-hover: rgba(40,34,26,0.18);
+  --color-accent: #B9762A;
+  --color-accent-dim: rgba(185,118,42,0.13);
+  --color-accent-glow: rgba(185,118,42,0.08);
+  --color-text: #2A2620;
+  --color-text-muted: #6E6557;
+  --color-text-dim: #9A9082;
+  --color-action-primary: var(--color-accent);
+  --color-nav-bg: rgba(248,243,233,0.7);
 }
 
 /* Hide native cursor on hover-capable devices (replaced by canvas cursor) */

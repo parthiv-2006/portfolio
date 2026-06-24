@@ -108,7 +108,22 @@ function EnteringOverlay({ onDone }) {
 export default function App() {
     const [showFullSite, setShowFullSite] = useState(false);
     const [showEntering, setShowEntering] = useState(false);
+    const [theme, setTheme] = useState('night');
     const { activeSection } = useActiveSection();
+
+    useEffect(() => {
+        let saved = 'night';
+        try { saved = localStorage.getItem('pp-theme') || 'night'; } catch (e) {}
+        setTheme(saved);
+        document.documentElement.dataset.theme = saved;
+    }, []);
+
+    const toggleTheme = () => {
+        const next = theme === 'night' ? 'day' : 'night';
+        setTheme(next);
+        document.documentElement.dataset.theme = next;
+        try { localStorage.setItem('pp-theme', next); } catch (e) {}
+    };
 
     const handleEnter = () => {
         setShowFullSite(true);
@@ -130,7 +145,7 @@ export default function App() {
             {/* Full portfolio site */}
             {showFullSite && (
                         <div className="min-h-screen bg-bg text-text">
-                            <Navbar activeSection={activeSection} />
+                            <Navbar activeSection={activeSection} theme={theme} toggleTheme={toggleTheme} />
                             <ScrollProgress activeSection={activeSection} />
 
                             <main>

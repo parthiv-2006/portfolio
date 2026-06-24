@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Sun, Moon } from 'lucide-react';
 import ContactModal, { DEFAULT_MESSAGE } from './ContactModal';
 
 const navLinks = [
@@ -75,7 +75,7 @@ function ScrambleLink({ label, href, isActive, onClick }) {
     );
 }
 
-export default function Navbar({ activeSection }) {
+export default function Navbar({ activeSection, theme, toggleTheme }) {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [contactOpen, setContactOpen] = useState(false);
     const [form, setForm] = useState({ email: '', message: DEFAULT_MESSAGE, _hp: '' });
@@ -102,7 +102,7 @@ export default function Navbar({ activeSection }) {
                 transition={{ duration: 0.6, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
                 className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 pt-4"
             >
-                <div className="flex items-center justify-between gap-4 w-full max-w-[1120px] px-5 py-2.5 rounded-full border border-white/[0.06] bg-[rgba(20,19,17,0.62)] backdrop-blur-xl shadow-lg shadow-black/20">
+                <div className="flex items-center justify-between gap-4 w-full max-w-[1120px] px-5 py-2.5 rounded-full border border-border bg-nav-bg backdrop-blur-xl shadow-lg shadow-black/20">
                     {/* Logo */}
                     <a
                         href="#hero"
@@ -124,6 +124,13 @@ export default function Navbar({ activeSection }) {
                                 onClick={(e) => handleNavClick(e, link.href)}
                             />
                         ))}
+                        <button
+                            onClick={toggleTheme}
+                            aria-label="Toggle theme"
+                            className="w-[38px] h-[38px] flex items-center justify-center rounded-full border border-border text-accent bg-transparent cursor-pointer transition-[border-color,transform] duration-300 hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+                        >
+                            {theme === 'night' ? <Sun size={15} /> : <Moon size={15} />}
+                        </button>
                         <button
                             onClick={handleContactOpen}
                             className="ml-1 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent text-bg font-sans font-semibold text-[13px] border-none cursor-pointer transition-all duration-300 hover:shadow-[0_0_24px_rgba(226,160,78,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
@@ -178,6 +185,17 @@ export default function Navbar({ activeSection }) {
                             className="px-6 py-3 rounded-full bg-accent text-bg font-semibold text-sm"
                         >
                             Get in touch
+                        </motion.button>
+                        <motion.button
+                            onClick={toggleTheme}
+                            aria-label="Toggle theme"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 10 }}
+                            transition={{ delay: (navLinks.length + 1) * 0.06, duration: 0.4 }}
+                            className="w-9.5 h-9.5 flex items-center justify-center rounded-full border border-border text-accent bg-transparent"
+                        >
+                            {theme === 'night' ? <Sun size={15} /> : <Moon size={15} />}
                         </motion.button>
                     </motion.div>
                 )}
