@@ -19,7 +19,7 @@ function daysAgo(n) {
 async function loadContributions() {
     if (_cache) return _cache;
     if (!_promise) {
-        _promise = fetch(`https://github-contributions-api.deno.dev/${GITHUB_USERNAME}.json`)
+        _promise = fetch(`https://github-contributions-api.deno.dev/${GITHUB_USERNAME}.json?t=${Date.now()}`)
             .then(r => (r.ok ? r.json() : null))
             .then(data => {
                 if (!data) return (_cache = []);

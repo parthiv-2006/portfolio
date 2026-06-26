@@ -16,7 +16,7 @@ const RANGES = [
  */
 async function fetchContributions(username) {
     try {
-        const response = await fetch(`https://github-contributions-api.deno.dev/${username}.json`);
+        const response = await fetch(`https://github-contributions-api.deno.dev/${username}.json?t=${Date.now()}`);
         if (!response.ok) return [];
 
         const data = await response.json();
