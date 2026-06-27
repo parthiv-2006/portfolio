@@ -85,8 +85,8 @@ function useParticleCanvas(canvasRef) {
 function HoverLetter({ char }) {
     return (
         <motion.span
-            className="inline-block cursor-default"
-            whileHover={{ y: -11, color: 'var(--color-accent)' }}
+            className="inline-block cursor-default transition-colors duration-300 hover:text-accent"
+            whileHover={{ y: -11 }}
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
         >
             {char}
