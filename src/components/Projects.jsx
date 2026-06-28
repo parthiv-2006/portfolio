@@ -43,7 +43,6 @@ const projects = [
         year: '2026',
         role: 'Dev Tool',
         github: 'https://github.com/parthiv-2006/Reflecta-Ai-Agent',
-        wip: true,
         image: '/projects/Reflecta.png',
     },
     {
@@ -84,6 +83,7 @@ const projects = [
         github: 'https://github.com/parthiv-2006/palate',
         live: 'https://palate-self.vercel.app/',
         devpost: 'https://devpost.com/software/palate-3uic5p',
+        hackathon: 'UofTHacks 2026',
         image: '/projects/palate.png',
     },
 ];
@@ -120,13 +120,12 @@ function ProjectCard({ project, index, activeFilter, isTouch, onClick }) {
                     <span className="font-mono text-[11px] text-text-dim">{project.year}</span>
                     {project.hasDemo && !isTouch && (
                         <span className="font-mono text-[11px] text-accent bg-accent/10 border border-accent/30 px-2 py-0.5 rounded-full">
-                            Live Demo
+                            Interactive
                         </span>
                     )}
-                    {project.wip && (
-                        <span className="font-mono text-[11px] text-amber-400 bg-amber-500/10 border border-amber-500/25 px-2 py-0.5 rounded-full flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                            In Dev
+                    {project.hackathon && (
+                        <span className="font-mono text-[11px] text-violet-300 bg-violet-500/10 border border-violet-500/25 px-2 py-0.5 rounded-full">
+                            {project.hackathon}
                         </span>
                     )}
                 </div>
