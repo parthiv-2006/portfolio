@@ -209,7 +209,7 @@ export default function ContactModal({ open, onClose, form, setForm, status, set
                                             id="contact-email"
                                             type="email"
                                             required
-                                            autoComplete="email"
+                                            autoComplete="off"
                                             placeholder="you@company.com"
                                             value={form.email}
                                             onChange={(e) => {
