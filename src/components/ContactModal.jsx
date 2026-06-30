@@ -77,6 +77,10 @@ export default function ContactModal({ open, onClose, form, setForm, status, set
         e.preventDefault();
         if (form._hp) return; // honeypot — silently drop
         if (status === 'sending') return;
+        if (!form.email) {
+            setStatus('no-email');
+            return;
+        }
 
         setStatus('sending');
         try {
@@ -204,12 +208,31 @@ export default function ContactModal({ open, onClose, form, setForm, status, set
                                             autoComplete="email"
                                             placeholder="you@company.com"
                                             value={form.email}
-                                            onChange={(e) =>
-                                                setForm((f) => ({ ...f, email: e.target.value }))
-                                            }
-                                            className="w-full px-4 py-2.5 rounded-xl bg-bg border border-white/[0.08] text-text text-sm placeholder:text-text-dim/50 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent/40 transition-all duration-200"
+                                            onChange={(e) => {
+                                                if (status === 'no-email') setStatus('idle');
+                                                setForm((f) => ({ ...f, email: e.target.value }));
+                                            }}
+                                            className={`w-full px-4 py-2.5 rounded-xl bg-bg border text-text text-sm placeholder:text-text-dim/50 focus:outline-none focus:ring-2 transition-all duration-200 ${
+                                                status === 'no-email'
+                                                    ? 'border-red-500/50 focus:ring-red-500/30 focus:border-red-500/50'
+                                                    : 'border-white/[0.08] focus:ring-accent/40 focus:border-accent/40'
+                                            }`}
                                             aria-required="true"
+                                            aria-invalid={status === 'no-email'}
                                         />
+                                        <AnimatePresence>
+                                            {status === 'no-email' && (
+                                                <motion.p
+                                                    initial={{ opacity: 0, y: -4 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    exit={{ opacity: 0, y: -4 }}
+                                                    className="mt-1.5 text-xs text-red-400"
+                                                    role="alert"
+                                                >
+                                                    Please enter your email so I can reply.
+                                                </motion.p>
+                                            )}
+                                        </AnimatePresence>
                                     </div>
 
                                     {/* Message */}
@@ -258,7 +281,7 @@ export default function ContactModal({ open, onClose, form, setForm, status, set
                                     {/* Submit */}
                                     <button
                                         type="submit"
-                                        disabled={status === 'sending' || !form.email}
+                                        disabled={status === 'sending'}
                                         className="w-full inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-full text-sm font-medium bg-accent text-bg hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-[0_0_20px_rgba(226,160,78,0.2)] hover:shadow-[0_0_28px_rgba(226,160,78,0.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
                                     >
                                         {status === 'sending' ? (
