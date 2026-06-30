@@ -77,7 +77,11 @@ export default function ContactModal({ open, onClose, form, setForm, status, set
         e.preventDefault();
         if (form._hp) return; // honeypot — silently drop
         if (status === 'sending') return;
-        if (!form.email) {
+
+        // Read directly from DOM to catch browser autofill (autofill bypasses onChange)
+        const emailValue = firstFocusRef.current?.value || form.email;
+
+        if (!emailValue) {
             setStatus('no-email');
             return;
         }
@@ -88,8 +92,8 @@ export default function ContactModal({ open, onClose, form, setForm, status, set
                 import.meta.env.VITE_EMAILJS_SERVICE_ID,
                 import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
                 {
-                    from_email: form.email,
-                    reply_to: form.email,
+                    from_email: emailValue,
+                    reply_to: emailValue,
                     message: form.message,
                 },
                 { publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY }
