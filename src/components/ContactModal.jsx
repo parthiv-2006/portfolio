@@ -88,7 +88,7 @@ export default function ContactModal({ open, onClose, form, setForm, status, set
                     email: form.email,
                     message: form.message,
                 },
-                import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+                { publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY }
             );
             setStatus('success');
         } catch {
