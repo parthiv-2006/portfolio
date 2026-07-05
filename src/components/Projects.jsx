@@ -1,9 +1,11 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ExternalLink, Github, X, Video } from 'lucide-react';
+import { ExternalLink, Github, X, Video, ChevronLeft, ChevronRight } from 'lucide-react';
 import SectionHeading from './SectionHeading';
 import GistDemoWrapper from './GistDemo/index';
 import useIsTouch from '../hooks/useIsTouch';
+
+const PROJECTS_PER_PAGE = 6;
 
 const projects = [
     {
@@ -46,6 +48,46 @@ const projects = [
         image: '/projects/Reflecta.png',
     },
     {
+        id: 'angler',
+        title: 'Angler',
+        tagline: 'AI Creative Strategy for Affiliate Media Buyers',
+        description:
+            'A four-module AI tool for affiliate media buyers that answers the question most teams never ask: which ads should we make? Pick a vertical, and Angler mines top competitor ads from Meta Ad Library ranked by longevity, deconstructs each winner into structured creative DNA, audits your own ad set for semantic diversity gaps using Entity ID analysis, and generates prioritized angle briefs with platform-ready copy for Meta, TikTok, and native — plus an MCP server so the entire intelligence layer is callable from Claude Desktop.',
+        tech: ['Next.js', 'TypeScript', 'Claude AI', 'Supabase', 'Zod', 'MCP'],
+        year: '2026',
+        role: 'AI Tool',
+        github: 'https://github.com/parthiv-2006/Angler',
+        live: 'https://www.angler.software',
+        competition: '$5K Build Competition',
+    },
+    {
+        id: 'glowi',
+        title: 'Glowi',
+        tagline: 'AI-Powered Skincare Analysis',
+        description:
+            'A mobile app that photographs a skin concern, runs a cinematic AI scan with Skia-rendered visuals, and delivers a personalized protocol: curated products with retailer links, evidence-based nutrition with PubMed citations, and routines built around your scan. Features cross-session AI memory, a Skin Weather forecast that adapts advice to local UV/humidity/pollen, a product Shelf with AI label reading and ingredient conflict detection, and a memory-aware skincare coach.',
+        tech: ['React Native', 'Expo', 'TypeScript', 'Supabase', 'Claude AI', 'Zustand'],
+        year: '2026',
+        role: 'AI + Mobile',
+        github: 'https://github.com/parthiv-2006/Glowi',
+        underDevelopment: true,
+    },
+    {
+        id: 'palate',
+        title: 'Palate',
+        tagline: 'AI Restaurant Recommender',
+        description:
+            'An AI-powered social dining app built for UofTHacks 2026. Combining behavioral analytics with Google Gemini AI, Palate cuts through group indecision with personalized recommendations, authenticated via passkey-first WebAuthn.',
+        tech: ['Next.js', 'TypeScript', 'MongoDB', 'Gemini AI', 'WebAuthn'],
+        year: '2026',
+        role: 'Full-Stack',
+        github: 'https://github.com/parthiv-2006/palate',
+        live: 'https://palate-self.vercel.app/',
+        devpost: 'https://devpost.com/software/palate-3uic5p',
+        hackathon: 'UofTHacks 2026',
+        image: '/projects/palate.png',
+    },
+    {
         id: 'anima',
         title: 'Anima',
         tagline: 'Gamified Habit Tracking',
@@ -70,21 +112,6 @@ const projects = [
         github: 'https://github.com/parthiv-2006/MacroMatch',
         live: 'https://macro-match-cyan.vercel.app/',
         image: '/projects/macromatch.png',
-    },
-    {
-        id: 'palate',
-        title: 'Palate',
-        tagline: 'AI Restaurant Recommender',
-        description:
-            'An AI-powered social dining app built for UofTHacks 2026. Combining behavioral analytics with Google Gemini AI, Palate cuts through group indecision with personalized recommendations, authenticated via passkey-first WebAuthn.',
-        tech: ['Next.js', 'TypeScript', 'MongoDB', 'Gemini AI', 'WebAuthn'],
-        year: '2026',
-        role: 'Full-Stack',
-        github: 'https://github.com/parthiv-2006/palate',
-        live: 'https://palate-self.vercel.app/',
-        devpost: 'https://devpost.com/software/palate-3uic5p',
-        hackathon: 'UofTHacks 2026',
-        image: '/projects/palate.png',
     },
 ];
 
@@ -112,11 +139,11 @@ function ProjectCard({ project, index, activeFilter, isTouch, onClick }) {
             </span>
 
             {/* Header: role + year + badge */}
-            <div className="relative z-[1] flex items-center justify-between mb-[18px]">
+            <div className="relative z-[1] flex items-center justify-between gap-2 flex-wrap mb-[18px]">
                 <span className="font-mono text-[11px] tracking-[0.12em] text-accent uppercase">
                     {project.role}
                 </span>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-mono text-[11px] text-text-dim">{project.year}</span>
                     {project.hasDemo && !isTouch && (
                         <span className="font-mono text-[11px] text-accent bg-accent/10 border border-accent/30 px-2 py-0.5 rounded-full">
@@ -126,6 +153,19 @@ function ProjectCard({ project, index, activeFilter, isTouch, onClick }) {
                     {project.hackathon && (
                         <span className="font-mono text-[11px] text-violet-300 bg-violet-500/10 border border-violet-500/25 px-2 py-0.5 rounded-full">
                             {project.hackathon}
+                        </span>
+                    )}
+                    {project.competition && (
+                        <span className="font-mono text-[11px] text-teal-300 bg-teal-500/10 border border-teal-500/25 px-2 py-0.5 rounded-full">
+                            {project.competition}
+                        </span>
+                    )}
+                    {project.underDevelopment && (
+                        <span
+                            className="font-mono text-[11px] text-amber-300 bg-amber-500/10 border border-amber-500/25 px-2 py-0.5 rounded-full"
+                            style={{ animation: 'badge-pulse 2.4s ease-in-out infinite' }}
+                        >
+                            Under Development
                         </span>
                     )}
                 </div>
@@ -176,11 +216,24 @@ function ProjectCard({ project, index, activeFilter, isTouch, onClick }) {
 export default function Projects() {
     const [selected, setSelected] = useState(null);
     const [activeFilter, setActiveFilter] = useState('All');
+    const [currentPage, setCurrentPage] = useState(0);
     const isTouch = useIsTouch();
 
     const filtered = useMemo(() => {
         if (activeFilter === 'All') return projects;
         return projects.filter((p) => p.tech.includes(activeFilter));
+    }, [activeFilter]);
+
+    // Pagination only applies to "All" view
+    const isPaginated = activeFilter === 'All';
+    const totalPages = isPaginated ? Math.ceil(projects.length / PROJECTS_PER_PAGE) : 1;
+    const displayedProjects = isPaginated
+        ? filtered.slice(currentPage * PROJECTS_PER_PAGE, (currentPage + 1) * PROJECTS_PER_PAGE)
+        : filtered;
+
+    // Reset page when filter changes
+    useEffect(() => {
+        setCurrentPage(0);
     }, [activeFilter]);
 
     // On touch/mobile devices, show the standard project modal instead of the interactive demo
@@ -218,22 +271,74 @@ export default function Projects() {
             </div>
 
             {/* Grid */}
-            {filtered.length === 0 ? (
+            {displayedProjects.length === 0 ? (
                 <p className="text-text-dim font-mono text-sm text-center py-16">
                     No projects match this filter.
                 </p>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[22px]">
-                    {filtered.map((project) => (
-                        <ProjectCard
-                            key={project.id}
-                            project={project}
-                            index={projects.findIndex((p) => p.id === project.id)}
-                            activeFilter={activeFilter}
-                            isTouch={isTouch}
-                            onClick={() => setSelected(project)}
-                        />
-                    ))}
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={isPaginated ? `page-${currentPage}` : `filter-${activeFilter}`}
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -16 }}
+                        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[22px]"
+                    >
+                        {displayedProjects.map((project) => (
+                            <ProjectCard
+                                key={project.id}
+                                project={project}
+                                index={projects.findIndex((p) => p.id === project.id)}
+                                activeFilter={activeFilter}
+                                isTouch={isTouch}
+                                onClick={() => setSelected(project)}
+                            />
+                        ))}
+                    </motion.div>
+                </AnimatePresence>
+            )}
+
+            {/* Pagination arrows — only on "All" view with multiple pages */}
+            {isPaginated && totalPages > 1 && (
+                <div className="flex items-center justify-center gap-5 mt-10">
+                    <button
+                        onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
+                        disabled={currentPage === 0}
+                        aria-label="Previous projects"
+                        className="group flex items-center justify-center w-11 h-11 rounded-full border transition-all duration-250 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:opacity-25 disabled:cursor-not-allowed border-white/[0.08] bg-surface hover:border-accent/40 hover:bg-accent/5 disabled:hover:border-white/[0.08] disabled:hover:bg-surface"
+                    >
+                        <ChevronLeft size={18} className="text-text-muted group-hover:text-accent transition-colors duration-200 group-disabled:group-hover:text-text-muted" />
+                    </button>
+
+                    {/* Page dots */}
+                    <div className="flex items-center gap-1">
+                        {Array.from({ length: totalPages }, (_, i) => (
+                            <button
+                                key={i}
+                                onClick={() => setCurrentPage(i)}
+                                aria-label={`Go to page ${i + 1}`}
+                                className="min-h-[44px] min-w-[36px] flex items-center justify-center cursor-pointer focus-visible:outline-none"
+                            >
+                                <span
+                                    className={`block rounded-full transition-all duration-300 ${
+                                        i === currentPage
+                                            ? 'w-7 h-2 bg-accent shadow-[0_0_10px_rgba(226,160,78,0.3)]'
+                                            : 'w-2 h-2 bg-text-dim/40 hover:bg-text-dim/70'
+                                    }`}
+                                />
+                            </button>
+                        ))}
+                    </div>
+
+                    <button
+                        onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
+                        disabled={currentPage === totalPages - 1}
+                        aria-label="Next projects"
+                        className="group flex items-center justify-center w-11 h-11 rounded-full border transition-all duration-250 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:opacity-25 disabled:cursor-not-allowed border-white/[0.08] bg-surface hover:border-accent/40 hover:bg-accent/5 disabled:hover:border-white/[0.08] disabled:hover:bg-surface"
+                    >
+                        <ChevronRight size={18} className="text-text-muted group-hover:text-accent transition-colors duration-200 group-disabled:group-hover:text-text-muted" />
+                    </button>
                 </div>
             )}
 
