@@ -5,13 +5,7 @@ import { X, Send, CheckCircle, AlertCircle } from 'lucide-react';
 
 const DIRECT_EMAIL = 'parthiv.paul@mail.utoronto.ca';
 
-const DEFAULT_MESSAGE = `Hi Parthiv,
-
-I came across your portfolio and was impressed by your work. I'd love to connect about a potential opportunity at [Company Name].
-
-Looking forward to hearing from you.
-
-[Recruiter Name]`;
+const DEFAULT_MESSAGE = '';
 
 export { DEFAULT_MESSAGE };
 
@@ -250,6 +244,7 @@ export default function ContactModal({ open, onClose, form, setForm, status, set
                                         <textarea
                                             id="contact-message"
                                             rows={7}
+                                            placeholder="Say hi/send me a message"
                                             value={form.message}
                                             onChange={(e) =>
                                                 setForm((f) => ({ ...f, message: e.target.value }))
