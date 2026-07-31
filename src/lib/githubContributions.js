@@ -28,6 +28,19 @@ const SOURCES = [
         parse: (json) =>
             json.contributions.flat().map((d) => ({ date: d.date, count: d.count })),
     },
+    {
+        // Snapshot we publish ourselves every 6h from GitHub's own GraphQL API
+        // (see .github/workflows/contributions-snapshot.yml). Last in the chain
+        // because it can be a few hours behind, which would drop today's count
+        // and read as "commit to keep it" while the live proxies are healthy.
+        // It exists so a third-party outage degrades to slightly-stale real
+        // data instead of nothing.
+        name: 'self-hosted snapshot',
+        url: (user, bust) =>
+            `https://raw.githubusercontent.com/${user}/portfolio/contributions-data/contributions.json?t=${bust}`,
+        parse: (json) =>
+            json.contributions.map((d) => ({ date: d.date, count: d.count })),
+    },
 ];
 
 export function toDateStr(d) {
