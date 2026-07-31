@@ -1,8 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GitCommit, ExternalLink } from 'lucide-react';
-
-const GITHUB_USERNAME = 'parthiv-2006';
+import { GITHUB_USERNAME, daysAgo, loadContributions } from '../lib/githubContributions';
 
 const RANGES = [
     { label: '30d', days: 30 },
@@ -10,47 +9,13 @@ const RANGES = [
     { label: '1y', days: 365 },
 ];
 
-/**
- * Fetches contribution graph data from a public proxy.
- * This provides the full 365 days of activity instead of hitting the 300-event limit.
- */
-async function fetchContributions(username) {
-    try {
-        const response = await fetch(`https://github-contributions-api.deno.dev/${username}.json?t=${Date.now()}`);
-        if (!response.ok) return [];
-
-        const data = await response.json();
-
-        // The API returns a 2D array of weeks/days. Flatten it to a 1D array.
-        const flatData = data.contributions.flat();
-
-        // Build today's date string in local timezone (not UTC) to avoid
-        // the API returning tomorrow's date when local time is behind UTC
-        const now = new Date();
-        const localToday = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-
-        return flatData
-            .map((day) => ({
-                date: day.date,
-                count: day.contributionCount,
-            }))
-            .filter((day) => day.date <= localToday)
-            .sort((a, b) => a.date.localeCompare(b.date));
-    } catch {
-        return [];
-    }
-}
-
 /** Determine which range has the highest contribution density */
 function findBestRange(allData) {
-    const now = new Date();
     let bestIdx = 0;
     let bestDensity = 0;
 
     for (let i = 0; i < RANGES.length; i++) {
-        const cutoff = new Date(now);
-        cutoff.setDate(cutoff.getDate() - RANGES[i].days);
-        const cutoffStr = cutoff.toISOString().slice(0, 10);
+        const cutoffStr = daysAgo(RANGES[i].days);
 
         const slice = allData.filter((d) => d.date > cutoffStr);
         const total = slice.reduce((sum, d) => sum + d.count, 0);
@@ -93,10 +58,13 @@ export default function GitHubGraph() {
     const touchTimerRef = useRef(null);
 
     useEffect(() => {
-        fetchContributions(GITHUB_USERNAME).then((d) => {
-            setAllData(d);
+        let alive = true;
+        loadContributions().then(({ days }) => {
+            if (!alive) return;
+            setAllData(days);
             setLoading(false);
         });
+        return () => { alive = false; };
     }, []);
 
     // Auto-select the best range once data loads, capped to 90d on narrow screens
