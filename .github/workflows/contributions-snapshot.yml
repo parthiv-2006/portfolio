@@ -1,0 +1,97 @@
+name: Contributions snapshot
+
+# Publishes the contribution calendar to the `contributions-data` branch so the
+# site has a data source we own. The site prefers the live public proxies and
+# only falls back to this snapshot when they're all unreachable — which is what
+# happened on 2026-07-20, when the single proxy the site depended on was shut
+# down and the streak silently read zero for days.
+#
+# This deliberately does NOT commit to the default branch: GitHub only counts
+# commits toward a contribution graph if they're on the default branch (or
+# gh-pages), so publishing here cannot inflate the very streak being displayed.
+# The bot author is a second safeguard — contributions are attributed by author
+# email, and github-actions[bot] isn't the account being graphed.
+
+on:
+  schedule:
+    # Every 6 hours, so the fallback is never more than a few hours stale.
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+
+# Serialise runs; the branch is force-pushed and concurrent runs would race.
+concurrency:
+  group: contributions-snapshot
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch contribution calendar
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LOGIN: ${{ github.repository_owner }}
+        run: |
+          set -euo pipefail
+          gh api graphql -F login="$LOGIN" -f query='
+            query($login: String!) {
+              user(login: $login) {
+                contributionsCollection {
+                  contributionCalendar {
+                    totalContributions
+                    weeks { contributionDays { date contributionCount } }
+                  }
+                }
+              }
+            }' > raw.json
+
+          jq --arg login "$LOGIN" '
+            .data.user.contributionsCollection.contributionCalendar
+            | {
+                generatedAt: (now | todate),
+                username: $login,
+                total: .totalContributions,
+                contributions: [
+                  .weeks[].contributionDays[] | { date: .date, count: .contributionCount }
+                ]
+              }
+          ' raw.json > contributions.json
+
+      - name: Sanity-check the snapshot
+        run: |
+          set -euo pipefail
+          days=$(jq '.contributions | length' contributions.json)
+          echo "days in snapshot: $days"
+          # A healthy calendar is ~365. Refuse to publish a truncated or empty
+          # response rather than overwrite a good snapshot with a broken one.
+          if [ "$days" -lt 300 ]; then
+            echo "::error::Only $days days returned; refusing to publish."
+            exit 1
+          fi
+          jq -e '.contributions | map(.count) | add > 0' contributions.json > /dev/null \
+            || { echo "::error::Calendar is entirely zero; refusing to publish."; exit 1; }
+          echo "latest: $(jq -c '.contributions[-1]' contributions.json)"
+
+      - name: Publish to contributions-data branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir publish
+          mv contributions.json publish/
+          cd publish
+          git init -q
+          git checkout -qb contributions-data
+          git add contributions.json
+          git \
+            -c user.name='github-actions[bot]' \
+            -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+            commit -q -m "chore(data): contribution snapshot $(date -u +%Y-%m-%dT%H:%MZ)"
+          # Single-commit force push: this branch is a data drop, not history,
+          # so it should not grow without bound.
+          git push -q --force \
+            "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+            contributions-data
