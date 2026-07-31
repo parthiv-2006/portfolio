@@ -1,77 +1,22 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-
-const GITHUB_USERNAME = 'parthiv-2006';
-
-let _cache = null;
-let _promise = null;
-
-function toDateStr(d) {
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
-
-function daysAgo(n) {
-    const d = new Date();
-    d.setDate(d.getDate() - n);
-    return toDateStr(d);
-}
-
-async function loadContributions() {
-    if (_cache) return _cache;
-    if (!_promise) {
-        _promise = fetch(`https://github-contributions-api.deno.dev/${GITHUB_USERNAME}.json?t=${Date.now()}`)
-            .then(r => (r.ok ? r.json() : null))
-            .then(data => {
-                if (!data) return (_cache = []);
-                const today = daysAgo(0);
-                _cache = data.contributions
-                    .flat()
-                    .map(d => ({ date: d.date, count: d.contributionCount }))
-                    .filter(d => d.date <= today)
-                    .sort((a, b) => a.date.localeCompare(b.date));
-                return _cache;
-            })
-            .catch(() => (_cache = []));
-    }
-    return _promise;
-}
-
-function computeStreaks(days) {
-    if (!days.length) return { current: 0, longest: 0, todayCount: 0, lastActive: null, streakDates: new Set() };
-
-    const today = daysAgo(0);
-    const map = Object.fromEntries(days.map(d => [d.date, d.count]));
-    const todayCount = map[today] ?? 0;
-
-    const streakDates = new Set();
-    let back = todayCount > 0 ? 0 : 1;
-    while ((map[daysAgo(back)] ?? 0) > 0) {
-        streakDates.add(daysAgo(back));
-        back++;
-    }
-
-    let longest = 0, run = 0;
-    for (const d of days) {
-        run = d.count > 0 ? run + 1 : 0;
-        if (run > longest) longest = run;
-    }
-
-    let lastActive = null;
-    for (let i = days.length - 1; i >= 0; i--) {
-        if (days[i].count > 0) { lastActive = days[i].date; break; }
-    }
-
-    return { current: streakDates.size, longest, todayCount, lastActive, streakDates };
-}
+import { computeStreaks, daysAgo, loadContributions } from '../lib/githubContributions';
 
 function useContributions() {
-    const [data, setData] = useState(_cache ?? []);
-    const [loading, setLoading] = useState(!_cache);
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [failed, setFailed] = useState(false);
     useEffect(() => {
-        if (_cache) return;
-        loadContributions().then(d => { setData(d); setLoading(false); });
+        let alive = true;
+        loadContributions().then(({ days, error }) => {
+            if (!alive) return;
+            setData(days);
+            setFailed(Boolean(error));
+            setLoading(false);
+        });
+        return () => { alive = false; };
     }, []);
-    return { data, loading };
+    return { data, loading, failed };
 }
 
 function Counter({ value }) {
@@ -133,7 +78,7 @@ function CommitWaveform({ contributions, streakDates, numDays = 35 }) {
 }
 
 export default function GitHubStreak({ compact = false }) {
-    const { data, loading } = useContributions();
+    const { data, loading, failed } = useContributions();
     const { current, longest, todayCount, lastActive, streakDates } = computeStreaks(data);
 
     const today = daysAgo(0);
@@ -155,6 +100,10 @@ export default function GitHubStreak({ compact = false }) {
             >
                 {loading ? (
                     <div className="h-9 w-56 rounded-lg bg-surface-light/30 animate-pulse" />
+                ) : failed ? (
+                    <div className="inline-flex items-center px-4 py-2.5 rounded-lg border border-white/[0.06] bg-surface/60">
+                        <span className="font-mono text-text-dim text-xs">streak unavailable</span>
+                    </div>
                 ) : (
                     <div className="inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4 py-2.5 rounded-lg border border-white/[0.06] bg-surface/60">
                         <span className="font-mono font-semibold text-text text-sm tabular-nums">
@@ -192,7 +141,7 @@ export default function GitHubStreak({ compact = false }) {
                 <span className="text-[10px] font-mono text-text-dim uppercase tracking-[0.15em]">
                     Builder Streak
                 </span>
-                {!loading && (
+                {!loading && !failed && (
                     <div className={`flex items-center gap-1.5 text-[10px] font-mono ${statusColor}`}>
                         <span
                             className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotColor}`}
@@ -207,6 +156,10 @@ export default function GitHubStreak({ compact = false }) {
                 <div className="space-y-4">
                     <div className="h-10 w-28 rounded bg-surface-light/30 animate-pulse" />
                     <div className="h-12 w-full rounded bg-surface-light/20 animate-pulse" />
+                </div>
+            ) : failed ? (
+                <div className="flex items-center justify-center py-8">
+                    <span className="text-text-dim text-xs font-mono">Unable to load streak data.</span>
                 </div>
             ) : (
                 <>
