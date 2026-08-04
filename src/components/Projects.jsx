@@ -13,8 +13,8 @@ const projects = [
         title: 'LeaseGuard',
         tagline: 'AI Legal Agent for Ontario Tenants',
         description:
-            'An AI agent that reads Ontario residential lease PDFs and produces a grounded risk analysis backed by real statute and tribunal text — not training-data hallucinations. A custom MCP server exposes 12 tools to a Claude AI orchestrator: parse the PDF, retrieve matching RTA sections via pgvector RAG, score clause risk deterministically, detect cross-clause contradictions, benchmark against real leases in the corpus, and generate negotiation guidance. Every legal claim is traceable to a retrieved source.',
-        tech: ['Next.js', 'TypeScript', 'Claude AI', 'Supabase', 'Python', 'Gemini AI'],
+            'An AI agent that reads Ontario residential lease PDFs and produces a grounded risk analysis backed by real statute and tribunal text — not training-data hallucinations. A custom MCP server exposes 12 tools to a Claude Haiku 4.5 orchestrator: parse the PDF, retrieve matching RTA sections, score clause risk deterministically, detect cross-clause contradictions, benchmark against real leases in the corpus, and generate negotiation guidance. Retrieval is hybrid BM25 + vector search with reciprocal rank fusion over a 2,372-chunk pgvector legal corpus, feeding a deterministic TypeScript risk engine covering 17 violation types. Full reports return in under 90 seconds, with 206 automated tests behind it — and every legal claim is traceable to a retrieved source.',
+        tech: ['Next.js', 'TypeScript', 'Claude AI', 'MCP', 'RAG', 'Supabase', 'Python', 'Gemini AI'],
         year: '2026',
         role: 'AI Agent',
         github: 'https://github.com/parthiv-2006/lease-guard',
@@ -40,8 +40,8 @@ const projects = [
         title: 'Reflecta',
         tagline: 'Self-Improving Test Coverage Agent',
         description:
-            'An autonomous CLI agent that finds untested Python code and writes targeted pytest tests for it, then proves they work. Reflecta parses coverage.json to surface uncovered functions, generates full test files with Gemini Flash, executes them in an isolated subprocess, and uses Groq (Llama 3.1 8B to 3.3 70B escalation) to repair failures. Every kept test clears two gates: an AST-level assertion check and a strict coverage-delta gate. Tests that pass but add no coverage are discarded.',
-        tech: ['Python', 'pytest', 'Gemini AI', 'Groq', 'coverage.py', 'Typer'],
+            'An autonomous CLI agent — published on PyPI as reflecta — that finds untested Python code, writes targeted pytest tests for it, then proves they work. Reflecta parses coverage.json to surface uncovered functions, generates full test files with Gemini Flash, executes them in an isolated subprocess, and uses Groq (Llama 3.1 8B to 3.3 70B escalation) to repair failures, escalating to Claude when repair stalls. Every kept test clears two gates: an AST-level assertion check and a strict coverage-delta gate — tests that pass but add no coverage are discarded. It lifted coverage from 64% to 80% on a real service across 338 tests.',
+        tech: ['Python', 'pytest', 'Gemini AI', 'Groq', 'Claude AI', 'coverage.py', 'Typer', 'AST'],
         year: '2026',
         role: 'Dev Tool',
         github: 'https://github.com/parthiv-2006/Reflecta-Ai-Agent',
@@ -52,13 +52,13 @@ const projects = [
         title: 'Angler',
         tagline: 'AI Creative Strategy for Affiliate Media Buyers',
         description:
-            'A four-module AI tool for affiliate media buyers that answers the question most teams never ask: which ads should we make? Pick a vertical, and Angler mines top competitor ads from Meta Ad Library ranked by longevity, deconstructs each winner into structured creative DNA, audits your own ad set for semantic diversity gaps using Entity ID analysis, and generates prioritized angle briefs with platform-ready copy for Meta, TikTok, and native — plus an MCP server so the entire intelligence layer is callable from Claude Desktop.',
-        tech: ['Next.js', 'TypeScript', 'Claude AI', 'Supabase', 'Zod', 'MCP'],
+            'Built for the ItsTodayMedia $5,000 Build Challenge. A four-module AI tool for affiliate media buyers, built solo in 10 days, that answers the question most teams never ask: which ads should we make? Pick a vertical, and Angler mines top competitor ads from the Meta Ad Library via Apify ranked by longevity, deconstructs each winner into structured creative DNA with a vision-language model, audits your own ad set for semantic diversity gaps using Entity ID analysis, and generates prioritized angle briefs with platform-ready copy for Meta, TikTok, and native. The entire intelligence layer is also exposed as a public MCP server callable from Claude Desktop, hardened by a security audit across 21 tests.',
+        tech: ['Next.js', 'TypeScript', 'Claude AI', 'Supabase', 'Apify', 'Zod', 'MCP'],
         year: '2026',
         role: 'AI Tool',
         github: 'https://github.com/parthiv-2006/Angler',
         live: 'https://www.angler.software',
-        competition: '$5K Build Competition',
+        competition: '$5K Build Challenge',
     },
     {
         id: 'glowi',
@@ -77,7 +77,7 @@ const projects = [
         title: 'Palate',
         tagline: 'AI Restaurant Recommender',
         description:
-            'An AI-powered social dining app built for UofTHacks 2026. Combining behavioral analytics with Google Gemini AI, Palate cuts through group indecision with personalized recommendations, authenticated via passkey-first WebAuthn.',
+            'An AI-powered social dining app built for UofTHacks 2026. I built the Next.js frontend and end-to-end passkey authentication (WebAuthn), submitted against the 1Password challenge — cryptographic passkeys replacing passwords entirely. Combining behavioral analytics with a Google Gemini engine, Palate turns group swipe data into restaurant picks and cuts through group indecision.',
         tech: ['Next.js', 'TypeScript', 'MongoDB', 'Gemini AI', 'WebAuthn'],
         year: '2026',
         role: 'Full-Stack',
