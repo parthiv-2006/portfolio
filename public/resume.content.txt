@@ -1,51 +1,62 @@
 Parthiv Paul
-647-781-6235 |parthiv.paul@mail.utoronto.ca |linkedin.com/in/parthiv-paul |github.com/parthiv-2006
+Toronto, ON | 647-781-6235 | parthiv.paul@mail.utoronto.ca | parthivpaul.me | linkedin.com/in/parthiv-paul |
+github.com/parthiv-2006
 Education
-University of Toronto St.  George                                                                                Toronto, ON
-Bachelor of Computer Science, Specialist Co-op Program (    CGPA: 3.70/4.00 )               Sept 2024 – Apr 2028
-Relevant Coursework:  Data Structures & Analysis, Software Design, Systems Programming,
-Computer Organization, Theory of Computation, Linear Algebra
+University of Toronto St. George Toronto, ON
+Bachelor of Computer Science, Specialist Co-op Program | CGPA: 3.6/4.0 Sept 2024 – Apr 2028
 Experience
-AI and Automation Extern                                                                              May 2025 – Aug 2025
-Outamation                                                                                      Remote
-–   Automated high-volume document classification by engineering  NLP and Computer Vision pipelines
-(PyMuPDF, OCR), reducing manual data entry workload by  40%.
-–    Enhanced internal knowledge retrieval accuracy by  25% by optimizing a Retrieval-Augmented Generation
-(RAG) system with LlamaIndex and custom vector embeddings.
-Software QA Tester                                                                                         June 2024 – Nov 2024
-Chester-Hill Solutions                                                                              Remote
-–   Decreased regression testing time by  60% by developing automated scripts for  50+ critical user flows , ensuring
-stability across multiple environments.
-–    Accelerated bug resolution by  15% through detailed API response analysis  and root cause documentation,
-enabling faster hotfix deployments.
-Frontend Developer                                                                                        May 2023 – Sept 2023
-Ontario Liberal Party                                                                          Toronto, ON
-–   Improved page load speeds by  20% for 1,000+ monthly users by architecting efficient React components and
-optimizing Redux state management flows.
-–    Increased mobile engagement metrics by  30% by refactoring legacy CSS into modular  Sass architectures and
-enforcing WCAG 2.1 compliance.
+Software Engineer Jul 2026 – Present
+Velox Systems Toronto, ON
+– Sole developer on the rebuild of a landscaping contractor’s production workspace, migrating its live
+safety-compliance app onto a FastAPI/Postgres backend and cutting authentication from Supabase to Zitadel
+OIDC behind a zero-error type and lint gate.
+– Shipped a route-planning module that turns a 4,756-tree municipal registry into truck-days in driving order and
+syncs offline crew completions back to the office, retiring a 95-file legacy planner.
+Full-Stack Developer, Contract Jul 2026 – Sep 2026
+Applied Optimal Inc. Remote
+– Built a 7-day trial to paid subscription system (FastAPI, Postgres, Stripe, Flutter Web) with member-count fee
+tiers, checkout, a reminder job, and server-side route lockout, across 4 migrations and 130 automated tests.
+– Worked a Jira ticket and peer-review loop on a 3-developer team, resolving spec gaps with a non-technical client
+across twice-weekly syncs, restoring blocking flake8 and black CI, and clearing 77 Flutter analyzer warnings.
+Software Developer, Contract Mar 2026 – May 2026
+GenLedge Remote
+– Built a Stripe MCP server (TypeScript, 12 tools) covering charges, invoices, subscriptions, and disputes,
+enabling AI accounting agents to query live payment data via the Model Context Protocol.
+– Built a Stripe webhook handler that verified event authenticity and routed 12 event types to specialized AI
+employee roles, generating real-time general-ledger entries automatically.
+AI and Automation Extern May 2025 – Aug 2025
+Outamation Remote
+– Built NLP and Computer Vision (OCR) pipelines to classify and extract fields from mortgage documents,
+replacing a manual data-entry step on the program’s sample document set.
+– Improved retrieval relevance by ∼25% on a benchmark query set by tuning a Retrieval-Augmented
+Generation (RAG) system in LlamaIndex, iterating on chunking and custom vector embeddings.
+Software QA Tester, Intern June 2024 – Nov 2024
+Chester-Hill Solutions Remote
+– Wrote automated test scripts covering 50+ user flows across multiple environments, cutting the repetitive manual
+regression passes the team ran each release cycle.
+– Investigated and documented defects through API response analysis and root-cause write-ups, giving developers
+clearer repro steps to turn around fixes faster.
 Projects
-Palate (UofTHacks 2026) |Next.js, TypeScript, MongoDB, Gemini AI, WebAuthn
-–   Mitigated credential vulnerabilities by implementing  passkey-first authentication using WebAuthn and
-cryptographic standards, replacing traditional passwords.
-–    Synchronized real-time lobby states for concurrent users by leveraging  Next.js Server Actions and optimistic
-UI updates , ensuring sub-100ms latency.
-–    Integrated Google Gemini AI  to analyze user behavior patterns and generate personalized restaurant
-recommendations via a feedback loop.
-MacroMatch |React, Node.js, Express, MongoDB, Linear Programming
-–   Optimized meal generation logic using the  Simplex Algorithm (Linear Programming)  to solve macronutrient
-constraint systems in under  200ms.
-–    Orchestrated a robust CI/CD pipeline via Vercel/Render for automated deployments and implemented
-JWT-based session management for secure user data access.
-Anima (Evo-Habit) |React, Vite, Zustand, Framer Motion, MongoDB
-–   Decoupled frontend logic using a  Monorepo architecture, leveraging Zustand for atomic state management to
-handle complex game loops.
-–    Increased user retention by designing fluid, 60fps animations with  Framer Motion and Lottie.
+LeaseGuard | TypeScript, Next.js, Claude (MCP), Supabase pgvector, RAG
+– Built an AI agent analyzing Ontario leases via a 12-tool MCP server (Claude Haiku 4.5) with hybrid
+BM25/vector retrieval, returning a grounded risk report under 90 seconds across 206 tests.
+Angler (ItsTodayMedia $5,000 Build Challenge) | Next.js, TypeScript, Claude, Supabase, MCP
+– Built a four-module AI web app solo in 10 days, mining competitor ads via Apify and extracting patterns with a
+vision-language model, then exposed it as a public MCP server and ran a security audit across 21 tests.
+Reflecta | Python, Typer, Gemini, Groq, Claude, pytest, AST
+– Published a Python CLI agent (reflecta, PyPI) that finds coverage gaps and generates/repairs tests via a
+multi-model routing pipeline, lifting coverage 64%→80% on a real service across 338 tests.
+Palate (UofTHacks 2026) | Next.js, TypeScript, MongoDB, WebAuthn, Google Gemini
+– Built the Next.js frontend and end-to-end passkey authentication (WebAuthn) for a group-dining app whose
+Gemini engine turns swipe data into restaurant picks, addressing the 1Password challenge.
 Technical Skills
-Languages:  Python, Java, TypeScript, JavaScript (ES6+), SQL, HTML5, CSS
-Frameworks:  Next.js, React, Node.js, Express.js, MongoDB, TailwindCSS, Redux, Zustand
-Dev Tools & Concepts :  Git, GitHub, Docker, WebAuthn, REST APIs, Agile/Scrum, CI/CD, WCAG, PyMuPDF
-Awards
-University of Toronto Dean’s List (2024-2025)   |J.S. Mclean Scholarship (UofT)
-2nd Place - National Waterloo SAF Financial Literacy Competition (2023)
-----------------Page (0) Break----------------
+Languages: Python, TypeScript, JavaScript (ES6+), Dart, Java, SQL, HTML5, CSS
+Frameworks: React, Next.js, Node.js, Express.js, FastAPI, Flutter, TailwindCSS, Zustand, LlamaIndex, Redux
+AI Tools: Claude Code, Claude API, Model Context Protocol (MCP), RAG, Google Gemini, Cursor
+Dev Tools: Git, GitHub, Docker, PostgreSQL, Supabase, Stripe, REST APIs, OAuth 2.0, WebAuthn, CI/CD, Jira
+Awards & Certifications
+UofT Dean’s List (2024-25, 2025-26) | J.S. McLean Scholarship | 2nd, Waterloo SAF Financial Literacy (2023) | Claude
+Code in Action & Building with the Claude API (Anthropic)
+
+-- 1 of 1 --
+
