@@ -1,43 +1,74 @@
 import { useRef } from 'react';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
-import { GraduationCap, Briefcase, Award, Rocket, Code2 } from 'lucide-react';
+import { GraduationCap, Briefcase, Award, Rocket, Code2, Terminal as TerminalIcon } from 'lucide-react';
 import SectionHeading from './SectionHeading';
+import Credentials from './Credentials';
 
 const entries = [
     {
-        icon: Code2,
-        title: 'GenLedge',
-        subtitle: 'Software Developer',
-        date: 'Mar 2026 – Apr 2026',
+        icon: Briefcase,
+        title: 'Velox Systems',
+        subtitle: 'Software Engineer',
+        date: 'Jul 2026 – Present',
+        location: 'Toronto, ON',
+        current: true,
         description:
-            'Built a Stripe MCP server (TypeScript, 12 tools) enabling AI accounting agents to query live payment data via the Model Context Protocol. Engineered a webhook pipeline with HMAC-SHA256 verification routing 12 event types to specialized AI employee roles for real-time general ledger entry generation.',
+            "Sole developer on the rebuild of a landscaping contractor's production workspace — migrating a live safety-compliance app onto a FastAPI/Postgres backend and cutting authentication from Supabase over to Zitadel OIDC, all behind a zero-error type and lint gate. Also shipped a route-planning module that turns a 4,756-tree municipal registry into truck-days in driving order and syncs offline crew completions back to the office, retiring a 95-file legacy planner.",
+        stack: ['FastAPI', 'PostgreSQL', 'Zitadel OIDC', 'TypeScript'],
+        type: 'experience',
+    },
+    {
+        icon: Code2,
+        title: 'Applied Optimal Inc.',
+        subtitle: 'Full-Stack Developer, Contract',
+        date: 'Jul 2026 – Sep 2026',
+        location: 'Remote',
+        description:
+            'Built a 7-day trial to paid subscription system with member-count fee tiers, checkout, a reminder job, and server-side route lockout — 4 migrations and 130 automated tests. Worked a Jira ticket and peer-review loop on a 3-developer team, resolving spec gaps with a non-technical client across twice-weekly syncs, restoring blocking flake8 and black CI, and clearing 77 Flutter analyzer warnings.',
+        stack: ['FastAPI', 'PostgreSQL', 'Stripe', 'Flutter Web', 'Jira'],
+        type: 'experience',
+    },
+    {
+        icon: TerminalIcon,
+        title: 'GenLedge',
+        subtitle: 'Software Developer, Contract',
+        date: 'Mar 2026 – May 2026',
+        location: 'Remote',
+        description:
+            'Built a Stripe MCP server (TypeScript, 12 tools) covering charges, invoices, subscriptions, and disputes, enabling AI accounting agents to query live payment data via the Model Context Protocol. Also built a Stripe webhook handler that verified event authenticity and routed 12 event types to specialized AI employee roles, generating real-time general-ledger entries automatically.',
+        stack: ['TypeScript', 'MCP', 'Stripe', 'Webhooks'],
         type: 'experience',
     },
     {
         icon: Rocket,
         title: 'Outamation',
         subtitle: 'AI and Automation Extern',
-        date: 'Summer 2025',
+        date: 'May 2025 – Aug 2025',
+        location: 'Remote',
         description:
-            'Engineering NLP and Computer Vision pipelines to automate high-volume document classification. Optimizing Retrieval-Augmented Generation (RAG) systems with LlamaIndex and custom vector embeddings.',
+            'Built NLP and Computer Vision (OCR) pipelines to classify and extract fields from mortgage documents, replacing a manual data-entry step on the program’s sample document set. Improved retrieval relevance by ~25% on a benchmark query set by tuning a Retrieval-Augmented Generation (RAG) system in LlamaIndex, iterating on chunking strategy and custom vector embeddings.',
+        stack: ['Python', 'LlamaIndex', 'RAG', 'OCR'],
         type: 'experience',
     },
     {
         icon: GraduationCap,
         title: 'University of Toronto, St. George',
-        subtitle: 'Computer Science Specialist Co-op',
-        date: '2024 – 2028',
+        subtitle: 'Computer Science Specialist, Co-op',
+        date: 'Sept 2024 – Apr 2028',
+        location: 'Toronto, ON · CGPA 3.6/4.0',
         description:
-            "Pursuing a Bachelor of Computer Science. Dean's List Scholar. Coursework includes Data Structures & Analysis, Software Design, Systems Programming, and Computer Organization.",
+            "Pursuing a Bachelor of Computer Science. Dean's List Scholar in 2024-25 and 2025-26. Coursework includes Data Structures & Analysis, Software Design, Systems Programming, Computer Organization, Theory of Computation, and Linear Algebra.",
         type: 'education',
     },
     {
         icon: Briefcase,
         title: 'Chester-Hill Solutions',
-        subtitle: 'Software QA Tester',
+        subtitle: 'Software QA Tester, Intern',
         date: 'June 2024 – Nov 2024',
+        location: 'Remote',
         description:
-            'Developed automated scripts for critical user flows to decrease regression testing time. Accelerated bug resolution through detailed API response analysis and root cause documentation.',
+            'Wrote automated test scripts covering 50+ user flows across multiple environments, cutting the repetitive manual regression passes the team ran each release cycle. Investigated and documented defects through API response analysis and root-cause write-ups, giving developers clearer repro steps to turn around fixes faster.',
+        stack: ['Test Automation', 'REST APIs'],
         type: 'experience',
     },
     {
@@ -45,8 +76,10 @@ const entries = [
         title: 'Ontario Liberal Party',
         subtitle: 'Frontend Developer',
         date: 'May 2023 – Sept 2023',
+        location: 'Toronto, ON',
         description:
             'Built React components and optimized Redux state management. Refactored legacy CSS into modular Sass and enforced WCAG 2.1 compliance, improving page performance and accessibility scores.',
+        stack: ['React', 'Redux', 'Sass', 'WCAG 2.1'],
         type: 'experience',
     },
 ];
@@ -65,13 +98,47 @@ function TimelineEntry({ entry, index }) {
         >
             {/* Dot */}
             <span className="absolute left-[-38px] top-[6px] w-3 h-3 rounded-full bg-accent ring-4 ring-bg shadow-[0_0_14px_rgba(226,160,78,0.4)]" />
+            {entry.current && (
+                <span
+                    className="absolute left-[-44px] top-0 w-6 h-6 rounded-full border border-accent pointer-events-none"
+                    style={{ animation: 'ring-pulse 2.6s ease-out infinite' }}
+                    aria-hidden="true"
+                />
+            )}
 
             {/* Card */}
             <div className="border border-white/[0.06] rounded-2xl bg-surface p-5 transition-all duration-300 hover:border-white/[0.12] hover:translate-x-1">
-                <p className="font-mono text-xs text-accent mb-2">{entry.date}</p>
-                <h3 className="text-[17px] font-semibold text-text mb-1">{entry.title}</h3>
+                <div className="flex items-baseline justify-between gap-3 flex-wrap mb-2">
+                    <p className="font-mono text-xs text-accent">{entry.date}</p>
+                    {entry.location && (
+                        <p className="font-mono text-[11px] text-text-dim">{entry.location}</p>
+                    )}
+                </div>
+
+                <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <h3 className="text-[17px] font-semibold text-text">{entry.title}</h3>
+                    {entry.current && (
+                        <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-accent bg-accent/10 border border-accent/25 px-2 py-0.5 rounded-full">
+                            Current
+                        </span>
+                    )}
+                </div>
+
                 <p className="text-[13.5px] text-accent mb-2">{entry.subtitle}</p>
                 <p className="text-sm text-text-muted leading-relaxed">{entry.description}</p>
+
+                {entry.stack && (
+                    <div className="flex flex-wrap gap-1.5 mt-4">
+                        {entry.stack.map((t) => (
+                            <span
+                                key={t}
+                                className="font-mono text-[11px] text-text-muted bg-surface2/60 border border-white/[0.06] px-2 py-0.5 rounded-md"
+                            >
+                                {t}
+                            </span>
+                        ))}
+                    </div>
+                )}
             </div>
         </motion.div>
     );
@@ -91,7 +158,7 @@ export default function Timeline() {
             <SectionHeading
                 label="Journey"
                 title="Experience & education"
-                subtitle="Key milestones in my development as a software engineer."
+                subtitle="Where I've shipped, what I studied, and what came of it."
             />
 
             <div ref={containerRef} className="relative pl-[38px]">
@@ -110,6 +177,8 @@ export default function Timeline() {
                     ))}
                 </div>
             </div>
+
+            <Credentials />
         </section>
     );
 }
