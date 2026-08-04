@@ -5,32 +5,31 @@ import { Download, Mail, Github, Linkedin, Brain, Check, Send } from 'lucide-rea
 import ContactModal, { DEFAULT_MESSAGE } from './ContactModal';
 import {
     SiPython,
-    SiJavascript,
     SiTypescript,
     SiReact,
     SiNodedotjs,
     SiNextdotjs,
     SiFastapi,
     SiGit,
-    SiMongodb,
+    SiPostgresql,
     SiTailwindcss,
     SiDocker,
-    SiOpenai,
+    SiAnthropic,
 } from 'react-icons/si';
 import GitHubGraph from './GitHubGraph';
 import GitHubStreak from './GitHubStreak';
 
 const TOP_SKILLS = [
-    { name: 'Python',       icon: SiPython },
-    { name: 'JavaScript',   icon: SiJavascript },
     { name: 'TypeScript',   icon: SiTypescript },
+    { name: 'Python',       icon: SiPython },
     { name: 'React',        icon: SiReact },
-    { name: 'Node.js',      icon: SiNodedotjs },
     { name: 'Next.js',      icon: SiNextdotjs },
     { name: 'FastAPI',      icon: SiFastapi },
-    { name: 'MongoDB',      icon: SiMongodb },
+    { name: 'Node.js',      icon: SiNodedotjs },
+    { name: 'PostgreSQL',   icon: SiPostgresql },
     { name: 'Tailwind CSS', icon: SiTailwindcss },
-    { name: 'Claude Code',  icon: Brain },
+    { name: 'Claude Code',  icon: SiAnthropic },
+    { name: 'MCP',          icon: Brain },
     { name: 'Docker',       icon: SiDocker },
     { name: 'Git/GitHub',   icon: SiGit },
 ];
@@ -142,6 +141,10 @@ export default function LandingSummary({ onEnter }) {
                         I'm a{' '}
                         <span className="text-accent font-medium">
                             CS Specialist at the University of Toronto
+                        </span>{' '}
+                        and a{' '}
+                        <span className="text-accent font-medium">
+                            software engineer at Velox Systems
                         </span>
                         , building everything from AI agents to full-stack web products. Looking for{' '}
                         <span className="text-accent font-medium">Fall 2026</span> and{' '}

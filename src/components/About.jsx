@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { MapPin, GraduationCap } from 'lucide-react';
+import { MapPin, GraduationCap, Briefcase } from 'lucide-react';
 import SectionHeading from './SectionHeading';
 
 export default function About() {
@@ -52,6 +52,10 @@ export default function About() {
                                 <GraduationCap size={14} className="text-accent shrink-0" />
                                 <span>CS Specialist @ University of Toronto</span>
                             </div>
+                            <div className="flex items-center gap-2.5 text-text-muted text-sm">
+                                <Briefcase size={14} className="text-accent shrink-0" />
+                                <span>Software Engineer @ Velox Systems</span>
+                            </div>
                         </div>
                     </motion.div>
 
@@ -66,6 +70,9 @@ export default function About() {
                         >
                             <p className="text-text text-base md:text-lg leading-relaxed mb-5">
                                 I'm a <span className="text-accent font-medium">CS Specialist at the University of Toronto</span>. I care more about the problem than the tools, so I end up working on whatever it calls for.
+                            </p>
+                            <p className="text-text-muted text-base leading-relaxed mb-5">
+                                Right now I'm a <span className="text-accent font-medium">software engineer at Velox Systems</span>, rebuilding a contractor's production workspace on FastAPI and Postgres. Before that I shipped a Stripe subscription system at Applied Optimal, a Stripe MCP server at GenLedge, and RAG pipelines at Outamation.
                             </p>
                             <p className="text-text-muted text-base leading-relaxed mb-5">
                                 Looking for software engineering internships for{' '}
