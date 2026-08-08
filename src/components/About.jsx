@@ -8,18 +8,14 @@ export default function About() {
             <div className="w-full">
                 <SectionHeading label="About" title="Who I Am" />
 
-                {/* Byline: name mark + quick facts, no boxed frame */}
+                {/* Byline: quick facts, no boxed frame */}
                 <motion.div
                     initial={{ opacity: 0, y: 12 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: '-80px' }}
                     transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                    className="flex flex-wrap items-center gap-x-7 gap-y-3 mb-10 pb-8 border-b border-white/[0.06]"
+                    className="flex flex-wrap items-center justify-center gap-x-7 gap-y-3 mb-10 pb-8 border-b border-white/[0.06] text-center"
                 >
-                    <span className="font-display italic text-accent leading-none text-3xl sm:text-4xl">
-                        P.
-                    </span>
-                    <span className="hidden sm:block w-px h-6 bg-white/[0.08]" />
                     <div className="flex items-center gap-2 text-text-muted text-sm">
                         <MapPin size={14} className="text-accent shrink-0" />
                         <span>Toronto, Canada</span>
