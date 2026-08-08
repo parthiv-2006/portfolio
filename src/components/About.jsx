@@ -9,50 +9,51 @@ export default function About() {
                 <SectionHeading label="About" title="Who I Am" />
 
                 <div className="flex flex-col lg:flex-row gap-10 lg:gap-16 items-start">
-                    {/* Left: Photo + quick info */}
+                    {/* Left: Monogram card + quick info */}
                     <motion.div
                         initial={{ opacity: 0, x: -30 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true, margin: '-80px' }}
                         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                        className="lg:w-[320px] shrink-0"
+                        className="lg:w-[320px] shrink-0 lg:sticky lg:top-28"
                     >
-                        {/* Headshot with accent border glow */}
-                        <div className="relative group/photo mb-6">
-                            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-accent/20 via-accent/5 to-transparent blur-sm opacity-60 group-hover/photo:opacity-100 transition-opacity duration-500" />
+                        {/* Monogram card with accent border glow */}
+                        <div className="relative group/card mb-6">
+                            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-accent/20 via-accent/5 to-transparent blur-sm opacity-60 group-hover/card:opacity-100 transition-opacity duration-500" />
 
-                            <div className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden border border-white/[0.08] bg-surface">
-                                <img
-                                    src="/headshot.png"
-                                    alt="Parthiv Paul"
-                                    className="w-full h-full object-cover scale-[1.12] group-hover/photo:scale-[1.18] transition-transform duration-700 ease-out"
-                                    onError={(e) => {
-                                        e.target.style.display = 'none';
-                                        e.target.nextElementSibling.style.display = 'flex';
-                                    }}
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-br from-accent/20 via-surface to-surface-light items-center justify-center hidden">
-                                    <div className="text-center">
-                                        <span className="text-6xl font-display italic text-accent/60">PP</span>
-                                        <p className="text-text-dim text-xs font-mono mt-2">your photo here</p>
-                                    </div>
-                                </div>
+                            <div className="relative rounded-2xl overflow-hidden border border-white/[0.08] bg-surface px-8 py-12 flex flex-col items-center text-center">
+                                {/* Ambient corner glow */}
+                                <div className="absolute -top-16 -right-16 w-40 h-40 rounded-full bg-accent/10 blur-3xl pointer-events-none" />
+                                <div className="absolute -bottom-16 -left-16 w-40 h-40 rounded-full bg-accent/5 blur-3xl pointer-events-none" />
 
-                                <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-surface/80 to-transparent" />
+                                {/* Faint concentric ring behind the monogram */}
+                                <div className="absolute w-36 h-36 rounded-full border border-accent/10" />
+                                <div className="absolute w-28 h-28 rounded-full border border-accent/10" />
+
+                                <span
+                                    className="relative font-display italic text-accent leading-none"
+                                    style={{ fontSize: 'clamp(3.4rem, 7vw, 4.6rem)' }}
+                                >
+                                    PP
+                                </span>
+                                <span className="relative mt-4 h-px w-10 bg-accent/40" />
+                                <span className="relative mt-4 font-mono text-[11px] tracking-[0.28em] uppercase text-text-dim">
+                                    Parthiv Paul
+                                </span>
                             </div>
                         </div>
 
                         {/* Quick location & education badges */}
-                        <div className="space-y-2">
-                            <div className="flex items-center gap-2.5 text-text-muted text-sm">
+                        <div className="rounded-2xl border border-white/[0.08] bg-surface divide-y divide-white/[0.06]">
+                            <div className="flex items-center gap-2.5 text-text-muted text-sm px-4 py-3">
                                 <MapPin size={14} className="text-accent shrink-0" />
                                 <span>Toronto, Canada</span>
                             </div>
-                            <div className="flex items-center gap-2.5 text-text-muted text-sm">
+                            <div className="flex items-center gap-2.5 text-text-muted text-sm px-4 py-3">
                                 <GraduationCap size={14} className="text-accent shrink-0" />
                                 <span>CS Specialist @ University of Toronto</span>
                             </div>
-                            <div className="flex items-center gap-2.5 text-text-muted text-sm">
+                            <div className="flex items-center gap-2.5 text-text-muted text-sm px-4 py-3">
                                 <Briefcase size={14} className="text-accent shrink-0" />
                                 <span>Software Engineer @ Velox Systems</span>
                             </div>
@@ -66,10 +67,10 @@ export default function About() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true, margin: '-80px' }}
                             transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-                            className="mb-10"
+                            className="mb-10 border-l-2 border-accent/20 pl-6 md:pl-8"
                         >
-                            <p className="text-text text-base md:text-lg leading-relaxed mb-5">
-                                I'm a <span className="text-accent font-medium">CS Specialist at the University of Toronto</span>. I care more about the problem than the tools, so I end up working on whatever it calls for.
+                            <p className="font-display italic text-text leading-snug mb-6" style={{ fontSize: 'clamp(1.35rem, 2.4vw, 1.75rem)' }}>
+                                I'm a <span className="text-accent">CS Specialist at the University of Toronto</span>. I care more about the problem than the tools, so I end up working on whatever it calls for.
                             </p>
                             <p className="text-text-muted text-base leading-relaxed mb-5">
                                 Right now I'm a <span className="text-accent font-medium">software engineer at Velox Systems</span>, rebuilding a contractor's production workspace on FastAPI and Postgres. Before that I shipped a Stripe subscription system at Applied Optimal, a Stripe MCP server at GenLedge, and RAG pipelines at Outamation.
