@@ -1,0 +1,188 @@
+%-------------------------
+% Resume in LaTeX
+% Author: Parthiv Paul
+%-------------------------
+
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+\input{glyphtounicode}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-0.75in}
+\addtolength{\textheight}{1.72in}
+
+\urlstyle{same}
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+\pdfgentounicode=1
+
+% SECTION FORMATTING
+\titleformat{\section}{
+  \vspace{-14pt}\scshape\raggedright\large
+}{}{0em}{}[\color{black}\titlerule \vspace{-8pt}]
+
+% Custom commands
+\newcommand{\resumeItem}[1]{
+  \item\small{
+    {#1}
+  }
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-1pt}\item
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+      \textit{\small#3} & \textit{\small#4} \\
+    \end{tabular*}\vspace{-6pt}
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+    \item
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \small#1 & #2 \\
+    \end{tabular*}\vspace{-6pt}
+}
+
+% COMPRESSED LISTS
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.15in, label={}, itemsep=0pt, topsep=2pt]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}[itemsep=1pt, topsep=2pt]}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-7pt}}
+
+\begin{document}
+
+%----------HEADING----------
+\begin{center}
+    \textbf{\Huge \scshape Parthiv Paul} \\ \vspace{5pt}
+    \small Toronto, ON $|$
+    647-781-6235 $|$
+    \href{mailto:parthiv.paul@mail.utoronto.ca}{\underline{parthiv.paul@mail.utoronto.ca}} $|$
+    \href{https://parthivpaul.me}{\underline{parthivpaul.me}} $|$
+    \href{https://linkedin.com/in/parthiv-paul}{\underline{linkedin.com/in/parthiv-paul}} $|$
+    \href{https://github.com/parthiv-2006}{\underline{github.com/parthiv-2006}}
+\end{center}
+
+
+%-----------EDUCATION-----------
+\section{Education}
+  \resumeSubHeadingListStart
+    \resumeSubheading
+      {University of Toronto St. George}{Toronto, ON}
+      {Bachelor of Computer Science, Specialist Co-op Program $|$ CGPA: 3.6/4.0}{Sept 2024 -- Apr 2028}
+  \resumeSubHeadingListEnd
+
+%-----------EXPERIENCE-----------
+\section{Experience}
+  \resumeSubHeadingListStart
+
+    \resumeSubheading
+      {Software Engineer}{Jul 2026 -- Present}
+      {Velox Systems}{Toronto, ON}
+      \resumeItemListStart
+        \resumeItem{Sole developer on the rebuild of a landscaping contractor's production workspace, migrating its live safety-compliance app onto a FastAPI/Postgres backend and cutting authentication from Supabase to Zitadel OIDC behind a zero-error type and lint gate.}
+        \resumeItem{Shipped a route-planning module that turns a 4,756-tree municipal registry into truck-days in driving order and syncs offline crew completions back to the office, retiring a 95-file legacy planner.}
+      \resumeItemListEnd
+
+    \resumeSubheading
+      {Full-Stack Developer, Contract}{Jul 2026 -- Sep 2026}
+      {Applied Optimal Inc.}{Remote}
+      \resumeItemListStart
+        \resumeItem{Built a 7-day trial to paid subscription system (FastAPI, Postgres, Stripe, Flutter Web) with member-count fee tiers, checkout, a reminder job, and server-side route lockout, across 4 migrations and 130 automated tests.}
+        \resumeItem{Worked a Jira ticket and peer-review loop on a 3-developer team, resolving spec gaps with a non-technical client across twice-weekly syncs, restoring blocking flake8 and black CI, and clearing 77 Flutter analyzer warnings.}
+      \resumeItemListEnd
+
+    \resumeSubheading
+      {Software Developer, Contract}{Mar 2026 -- May 2026}
+      {GenLedge}{Remote}
+      \resumeItemListStart
+        \resumeItem{Built a \textbf{Stripe MCP server} (TypeScript, 12 tools) covering charges, invoices, subscriptions, and disputes, enabling AI accounting agents to query live payment data via the \textbf{Model Context Protocol}.}
+        \resumeItem{Built a \textbf{Stripe webhook handler} that verified event authenticity and routed \textbf{12 event types} to specialized AI employee roles, generating real-time \textbf{general-ledger entries} automatically.}
+      \resumeItemListEnd
+
+    \resumeSubheading
+      {AI and Automation Extern}{May 2025 -- Aug 2025}
+      {Outamation}{Remote}
+      \resumeItemListStart
+        \resumeItem{Built \textbf{NLP} and \textbf{Computer Vision} (OCR) pipelines to classify and extract fields from mortgage documents, replacing a manual data-entry step on the program's sample document set.}
+        \resumeItem{Improved retrieval relevance by \textbf{$\sim$25\%} on a benchmark query set by tuning a \textbf{Retrieval-Augmented Generation (RAG)} system in \textbf{LlamaIndex}, iterating on chunking and custom vector embeddings.}
+      \resumeItemListEnd
+
+    \resumeSubheading
+      {Software QA Tester, Intern}{June 2024 -- Nov 2024}
+      {Chester-Hill Solutions}{Remote}
+      \resumeItemListStart
+        \resumeItem{Wrote automated test scripts covering \textbf{50+ user flows} across multiple environments, cutting the repetitive manual regression passes the team ran each release cycle.}
+        \resumeItem{Investigated and documented defects through \textbf{API response analysis} and root-cause write-ups, giving developers clearer repro steps to turn around fixes faster.}
+      \resumeItemListEnd
+
+  \resumeSubHeadingListEnd
+
+%-----------PROJECTS-----------
+\section{Projects}
+    \resumeSubHeadingListStart
+
+      \resumeProjectHeading
+          {\textbf{LeaseGuard} $|$ \emph{TypeScript, Next.js, Claude (MCP), Supabase pgvector, RAG}}{}
+          \resumeItemListStart
+            \resumeItem{Built an \textbf{AI agent} analyzing Ontario leases via a \textbf{12-tool MCP server} (\textbf{Claude Haiku 4.5}) with \textbf{hybrid BM25/vector retrieval}, returning a grounded risk report under \textbf{90 seconds} across \textbf{206 tests}.}
+          \resumeItemListEnd
+
+      \resumeProjectHeading
+          {\textbf{Angler (ItsTodayMedia \$5,000 Build Challenge)} $|$ \emph{Next.js, TypeScript, Claude, Supabase, MCP}}{}
+          \resumeItemListStart
+            \resumeItem{Built a four-module \textbf{AI web app} solo in 10 days, mining competitor ads via \textbf{Apify} and extracting patterns with a \textbf{vision-language model}, then exposed it as a public \textbf{MCP server} and ran a security audit across \textbf{21 tests}.}
+          \resumeItemListEnd
+
+      \resumeProjectHeading
+          {\textbf{Reflecta} $|$ \emph{Python, Typer, Gemini, Groq, Claude, pytest, AST}}{}
+          \resumeItemListStart
+            \resumeItem{Published a \textbf{Python CLI agent} (\texttt{reflecta}, PyPI) that finds coverage gaps and generates/repairs tests via a \textbf{multi-model routing pipeline}, lifting coverage \textbf{64\%$\to$80\%} on a real service across \textbf{338 tests}.}
+          \resumeItemListEnd
+
+      \resumeProjectHeading
+          {\textbf{Palate (UofTHacks 2026)} $|$ \emph{Next.js, TypeScript, MongoDB, WebAuthn, Google Gemini}}{}
+          \resumeItemListStart
+            \resumeItem{Built the \textbf{Next.js} frontend and end-to-end \textbf{passkey authentication} (\textbf{WebAuthn}) for a group-dining app whose \textbf{Gemini} engine turns swipe data into restaurant picks, addressing the \textbf{1Password challenge}.}
+          \resumeItemListEnd
+
+    \resumeSubHeadingListEnd
+
+%-----------TECHNICAL SKILLS-----------
+\section{Technical Skills}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \textbf{Languages}{: Python, TypeScript, JavaScript (ES6+), Dart, Java, SQL, HTML5, CSS} \\
+     \textbf{Frameworks}{: React, Next.js, Node.js, Express.js, FastAPI, Flutter, TailwindCSS, Zustand, LlamaIndex, Redux} \\
+     \textbf{AI Tools}{: Claude Code, Claude API, Model Context Protocol (MCP), RAG, Google Gemini, Cursor} \\
+     \textbf{Dev Tools}{: Git, GitHub, Docker, PostgreSQL, Supabase, Stripe, REST APIs, OAuth 2.0, WebAuthn, CI/CD, Jira}
+    }}
+ \end{itemize}
+
+%-----------AWARDS \& CERTIFICATIONS-----------
+\section{Awards \& Certifications}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     UofT Dean's List (2024-25, 2025-26) $|$ J.S. McLean Scholarship $|$ 2nd, Waterloo SAF Financial Literacy (2023) $|$ Claude Code in Action \& Building with the Claude API (Anthropic)
+    }}
+ \end{itemize}
+
+\end{document}
