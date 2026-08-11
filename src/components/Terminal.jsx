@@ -44,7 +44,7 @@ const COMMANDS = {
         downloadResume();
         return [
             { type: 'success', text: '📄 Downloading resume...' },
-            { type: 'info', text: '   → Parthiv_Paul_Resume.pdf' },
+            { type: 'info', text: '   → parthiv_paul_swe.pdf' },
         ];
     },
     about: () => [
