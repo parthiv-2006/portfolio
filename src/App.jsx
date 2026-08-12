@@ -111,6 +111,23 @@ export default function App() {
     const [theme, setTheme] = useState('night');
     const { activeSection } = useActiveSection(showFullSite);
 
+    // Konami code — matches the footer hint ("open the console")
+    useEffect(() => {
+        const sequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+        let progress = 0;
+        const onKeyDown = (e) => {
+            const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+            progress = key === sequence[progress] ? progress + 1 : (key === sequence[0] ? 1 : 0);
+            if (progress === sequence.length) {
+                progress = 0;
+                console.log('%c⌨️  You found it.', 'color:#E2A04E;font-family:monospace;font-size:14px;font-weight:bold;');
+                console.log('%cHi, I\'m Parthiv — thanks for poking around. parthiv.paul5545@gmail.com', 'color:#9A9082;font-family:monospace;');
+            }
+        };
+        window.addEventListener('keydown', onKeyDown);
+        return () => window.removeEventListener('keydown', onKeyDown);
+    }, []);
+
     useEffect(() => {
         let saved = 'night';
         try { saved = localStorage.getItem('pp-theme') || 'night'; } catch (e) {}
