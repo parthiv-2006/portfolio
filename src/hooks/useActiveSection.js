@@ -2,11 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 
 const SECTION_IDS = ['hero', 'about', 'skills', 'activity', 'work', 'journey', 'lab', 'contact'];
 
-export default function useActiveSection() {
+export default function useActiveSection(enabled = true) {
     const [activeSection, setActiveSection] = useState('hero');
     const observerRef = useRef(null);
 
     useEffect(() => {
+        if (!enabled) return;
+
         observerRef.current = new IntersectionObserver(
             (entries) => {
                 // Pick the entry with the largest intersection ratio
@@ -27,7 +29,7 @@ export default function useActiveSection() {
         });
 
         return () => observerRef.current?.disconnect();
-    }, []);
+    }, [enabled]);
 
     return { activeSection, sectionIds: SECTION_IDS };
 }

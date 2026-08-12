@@ -4,8 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 const sections = [
     { id: 'hero', label: 'Home', xp: 0 },
     { id: 'skills', label: 'Skills', xp: 20 },
-    { id: 'projects', label: 'Work', xp: 45 },
-    { id: 'timeline', label: 'Journey', xp: 70 },
+    { id: 'work', label: 'Work', xp: 45 },
+    { id: 'journey', label: 'Journey', xp: 70 },
     { id: 'contact', label: 'Contact', xp: 100 },
 ];
 

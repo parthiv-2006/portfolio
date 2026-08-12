@@ -109,7 +109,7 @@ export default function App() {
     const [showFullSite, setShowFullSite] = useState(false);
     const [showEntering, setShowEntering] = useState(false);
     const [theme, setTheme] = useState('night');
-    const { activeSection } = useActiveSection();
+    const { activeSection } = useActiveSection(showFullSite);
 
     useEffect(() => {
         let saved = 'night';
