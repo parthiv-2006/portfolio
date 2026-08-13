@@ -10,9 +10,19 @@ export const GITHUB_USERNAME = 'parthiv-2006';
  * github-contributions-api.deno.dev, disappeared when Deno Deploy Classic was
  * sunset on 2026-07-20 and every day silently read as zero.)
  *
+ * `own-api` (a Vercel function backed by a server-side token, see
+ * /api/contributions.js) talks to GitHub's GraphQL API directly and is tried
+ * first — no third-party caching lag. It 404s in local `vite dev` (no
+ * serverless runtime) and falls through to the proxies below, which is fine.
+ *
  * Each source returns the trailing ~year as a flat [{ date, count }].
  */
 const SOURCES = [
+    {
+        name: 'own-api',
+        url: (user, bust) => `/api/contributions?user=${encodeURIComponent(user)}&t=${bust}`,
+        parse: (json) => json.contributions.map((d) => ({ date: d.date, count: d.count })),
+    },
     {
         name: 'jogruber',
         url: (user, bust) =>
