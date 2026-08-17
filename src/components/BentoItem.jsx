@@ -1,5 +1,7 @@
 import { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
+import usePrefersReducedMotion from '../hooks/usePrefersReducedMotion';
+import useIsTouch from '../hooks/useIsTouch';
 
 const itemVariants = {
     hidden: { opacity: 0, scale: 0.85, filter: 'blur(6px)' },
@@ -11,11 +13,26 @@ const itemVariants = {
     },
 };
 
-export default function BentoItem({ children, className = '', delay = 0, onClick, isStaggerChild = false }) {
+export default function BentoItem({
+    children,
+    className = '',
+    delay = 0,
+    onClick,
+    label,
+    isStaggerChild = false,
+}) {
     const cardRef = useRef(null);
     const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 });
+    const reducedMotion = usePrefersReducedMotion();
+    const isTouch = useIsTouch();
+
+    const isInteractive = typeof onClick === 'function';
+    // The pointer-tracked tilt is driven by React state, not framer's own
+    // reduced-motion handling, so it has to opt out here explicitly.
+    const tiltEnabled = !reducedMotion && !isTouch;
 
     const handleMouseMove = (e) => {
+        if (!tiltEnabled) return;
         const rect = cardRef.current?.getBoundingClientRect();
         if (!rect) return;
         const x = (e.clientX - rect.left) / rect.width - 0.5;
@@ -24,8 +41,28 @@ export default function BentoItem({ children, className = '', delay = 0, onClick
     };
 
     const handleMouseLeave = () => {
+        if (!tiltEnabled) return;
         setTilt({ rotateX: 0, rotateY: 0 });
     };
+
+    const handleKeyDown = (e) => {
+        if (!isInteractive) return;
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        // Space would otherwise scroll the page out from under the card.
+        e.preventDefault();
+        onClick(e);
+    };
+
+    const interactiveProps = isInteractive
+        ? {
+            role: 'button',
+            tabIndex: 0,
+            'aria-label': label,
+            onClick,
+            onKeyDown: handleKeyDown,
+            whileTap: { scale: 0.97, transition: { type: 'spring', stiffness: 300, damping: 10 } },
+        }
+        : {};
 
     return (
         <motion.div
@@ -35,15 +72,16 @@ export default function BentoItem({ children, className = '', delay = 0, onClick
             whileInView={isStaggerChild ? undefined : { opacity: 1, scale: 1, filter: 'blur(0px)' }}
             viewport={isStaggerChild ? undefined : { once: true, margin: '-100px' }}
             transition={isStaggerChild ? undefined : { type: 'spring', stiffness: 200, damping: 18, delay }}
-            whileTap={{ scale: 0.97, transition: { type: 'spring', stiffness: 300, damping: 10 } }}
-            onClick={onClick}
+            {...interactiveProps}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             style={{
                 perspective: '800px',
                 transformStyle: 'preserve-3d',
             }}
-            className={`relative rounded-2xl border border-white/[0.08] bg-surface/60 backdrop-blur-sm p-6 overflow-hidden group cursor-pointer shadow-lg shadow-black/20 hover:border-white/20 hover:shadow-xl hover:shadow-accent/5 transition-all duration-300 ${className}`}
+            className={`relative rounded-2xl border border-border bg-surface/60 backdrop-blur-sm p-5 sm:p-6 overflow-hidden group shadow-lg shadow-black/20 hover:border-border-hover hover:shadow-xl hover:shadow-accent/5 transition-all duration-300 ${
+                isInteractive ? 'cursor-pointer' : ''
+            } ${className}`}
         >
             <motion.div
                 style={{
@@ -55,8 +93,11 @@ export default function BentoItem({ children, className = '', delay = 0, onClick
                 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             >
-                {/* Subtle hover glow */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-[radial-gradient(ellipse_at_center,rgba(0,229,255,0.06)_0%,transparent_70%)]" />
+                {/* Subtle hover glow — accent token so it tracks the day/night theme */}
+                <div
+                    aria-hidden="true"
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-500 pointer-events-none bg-[radial-gradient(ellipse_at_center,var(--color-accent-glow)_0%,transparent_70%)]"
+                />
                 <div className="relative z-10">{children}</div>
             </motion.div>
         </motion.div>

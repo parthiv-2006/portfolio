@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useId } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import {
     SiPython,
@@ -104,11 +104,12 @@ function SkillCard({ skill, index }) {
     };
 
     return (
-        <motion.div
+        <motion.li
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
-                delay: index * 0.04,
+                // Capped so a long category (Frameworks has 13) still finishes fast.
+                delay: Math.min(index, 10) * 0.035,
                 type: 'spring',
                 stiffness: 200,
                 damping: 20,
@@ -118,9 +119,9 @@ function SkillCard({ skill, index }) {
                 transition: { type: 'spring', stiffness: 400, damping: 15 },
             }}
             onHoverStart={handleHoverStart}
-            className={`group relative flex items-center gap-3 px-4 py-3.5 rounded-xl border transition-colors duration-300 cursor-default overflow-hidden
+            className={`group relative flex items-center gap-2.5 sm:gap-3 px-3 py-3 sm:px-4 sm:py-3.5 rounded-xl border transition-colors duration-300 cursor-default overflow-hidden
                 ${skill.core
-                    ? 'bg-surface border-accent/20 hover:border-accent/50'
+                    ? 'bg-surface border-accent/20 hover:border-accent/50 hover:bg-surface-light'
                     : 'bg-surface border-white/[0.06] hover:border-white/[0.15] hover:bg-surface-light'
                 }`}
         >
@@ -129,20 +130,30 @@ function SkillCard({ skill, index }) {
                 <motion.div
                     animate={glowControls}
                     initial={{ opacity: 0 }}
+                    aria-hidden="true"
                     className="absolute inset-0 pointer-events-none rounded-xl"
                     style={{
                         background:
-                            'radial-gradient(ellipse at center, rgba(226,160,78,0.22) 0%, transparent 70%)',
+                            'radial-gradient(ellipse at center, var(--color-accent-dim) 0%, transparent 70%)',
                     }}
                 />
             )}
 
-            {/* Core stack indicator dot */}
+            {/* Core stack indicator dot — the legend above the grid explains it
+                visually; the sr-only text carries the same meaning non-visually. */}
             {skill.core && (
-                <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-accent" />
+                <>
+                    <span
+                        aria-hidden="true"
+                        className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-accent"
+                    />
+                    <span className="sr-only">Core stack:</span>
+                </>
             )}
 
             <Icon
+                aria-hidden="true"
+                focusable="false"
                 className={`shrink-0 transition-colors duration-300 ${
                     skill.core
                         ? 'text-accent'
@@ -152,7 +163,7 @@ function SkillCard({ skill, index }) {
             />
 
             <span
-                className={`text-sm font-medium leading-tight transition-colors duration-300 ${
+                className={`min-w-0 break-words text-[13px] sm:text-sm font-medium leading-tight transition-colors duration-300 ${
                     skill.core
                         ? 'text-text'
                         : 'text-text-muted group-hover:text-text'
@@ -160,14 +171,36 @@ function SkillCard({ skill, index }) {
             >
                 {skill.name}
             </span>
-        </motion.div>
+        </motion.li>
     );
 }
 
 export default function SkillsGrid() {
     const [activeTab, setActiveTab] = useState('Languages');
+    const tabRefs = useRef([]);
+    const uid = useId();
 
     const tabSkills = skills.filter((s) => s.category === activeTab);
+    const coreCount = tabSkills.filter((s) => s.core).length;
+
+    const tabId = (cat) => `${uid}-tab-${cat.replace(/\W+/g, '-')}`;
+    const panelId = (cat) => `${uid}-panel-${cat.replace(/\W+/g, '-')}`;
+
+    // Arrow/Home/End move between tabs, per the ARIA tabs pattern. Without this
+    // the roving tabindex below would leave the other tabs unreachable.
+    const handleTabKeyDown = (e) => {
+        const current = categories.indexOf(activeTab);
+        let next = null;
+        if (e.key === 'ArrowRight') next = (current + 1) % categories.length;
+        else if (e.key === 'ArrowLeft') next = (current - 1 + categories.length) % categories.length;
+        else if (e.key === 'Home') next = 0;
+        else if (e.key === 'End') next = categories.length - 1;
+        if (next === null) return;
+
+        e.preventDefault();
+        setActiveTab(categories[next]);
+        tabRefs.current[next]?.focus();
+    };
 
     return (
         <section id="skills" className="w-full">
@@ -176,44 +209,78 @@ export default function SkillsGrid() {
 
                 {/* ── Tab bar ── */}
                 <div
-                    className="flex overflow-x-auto mb-8 border-b border-white/[0.06]"
+                    role="tablist"
+                    aria-label="Skill categories"
+                    onKeyDown={handleTabKeyDown}
+                    className="flex overflow-x-auto mb-4 border-b border-white/[0.06]"
                     style={{ scrollbarWidth: 'none' }}
                 >
-                    {categories.map((cat) => (
-                        <button
-                            key={cat}
-                            onClick={() => setActiveTab(cat)}
-                            className={`relative flex-shrink-0 px-5 py-3 text-sm font-mono transition-colors duration-200 cursor-pointer min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-inset rounded-t ${
-                                activeTab === cat
-                                    ? 'text-text'
-                                    : 'text-text-dim hover:text-text-muted'
-                            }`}
-                        >
-                            {cat}
-                            {activeTab === cat && (
-                                <motion.div
-                                    layoutId="tab-indicator"
-                                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"
-                                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                                />
-                            )}
-                        </button>
-                    ))}
+                    {categories.map((cat, i) => {
+                        const isActive = activeTab === cat;
+                        const count = skills.filter((s) => s.category === cat).length;
+                        return (
+                            <button
+                                key={cat}
+                                ref={(el) => { tabRefs.current[i] = el; }}
+                                type="button"
+                                role="tab"
+                                id={tabId(cat)}
+                                aria-selected={isActive}
+                                aria-controls={panelId(cat)}
+                                tabIndex={isActive ? 0 : -1}
+                                onClick={() => setActiveTab(cat)}
+                                className={`relative flex-shrink-0 flex items-center gap-2 px-4 sm:px-5 py-3 text-sm font-mono transition-colors duration-200 cursor-pointer min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset rounded-t ${
+                                    isActive
+                                        ? 'text-text'
+                                        : 'text-text-dim hover:text-text-muted'
+                                }`}
+                            >
+                                {cat}
+                                <span
+                                    aria-hidden="true"
+                                    className={`font-mono text-[10px] tabular-nums transition-colors duration-200 ${
+                                        isActive ? 'text-accent' : 'text-text-dim/70'
+                                    }`}
+                                >
+                                    {count}
+                                </span>
+                                {isActive && (
+                                    <motion.div
+                                        layoutId="tab-indicator"
+                                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"
+                                        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                                    />
+                                )}
+                            </button>
+                        );
+                    })}
                 </div>
+
+                {/* Legend for the amber dot — carries the meaning without a hover-only tooltip */}
+                <p className="flex items-center gap-2 mb-6 font-mono text-[11px] tracking-[0.1em] uppercase text-text-dim">
+                    <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+                    Core stack · {coreCount} of {tabSkills.length} in {activeTab}
+                </p>
 
                 {/* ── Tab content — exit left, enter right ── */}
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={activeTab}
+                        role="tabpanel"
+                        id={panelId(activeTab)}
+                        aria-labelledby={tabId(activeTab)}
+                        tabIndex={0}
                         initial={{ opacity: 0, x: 24 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -24 }}
                         transition={{ duration: 0.18, ease: 'easeInOut' }}
-                        className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"
+                        className="rounded-xl"
                     >
-                        {tabSkills.map((skill, i) => (
-                            <SkillCard key={skill.name} skill={skill} index={i} />
-                        ))}
+                        <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-3">
+                            {tabSkills.map((skill, i) => (
+                                <SkillCard key={skill.name} skill={skill} index={i} />
+                            ))}
+                        </ul>
                     </motion.div>
                 </AnimatePresence>
             </div>

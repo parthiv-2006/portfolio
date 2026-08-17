@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback, useId } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ExternalLink, Github, X, Video, ChevronLeft, ChevronRight } from 'lucide-react';
 import SectionHeading from './SectionHeading';
@@ -6,6 +6,9 @@ import GistDemoWrapper from './GistDemo/index';
 import useIsTouch from '../hooks/useIsTouch';
 
 const PROJECTS_PER_PAGE = 6;
+
+const FOCUSABLE =
+    'a[href], button, textarea, input, select, [tabindex]:not([tabindex="-1"])';
 
 const projects = [
     {
@@ -59,6 +62,7 @@ const projects = [
         github: 'https://github.com/parthiv-2006/Angler',
         live: 'https://www.angler.software',
         competition: '$5K Build Challenge',
+        image: '/projects/angler.png',
     },
     {
         id: 'glowi',
@@ -71,6 +75,7 @@ const projects = [
         role: 'AI + Mobile',
         github: 'https://github.com/parthiv-2006/Glowi',
         underDevelopment: true,
+        image: '/projects/glowi.png',
     },
     {
         id: 'palate',
@@ -117,18 +122,71 @@ const projects = [
 
 const allTechs = [...new Set(projects.flatMap((p) => p.tech))].sort();
 
+/**
+ * Fixed-ratio thumbnail: reserves its box before the file arrives so the grid
+ * never reflows, shimmers while loading, and degrades to a monogram plate
+ * instead of a broken-image glyph.
+ */
+function ProjectThumb({ project }) {
+    const [status, setStatus] = useState(project.image ? 'loading' : 'fallback');
+    const [fit, setFit] = useState('cover');
+
+    // Screenshots are ~16:10; logo-style art is square. Letterbox the square
+    // ones rather than cropping their subject out of frame.
+    const handleLoad = (e) => {
+        const { naturalWidth: w, naturalHeight: h } = e.currentTarget;
+        if (w && h && w / h < 1.35) setFit('contain');
+        setStatus('ready');
+    };
+
+    return (
+        <div className="relative z-[1] w-full aspect-[16/10] mb-5 rounded-xl overflow-hidden border border-white/[0.06] bg-surface2">
+            {status === 'loading' && (
+                <div className="shimmer absolute inset-0" aria-hidden="true" />
+            )}
+
+            {status === 'fallback' ? (
+                <div
+                    className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-surface2"
+                    aria-hidden="true"
+                >
+                    <span className="font-display italic text-[40px] leading-none text-text-dim">
+                        {project.title.charAt(0)}
+                    </span>
+                    <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-text-dim">
+                        {project.role}
+                    </span>
+                </div>
+            ) : (
+                <img
+                    src={project.image}
+                    alt={`${project.title} preview`}
+                    width="1600"
+                    height="1000"
+                    loading="lazy"
+                    decoding="async"
+                    onLoad={handleLoad}
+                    onError={() => setStatus('fallback')}
+                    className={`absolute inset-0 w-full h-full transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03] ${
+                        fit === 'contain' ? 'object-contain p-4' : 'object-cover object-top'
+                    } ${status === 'ready' ? 'opacity-100' : 'opacity-0'}`}
+                />
+            )}
+        </div>
+    );
+}
+
 function ProjectCard({ project, index, activeFilter, isTouch, onClick }) {
     const displayNum = String(index + 1).padStart(2, '0');
     const cta = project.hasDemo && !isTouch ? 'Demo' : 'View';
 
     return (
-        <motion.div
+        <motion.article
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-60px' }}
             transition={{ duration: 0.5, delay: (index % 3) * 0.08, ease: [0.22, 1, 0.36, 1] }}
-            onClick={onClick}
-            className="relative border border-white/[0.06] rounded-[18px] overflow-hidden bg-surface cursor-pointer flex flex-col p-6 pb-5 transition-all duration-400 hover:-translate-y-[7px] hover:border-accent/40 hover:shadow-[0_24px_50px_-20px_rgba(0,0,0,0.6)]"
+            className="group relative border border-white/[0.06] rounded-[18px] overflow-hidden bg-surface cursor-pointer flex flex-col p-5 sm:p-6 pb-5 transition-all duration-400 hover:-translate-y-[7px] hover:border-accent/40 hover:shadow-[0_24px_50px_-20px_rgba(0,0,0,0.6)] has-[:focus-visible]:-translate-y-[7px] has-[:focus-visible]:border-accent/40 has-[:focus-visible]:[outline:2px_solid_var(--color-accent)] has-[:focus-visible]:[outline-offset:3px]"
         >
             {/* Ghost number watermark */}
             <span
@@ -171,18 +229,28 @@ function ProjectCard({ project, index, activeFilter, isTouch, onClick }) {
                 </div>
             </div>
 
-            {/* Title */}
-            <h3 className="relative z-[1] font-display italic text-[2rem] font-normal leading-[1.05] tracking-[-0.01em] mb-[10px]">
-                {project.title}<span className="text-accent">.</span>
+            {/* Title — the button stretches over the whole card via ::after, so the
+                card is one keyboard stop with real heading semantics preserved. */}
+            <h3 className="relative z-[2] font-display italic text-[2rem] font-normal leading-[1.05] tracking-[-0.01em] mb-[10px]">
+                <button
+                    type="button"
+                    onClick={onClick}
+                    className="text-left after:absolute after:inset-0 after:content-[''] after:rounded-[18px] focus-visible:outline-none"
+                >
+                    {project.title}<span className="text-accent">.</span>
+                    <span className="sr-only"> — open project details</span>
+                </button>
             </h3>
 
             {/* Tagline */}
-            <p className="relative z-[1] text-[14px] text-text-muted leading-[1.55] mb-auto pb-[22px]">
+            <p className="relative z-[1] text-[14px] text-text-muted leading-[1.55] mb-[18px]">
                 {project.tagline}
             </p>
 
+            <ProjectThumb project={project} />
+
             {/* Divider */}
-            <div className="h-px bg-white/[0.06] mb-4" />
+            <div className="h-px bg-white/[0.06] mt-auto mb-4" />
 
             {/* Bottom: tech + cta */}
             <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -209,8 +277,78 @@ function ProjectCard({ project, index, activeFilter, isTouch, onClick }) {
                     {cta} ↗
                 </span>
             </div>
-        </motion.div>
+        </motion.article>
     );
+}
+
+/**
+ * Modal plumbing the markup can't express on its own: move focus in, keep Tab
+ * inside, close on Escape, lock the page behind it, and hand focus back to
+ * whatever opened it — including when the close came from Escape or backdrop.
+ */
+function useDialog(isOpen, onClose, dialogRef) {
+    useEffect(() => {
+        if (!isOpen) return undefined;
+
+        const opener = document.activeElement;
+        const { body } = document;
+        const prevOverflow = body.style.overflow;
+        const prevPaddingRight = body.style.paddingRight;
+        const scrollbar = window.innerWidth - document.documentElement.clientWidth;
+
+        body.style.overflow = 'hidden';
+        if (scrollbar > 0) body.style.paddingRight = `${scrollbar}px`;
+
+        const items = () =>
+            Array.from(dialogRef.current?.querySelectorAll(FOCUSABLE) ?? []).filter(
+                (el) => !el.hasAttribute('disabled') && el.offsetParent !== null,
+            );
+
+        const frame = requestAnimationFrame(() => {
+            (items()[0] ?? dialogRef.current)?.focus({ preventScroll: true });
+        });
+
+        const onKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                e.stopPropagation();
+                onClose();
+                return;
+            }
+            if (e.key !== 'Tab') return;
+
+            const node = dialogRef.current;
+            const list = items();
+            if (!node) return;
+            if (list.length === 0) {
+                e.preventDefault();
+                node.focus({ preventScroll: true });
+                return;
+            }
+
+            const first = list[0];
+            const last = list[list.length - 1];
+            const active = document.activeElement;
+            const outside = !node.contains(active);
+
+            if (e.shiftKey && (active === first || outside)) {
+                e.preventDefault();
+                last.focus();
+            } else if (!e.shiftKey && (active === last || outside)) {
+                e.preventDefault();
+                first.focus();
+            }
+        };
+
+        document.addEventListener('keydown', onKeyDown, true);
+
+        return () => {
+            cancelAnimationFrame(frame);
+            document.removeEventListener('keydown', onKeyDown, true);
+            body.style.overflow = prevOverflow;
+            body.style.paddingRight = prevPaddingRight;
+            if (opener instanceof HTMLElement) opener.focus({ preventScroll: true });
+        };
+    }, [isOpen, onClose, dialogRef]);
 }
 
 export default function Projects() {
@@ -218,6 +356,10 @@ export default function Projects() {
     const [activeFilter, setActiveFilter] = useState('All');
     const [currentPage, setCurrentPage] = useState(0);
     const isTouch = useIsTouch();
+    const dialogRef = useRef(null);
+    const titleId = useId();
+
+    const closeModal = useCallback(() => setSelected(null), []);
 
     const filtered = useMemo(() => {
         if (activeFilter === 'All') return projects;
@@ -249,32 +391,73 @@ export default function Projects() {
         return () => { delete document.body.dataset.demoOpen; };
     }, [isDemo, selected]);
 
+    useDialog(Boolean(selected), closeModal, dialogRef);
+
+    const atStart = currentPage === 0;
+    const atEnd = currentPage === totalPages - 1;
+
+    // Announced to screen readers on every filter/page change, and printed
+    // above the grid so the counts are visible too.
+    let resultSummary;
+    if (filtered.length === 0) {
+        resultSummary = `No projects use ${activeFilter}`;
+    } else if (isPaginated && totalPages > 1) {
+        resultSummary = `Showing ${displayedProjects.length} of ${projects.length} projects — page ${currentPage + 1} of ${totalPages}`;
+    } else if (isPaginated) {
+        resultSummary = `Showing all ${projects.length} projects`;
+    } else {
+        resultSummary = `${filtered.length} ${filtered.length === 1 ? 'project' : 'projects'} using ${activeFilter}`;
+    }
+
     return (
         <section id="work" className="w-full">
             <SectionHeading label="Selected work" title="Things I've built" />
 
-            {/* Filter pills */}
-            <div className="flex gap-2 flex-wrap mb-8">
-                {['All', ...allTechs].map((tech) => (
-                    <button
-                        key={tech}
-                        onClick={() => setActiveFilter(tech)}
-                        className={`px-4 py-1.5 text-xs font-mono rounded-full border transition-all duration-250 cursor-pointer min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 ${
-                            activeFilter === tech
-                                ? 'bg-accent/15 text-accent border-accent/30 shadow-[0_0_12px_rgba(226,160,78,0.15)]'
-                                : 'bg-surface/40 text-text-muted border-white/[0.06] hover:border-white/[0.15] hover:text-text'
-                        }`}
-                    >
-                        {tech}
-                    </button>
-                ))}
+            {/* Filter pills — toggle buttons, so their pressed state is announced */}
+            <div role="group" aria-label="Filter projects by technology" className="flex gap-2 flex-wrap mb-5">
+                {['All', ...allTechs].map((tech) => {
+                    const isActive = activeFilter === tech;
+                    return (
+                        <button
+                            key={tech}
+                            type="button"
+                            aria-pressed={isActive}
+                            onClick={() => setActiveFilter(tech)}
+                            className={`px-4 py-1.5 text-xs font-mono rounded-full border transition-all duration-250 cursor-pointer min-h-[44px] ${
+                                isActive
+                                    ? 'bg-accent/15 text-accent border-accent/30 shadow-[0_0_12px_var(--color-accent-glow)]'
+                                    : 'bg-surface/40 text-text-muted border-white/[0.06] hover:border-white/[0.15] hover:text-text'
+                            }`}
+                        >
+                            {tech}
+                        </button>
+                    );
+                })}
             </div>
 
-            {/* Grid */}
+            {/* Result count — doubles as the live region for filter/page changes */}
+            <p
+                role="status"
+                aria-live="polite"
+                aria-atomic="true"
+                className="font-mono text-[11px] tracking-[0.14em] uppercase text-text-dim mb-8"
+            >
+                {resultSummary}
+            </p>
+
+            {/* Grid. Every filter option is derived from the project list, so an
+                empty result is unreachable — the fallback is a safety net only. */}
             {displayedProjects.length === 0 ? (
-                <p className="text-text-dim font-mono text-sm text-center py-16">
-                    No projects match this filter.
-                </p>
+                <div className="flex flex-col items-center gap-4 py-16">
+                    <p className="text-text-dim font-mono text-sm">No projects match this filter.</p>
+                    <button
+                        type="button"
+                        onClick={() => setActiveFilter('All')}
+                        className="px-4 py-2 min-h-[44px] text-xs font-mono rounded-full border border-accent/30 bg-accent/10 text-accent cursor-pointer hover:bg-accent/20 transition-colors duration-250"
+                    >
+                        Show all projects
+                    </button>
+                </div>
             ) : (
                 <AnimatePresence mode="wait">
                     <motion.div
@@ -299,16 +482,23 @@ export default function Projects() {
                 </AnimatePresence>
             )}
 
-            {/* Pagination arrows — only on "All" view with multiple pages */}
+            {/* Pagination arrows — only on "All" view with multiple pages.
+                aria-disabled rather than disabled so the arrow you just used to
+                reach the last page keeps focus instead of dropping it to body. */}
             {isPaginated && totalPages > 1 && (
-                <div className="flex items-center justify-center gap-5 mt-10">
+                <nav aria-label="Project pages" className="flex items-center justify-center gap-5 mt-10">
                     <button
+                        type="button"
                         onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
-                        disabled={currentPage === 0}
-                        aria-label="Previous projects"
-                        className="group flex items-center justify-center w-11 h-11 rounded-full border transition-all duration-250 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:opacity-25 disabled:cursor-not-allowed border-white/[0.08] bg-surface hover:border-accent/40 hover:bg-accent/5 disabled:hover:border-white/[0.08] disabled:hover:bg-surface"
+                        aria-disabled={atStart}
+                        aria-label="Previous page of projects"
+                        className={`flex items-center justify-center w-11 h-11 rounded-full border transition-all duration-250 bg-surface ${
+                            atStart
+                                ? 'opacity-35 cursor-not-allowed border-white/[0.04]'
+                                : 'cursor-pointer border-white/[0.08] hover:border-accent/40 hover:bg-accent/5 hover:text-accent'
+                        }`}
                     >
-                        <ChevronLeft size={18} className="text-text-muted group-hover:text-accent transition-colors duration-200 group-disabled:group-hover:text-text-muted" />
+                        <ChevronLeft size={18} className={atStart ? 'text-text-dim' : 'text-text-muted'} />
                     </button>
 
                     {/* Page dots */}
@@ -316,14 +506,16 @@ export default function Projects() {
                         {Array.from({ length: totalPages }, (_, i) => (
                             <button
                                 key={i}
+                                type="button"
                                 onClick={() => setCurrentPage(i)}
-                                aria-label={`Go to page ${i + 1}`}
-                                className="min-h-[44px] min-w-[36px] flex items-center justify-center cursor-pointer focus-visible:outline-none"
+                                aria-label={`Go to page ${i + 1} of ${totalPages}`}
+                                aria-current={i === currentPage ? 'true' : undefined}
+                                className="min-h-[44px] min-w-[36px] flex items-center justify-center cursor-pointer rounded-lg"
                             >
                                 <span
                                     className={`block rounded-full transition-all duration-300 ${
                                         i === currentPage
-                                            ? 'w-7 h-2 bg-accent shadow-[0_0_10px_rgba(226,160,78,0.3)]'
+                                            ? 'w-7 h-2 bg-accent shadow-[0_0_10px_var(--color-accent-dim)]'
                                             : 'w-2 h-2 bg-text-dim/40 hover:bg-text-dim/70'
                                     }`}
                                 />
@@ -332,14 +524,19 @@ export default function Projects() {
                     </div>
 
                     <button
+                        type="button"
                         onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
-                        disabled={currentPage === totalPages - 1}
-                        aria-label="Next projects"
-                        className="group flex items-center justify-center w-11 h-11 rounded-full border transition-all duration-250 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:opacity-25 disabled:cursor-not-allowed border-white/[0.08] bg-surface hover:border-accent/40 hover:bg-accent/5 disabled:hover:border-white/[0.08] disabled:hover:bg-surface"
+                        aria-disabled={atEnd}
+                        aria-label="Next page of projects"
+                        className={`flex items-center justify-center w-11 h-11 rounded-full border transition-all duration-250 bg-surface ${
+                            atEnd
+                                ? 'opacity-35 cursor-not-allowed border-white/[0.04]'
+                                : 'cursor-pointer border-white/[0.08] hover:border-accent/40 hover:bg-accent/5 hover:text-accent'
+                        }`}
                     >
-                        <ChevronRight size={18} className="text-text-muted group-hover:text-accent transition-colors duration-200 group-disabled:group-hover:text-text-muted" />
+                        <ChevronRight size={18} className={atEnd ? 'text-text-dim' : 'text-text-muted'} />
                     </button>
-                </div>
+                </nav>
             )}
 
             {/* Modals */}
@@ -351,7 +548,8 @@ export default function Projects() {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             transition={{ duration: 0.2 }}
-                            onClick={() => setSelected(null)}
+                            onClick={closeModal}
+                            aria-hidden="true"
                             className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm"
                         />
 
@@ -359,23 +557,31 @@ export default function Projects() {
                         {isDemo ? (
                             <div className="fixed inset-2 sm:inset-4 md:inset-6 z-50 flex flex-col">
                                 <motion.div
+                                    ref={dialogRef}
+                                    role="dialog"
+                                    aria-modal="true"
+                                    aria-labelledby={titleId}
+                                    tabIndex={-1}
                                     initial={{ opacity: 0, y: 16, scale: 0.97 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: 8, scale: 0.98 }}
                                     transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                                     onClick={(e) => e.stopPropagation()}
-                                    className="relative flex flex-col w-full h-full rounded-2xl border border-white/[0.08] bg-[#111110] overflow-hidden shadow-2xl shadow-black/60"
+                                    className="relative flex flex-col w-full h-full rounded-2xl border border-white/[0.08] bg-bg overflow-hidden shadow-2xl shadow-black/60 focus:outline-none"
                                 >
                                     <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.06] flex-shrink-0">
                                         <div className="flex items-center gap-3">
-                                            <svg width="18" height="18" viewBox="0 0 32 32" fill="none">
+                                            <svg width="18" height="18" viewBox="0 0 32 32" fill="none" aria-hidden="true">
                                                 <rect width="32" height="32" rx="6" fill="oklch(0.75 0.11 150)" />
                                                 <path d="M 20.8 11.5 A 7 7 0 1 0 20.8 15.2 H 24 V 21.5 Q 24 26.2 18.4 26.2 Q 13.8 26.2 13.4 22.7" stroke="oklch(0.22 0.03 150)" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
                                                 <path d="M 14 7.5 C 19 9.2 20 17 14 19.5 C 8 17 9 9.2 14 7.5 Z" fill="oklch(0.30 0.07 150)" />
                                             </svg>
-                                            <span className="text-sm font-semibold text-text font-mono">Gist</span>
-                                            <span className="text-text-dim text-xs font-mono hidden sm:inline">—</span>
-                                            <span className="text-text-dim text-xs font-mono hidden sm:inline">Interactive Demo</span>
+                                            <span id={titleId} className="text-sm font-semibold text-text font-mono">
+                                                Gist
+                                                <span className="sr-only"> interactive demo</span>
+                                            </span>
+                                            <span className="text-text-dim text-xs font-mono hidden sm:inline" aria-hidden="true">—</span>
+                                            <span className="text-text-dim text-xs font-mono hidden sm:inline" aria-hidden="true">Interactive Demo</span>
                                         </div>
                                         <div className="flex items-center gap-3">
                                             <a
@@ -385,14 +591,15 @@ export default function Projects() {
                                                 onClick={(e) => e.stopPropagation()}
                                                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-light text-text-muted text-xs font-mono border border-white/[0.06] hover:border-white/20 hover:text-text transition-all duration-200"
                                             >
-                                                <Github size={13} /> GitHub
+                                                <Github size={13} aria-hidden="true" /> GitHub
                                             </a>
                                             <button
-                                                onClick={() => setSelected(null)}
-                                                className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg text-text-dim hover:text-text hover:bg-surface-light transition-colors border border-transparent hover:border-white/[0.08]"
-                                                aria-label="Close"
+                                                type="button"
+                                                onClick={closeModal}
+                                                className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg text-text-dim hover:text-text hover:bg-surface-light transition-colors border border-transparent hover:border-white/[0.08] cursor-pointer"
+                                                aria-label="Close interactive demo"
                                             >
-                                                <X size={18} />
+                                                <X size={18} aria-hidden="true" />
                                             </button>
                                         </div>
                                     </div>
@@ -404,42 +611,48 @@ export default function Projects() {
                         ) : (
                             /* Standard project detail modal */
                             <div
-                                className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6"
-                                onClick={() => setSelected(null)}
+                                className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6"
+                                onClick={closeModal}
                             >
                                 <motion.div
+                                    ref={dialogRef}
+                                    role="dialog"
+                                    aria-modal="true"
+                                    aria-labelledby={titleId}
+                                    tabIndex={-1}
                                     initial={{ opacity: 0, y: 20, scale: 0.97 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: 10, scale: 0.98 }}
                                     transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                                     onClick={(e) => e.stopPropagation()}
-                                    className="relative w-full max-w-[620px] rounded-2xl border border-white/[0.08] bg-surface overflow-hidden shadow-2xl shadow-black/40 flex flex-col max-h-[88vh]"
+                                    className="relative w-full max-w-[620px] rounded-2xl border border-white/[0.08] bg-surface overflow-hidden shadow-2xl shadow-black/40 flex flex-col max-h-[90vh] focus:outline-none"
                                 >
                                     {/* Modal header */}
-                                    <div className="relative p-7 pb-0 flex-shrink-0 overflow-hidden">
+                                    <div className="relative p-5 sm:p-7 pb-0 pr-14 sm:pr-16 flex-shrink-0 overflow-hidden">
                                         {/* Ghost number */}
                                         <span className="absolute bottom-[-24px] right-[18px] font-display italic text-[130px] leading-none text-surface2 pointer-events-none select-none" aria-hidden="true">
                                             {String(projects.findIndex(p => p.id === selected.id) + 1).padStart(2, '0')}
                                         </span>
                                         <button
-                                            onClick={() => setSelected(null)}
-                                            className="absolute top-3.5 right-3.5 w-9 h-9 rounded-full flex items-center justify-center border border-white/[0.08] bg-surface2 text-text-muted hover:text-text cursor-pointer transition-colors"
-                                            aria-label="Close"
+                                            type="button"
+                                            onClick={closeModal}
+                                            className="absolute top-3.5 right-3.5 z-[2] w-10 h-10 rounded-full flex items-center justify-center border border-white/[0.08] bg-surface2 text-text-muted hover:text-text hover:border-accent/40 cursor-pointer transition-colors"
+                                            aria-label={`Close ${selected.title} details`}
                                         >
-                                            <X size={15} />
+                                            <X size={15} aria-hidden="true" />
                                         </button>
                                         <p className="relative z-[1] font-mono text-[11px] tracking-[0.14em] uppercase text-accent mb-3">
                                             {selected.role} · {selected.year}
                                         </p>
-                                        <h3 className="relative z-[1] font-display italic text-[clamp(1.6rem,5vw,2.8rem)] font-normal leading-[1.05] tracking-[-0.01em] mb-2">
+                                        <h3 id={titleId} className="relative z-[1] font-display italic text-[clamp(1.6rem,5vw,2.8rem)] font-normal leading-[1.05] tracking-[-0.01em] mb-2">
                                             {selected.title}<span className="text-accent">.</span>
                                         </h3>
                                         <p className="relative z-[1] text-text-muted text-[15px] leading-[1.5]">{selected.tagline}</p>
                                     </div>
 
-                                    <div className="mx-7 my-6 h-px bg-white/[0.06] flex-shrink-0" />
+                                    <div className="mx-5 sm:mx-7 my-5 sm:my-6 h-px bg-white/[0.06] flex-shrink-0" />
 
-                                    <div className="px-7 pb-7 flex-1 overflow-y-auto">
+                                    <div className="px-5 sm:px-7 pb-6 sm:pb-7 flex-1 overflow-y-auto overscroll-contain">
                                         <p className="text-text-muted text-sm leading-relaxed mb-7">{selected.description}</p>
 
                                         <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-dim mb-3">Tech Stack</p>
@@ -454,20 +667,20 @@ export default function Projects() {
                                         <div className="flex flex-wrap gap-3">
                                             {selected.github && (
                                                 <a href={selected.github} target="_blank" rel="noopener noreferrer"
-                                                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-surface2 text-text-muted text-sm border border-white/[0.08] hover:border-white/20 hover:text-text transition-all duration-250">
-                                                    <Github size={16} /> Source Code
+                                                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 min-h-[48px] rounded-xl bg-surface2 text-text-muted text-sm border border-white/[0.08] hover:border-white/20 hover:text-text transition-all duration-250">
+                                                    <Github size={16} aria-hidden="true" /> Source Code
                                                 </a>
                                             )}
                                             {selected.live && (
                                                 <a href={selected.live} target="_blank" rel="noopener noreferrer"
-                                                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-accent/10 text-accent text-sm border border-accent/20 hover:bg-accent/20 transition-all duration-250">
-                                                    <ExternalLink size={16} /> Live Demo
+                                                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 min-h-[48px] rounded-xl bg-accent/10 text-accent text-sm border border-accent/20 hover:bg-accent/20 transition-all duration-250">
+                                                    <ExternalLink size={16} aria-hidden="true" /> Live Demo
                                                 </a>
                                             )}
                                             {selected.devpost && (
                                                 <a href={selected.devpost} target="_blank" rel="noopener noreferrer"
-                                                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-surface2 text-text-muted text-sm border border-white/[0.08] hover:border-white/20 hover:text-text transition-all duration-250">
-                                                    <Video size={16} /> Demo Video
+                                                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 min-h-[48px] rounded-xl bg-surface2 text-text-muted text-sm border border-white/[0.08] hover:border-white/20 hover:text-text transition-all duration-250">
+                                                    <Video size={16} aria-hidden="true" /> Demo Video
                                                 </a>
                                             )}
                                         </div>
