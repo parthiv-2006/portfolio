@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useMagnetic } from '../hooks/useMagnetic';
-import { Download, Mail, Github, Linkedin, Brain, Check, Send } from 'lucide-react';
+import useIsTouch from '../hooks/useIsTouch';
+import { Download, Mail, Github, Linkedin, Brain, Check, Send, AlertCircle } from 'lucide-react';
 import ContactModal, { DEFAULT_MESSAGE } from './ContactModal';
 import {
     SiPython,
@@ -36,6 +37,37 @@ const TOP_SKILLS = [
 
 const EMAIL = 'parthiv.paul@mail.utoronto.ca';
 
+/**
+ * navigator.clipboard is undefined on insecure origins and its promise can
+ * reject when the permission is denied, so fall back to the legacy
+ * execCommand path before giving up. Resolves to true when the copy landed.
+ */
+async function copyText(text) {
+    try {
+        if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(text);
+            return true;
+        }
+    } catch {
+        // fall through to the legacy path
+    }
+    try {
+        const scratch = document.createElement('textarea');
+        scratch.value = text;
+        scratch.setAttribute('readonly', '');
+        scratch.style.position = 'fixed';
+        scratch.style.top = '0';
+        scratch.style.opacity = '0';
+        document.body.appendChild(scratch);
+        scratch.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(scratch);
+        return ok;
+    } catch {
+        return false;
+    }
+}
+
 const container = {
     hidden: { opacity: 0 },
     show: {
@@ -50,17 +82,28 @@ const fadeUp = {
 };
 
 export default function LandingSummary({ onEnter }) {
-    const [emailCopied, setEmailCopied] = useState(false);
+    // 'idle' | 'copied' | 'failed'
+    const [copyState, setCopyState] = useState('idle');
+    const [copyAnnouncement, setCopyAnnouncement] = useState('');
     const magnetic = useMagnetic(0.38);
+    const isTouch = useIsTouch();
     const [contactOpen, setContactOpen] = useState(false);
     const [contactForm, setContactForm] = useState({ email: '', message: DEFAULT_MESSAGE, _hp: '' });
     const [contactStatus, setContactStatus] = useState('idle');
 
-    const handleEmailClick = (e) => {
+    const handleEmailClick = async (e) => {
         e.preventDefault();
-        navigator.clipboard.writeText(EMAIL);
-        setEmailCopied(true);
-        setTimeout(() => setEmailCopied(false), 2000);
+        const ok = await copyText(EMAIL);
+        setCopyState(ok ? 'copied' : 'failed');
+        setCopyAnnouncement(
+            ok
+                ? `Email address copied to clipboard: ${EMAIL}`
+                : `Could not copy automatically. Email address is ${EMAIL}`
+        );
+        setTimeout(() => {
+            setCopyState('idle');
+            setCopyAnnouncement('');
+        }, 4000);
     };
 
     const handleContactOpen = () => {
@@ -69,8 +112,19 @@ export default function LandingSummary({ onEnter }) {
         setContactOpen(true);
     };
 
+    // The magnetic drift needs a real cursor. On coarse pointers it either does
+    // nothing or fires off synthesized mouse events, so drop it entirely there.
+    const magneticProps = isTouch
+        ? {}
+        : {
+              ref: magnetic.ref,
+              style: magnetic.motionStyle,
+              onMouseMove: magnetic.onMouseMove,
+              onMouseLeave: magnetic.onMouseLeave,
+          };
+
     return (
-        <div className="min-h-screen bg-bg text-text flex items-start justify-center py-16 px-4 sm:px-6 relative overflow-hidden">
+        <div className="min-h-screen bg-bg text-text flex items-start justify-center py-12 sm:py-16 px-4 sm:px-6 relative overflow-hidden">
             {/* Ambient warm glow */}
             <div
                 className="absolute inset-0 pointer-events-none"
@@ -111,20 +165,33 @@ export default function LandingSummary({ onEnter }) {
                     <p className="text-text-muted text-sm mt-2 leading-relaxed">
                         Always learning. Always building. Sometimes it works out.
                     </p>
-                    <div className="relative inline-flex mt-6">
-                        <span className="absolute inset-0 rounded-full border border-accent/50 animate-[ring-pulse_2.6s_ease-out_infinite] pointer-events-none" />
-                        <span className="absolute inset-0 rounded-full border border-accent/50 animate-[ring-pulse_2.6s_ease-out_infinite_1.3s] pointer-events-none" />
+                    {/* Primary action — the one control everything else defers to. */}
+                    <div className="relative inline-flex mt-9 w-full max-w-[320px] sm:w-auto sm:max-w-none">
+                        <span
+                            className="absolute inset-0 rounded-full border border-accent/50 animate-[ring-pulse_2.6s_ease-out_infinite] pointer-events-none"
+                            aria-hidden="true"
+                        />
+                        <span
+                            className="absolute inset-0 rounded-full border border-accent/50 animate-[ring-pulse_2.6s_ease-out_infinite_1.3s] pointer-events-none"
+                            aria-hidden="true"
+                        />
                         <motion.button
-                            ref={magnetic.ref}
-                            style={magnetic.motionStyle}
-                            onMouseMove={magnetic.onMouseMove}
-                            onMouseLeave={magnetic.onMouseLeave}
+                            {...magneticProps}
+                            type="button"
                             onClick={onEnter}
-                            className="group relative inline-flex items-center justify-center gap-3 px-[42px] py-[17px] rounded-full text-base font-semibold bg-accent text-bg transition-[box-shadow] duration-300 shadow-[0_0_36px_rgba(226,160,78,0.10)] hover:shadow-[0_0_56px_rgba(226,160,78,0.55)] overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+                            className="group relative inline-flex w-full sm:w-auto items-center justify-center gap-3 px-8 sm:px-[42px] py-[18px] rounded-full text-[17px] font-semibold tracking-[-0.01em] bg-accent text-bg transition-[box-shadow] duration-300 shadow-[0_0_40px_rgba(226,160,78,0.22)] hover:shadow-[0_0_56px_rgba(226,160,78,0.55)] overflow-hidden"
                         >
-                            <span className="absolute top-0 bottom-0 left-0 w-[45%] bg-gradient-to-r from-transparent via-white/30 to-transparent animate-[sheen_3.4s_ease-in-out_infinite] pointer-events-none" />
+                            <span
+                                className="absolute top-0 bottom-0 left-0 w-[45%] bg-gradient-to-r from-transparent via-white/30 to-transparent animate-[sheen_3.4s_ease-in-out_infinite] pointer-events-none"
+                                aria-hidden="true"
+                            />
                             <span className="relative z-10">View Full Portfolio</span>
-                            <span className="relative z-10 inline-block transition-transform duration-300 group-hover:translate-x-1 animate-[arrow-nudge_1.5s_ease-in-out_infinite]">→</span>
+                            <span
+                                className="relative z-10 inline-block transition-transform duration-300 group-hover:translate-x-1 animate-[arrow-nudge_1.5s_ease-in-out_infinite]"
+                                aria-hidden="true"
+                            >
+                                →
+                            </span>
                         </motion.button>
                     </div>
                 </motion.div>
@@ -159,11 +226,11 @@ export default function LandingSummary({ onEnter }) {
                     <p className="text-[10px] font-mono text-text-dim uppercase tracking-[0.18em] mb-3">
                         Core stack
                     </p>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
                         {TOP_SKILLS.map(({ name, icon: Icon }) => (
                             <div
                                 key={name}
-                                className="flex items-center gap-2.5 px-3 py-[9px] rounded-[11px] border border-white/[0.06] bg-surface transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/35"
+                                className="flex items-center gap-2 sm:gap-2.5 px-2.5 sm:px-3 py-[9px] rounded-[11px] border border-white/[0.06] bg-surface transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/35"
                             >
                                 <Icon size={16} className="text-accent shrink-0" />
                                 <span className="text-text font-medium text-[13px] truncate">{name}</span>
@@ -183,61 +250,82 @@ export default function LandingSummary({ onEnter }) {
                 </motion.div>
 
                 {/* ── Contact + Resume ── */}
-                <motion.div
-                    variants={fadeUp}
-                    className="mb-8 flex flex-wrap items-center gap-2.5 justify-center"
-                >
-                    {/* Send message — opens ContactModal */}
-                    <button
-                        onClick={handleContactOpen}
-                        aria-haspopup="dialog"
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg border border-accent/25 bg-accent/[0.07] text-accent text-sm hover:bg-accent/15 hover:border-accent/40 transition-all duration-200 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
-                    >
-                        <Send size={14} />
-                        Get in Touch
-                    </button>
+                <motion.div variants={fadeUp} className="mb-8 flex flex-col items-center gap-2.5">
+                    {/* Secondary actions — outlined, so nothing else reads as filled but the CTA. */}
+                    <div className="flex flex-wrap items-center justify-center gap-2.5">
+                        <button
+                            type="button"
+                            onClick={handleContactOpen}
+                            aria-haspopup="dialog"
+                            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-accent/30 text-accent text-sm hover:bg-accent/10 hover:border-accent/50 transition-all duration-200 min-h-[44px]"
+                        >
+                            <Send size={14} aria-hidden="true" />
+                            Get in Touch
+                        </button>
 
-                    {/* Email — copies to clipboard */}
-                    <button
-                        onClick={handleEmailClick}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg bg-surface border text-sm transition-all duration-200 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 ${
-                            emailCopied
-                                ? 'border-accent/40 text-accent'
-                                : 'border-white/[0.06] text-text-muted hover:text-accent hover:border-accent/30'
-                        }`}
-                    >
-                        {emailCopied ? <Check size={14} /> : <Mail size={14} />}
-                        {emailCopied ? 'Copied!' : 'Email'}
-                    </button>
+                        <a
+                            href="parthiv_paul_swe.pdf"
+                            download="parthiv_paul_swe.pdf"
+                            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-accent/30 text-accent text-sm hover:bg-accent/10 hover:border-accent/50 transition-all duration-300 min-h-[44px]"
+                        >
+                            <Download size={14} aria-hidden="true" />
+                            Resume
+                        </a>
+                    </div>
 
-                    <a
-                        href="https://github.com/parthiv-2006"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface border border-white/[0.06] text-text-muted text-sm hover:text-accent hover:border-accent/30 transition-all duration-200 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
-                    >
-                        <Github size={14} />
-                        GitHub
-                    </a>
+                    {/* Tertiary actions — quietest tier. */}
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                        <button
+                            type="button"
+                            onClick={handleEmailClick}
+                            aria-label={`Copy email address ${EMAIL}`}
+                            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg bg-surface/60 border text-[13px] transition-all duration-200 min-h-[44px] ${
+                                copyState === 'copied'
+                                    ? 'border-accent/40 text-accent'
+                                    : copyState === 'failed'
+                                      ? 'border-white/[0.12] text-text'
+                                      : 'border-white/[0.06] text-text-muted hover:text-accent hover:border-accent/30'
+                            }`}
+                        >
+                            {copyState === 'copied' ? (
+                                <Check size={14} aria-hidden="true" />
+                            ) : copyState === 'failed' ? (
+                                <AlertCircle size={14} aria-hidden="true" />
+                            ) : (
+                                <Mail size={14} aria-hidden="true" />
+                            )}
+                            {copyState === 'copied'
+                                ? 'Copied!'
+                                : copyState === 'failed'
+                                  ? 'Copy failed'
+                                  : 'Email'}
+                        </button>
 
-                    <a
-                        href="https://www.linkedin.com/in/parthiv-paul"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface border border-white/[0.06] text-text-muted text-sm hover:text-accent hover:border-accent/30 transition-all duration-200 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
-                    >
-                        <Linkedin size={14} />
-                        LinkedIn
-                    </a>
+                        <a
+                            href="https://github.com/parthiv-2006"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-surface/60 border border-white/[0.06] text-text-muted text-[13px] hover:text-accent hover:border-accent/30 transition-all duration-200 min-h-[44px]"
+                        >
+                            <Github size={14} aria-hidden="true" />
+                            GitHub
+                        </a>
 
-                    <a
-                        href="parthiv_paul_swe.pdf"
-                        download="parthiv_paul_swe.pdf"
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg border border-accent/25 bg-accent/[0.07] text-accent text-sm hover:bg-accent/15 hover:border-accent/40 transition-all duration-300 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
-                    >
-                        <Download size={14} />
-                        Resume
-                    </a>
+                        <a
+                            href="https://www.linkedin.com/in/parthiv-paul"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-surface/60 border border-white/[0.06] text-text-muted text-[13px] hover:text-accent hover:border-accent/30 transition-all duration-200 min-h-[44px]"
+                        >
+                            <Linkedin size={14} aria-hidden="true" />
+                            LinkedIn
+                        </a>
+                    </div>
+
+                    {/* Clipboard result is announced here, not just shown on the button. */}
+                    <p aria-live="polite" className="sr-only">
+                        {copyAnnouncement}
+                    </p>
                 </motion.div>
 
                 <motion.p
