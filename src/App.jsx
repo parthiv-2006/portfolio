@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { motion, MotionConfig } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -220,8 +220,13 @@ function Footer() {
     );
 }
 
+// A shared project link (?project=leaseguard) should land straight on the
+// content — the landing-gate curtain would otherwise swallow the first visit.
+const hasProjectDeepLink = () =>
+    typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('project');
+
 export default function App() {
-    const [showFullSite, setShowFullSite] = useState(false);
+    const [showFullSite, setShowFullSite] = useState(hasProjectDeepLink);
     const [showEntering, setShowEntering] = useState(false);
     const [theme, setTheme] = useState('night');
     const { activeSection } = useActiveSection(showFullSite);
@@ -249,6 +254,16 @@ export default function App() {
     // first paint — this only mirrors it into React state.
     useEffect(() => {
         setTheme(document.documentElement.dataset.theme || 'night');
+    }, []);
+
+    // Deep-linked project: jump the page underneath the modal to Work so
+    // closing it doesn't strand the visitor back up at the hero. Must run as
+    // a layout effect — the modal's own effect (a child, so it fires first
+    // among passive effects) locks body scroll, which blocks a later scroll.
+    useLayoutEffect(() => {
+        if (hasProjectDeepLink()) {
+            document.getElementById('work')?.scrollIntoView();
+        }
     }, []);
 
     const toggleTheme = () => {

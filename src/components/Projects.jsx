@@ -301,15 +301,103 @@ function useDialog(isOpen, onClose, dialogRef) {
     }, [isOpen, onClose, dialogRef]);
 }
 
+/** Reads the `?project=` query param, validated against the known project ids. */
+function projectIdFromUrl() {
+    if (typeof window === 'undefined') return null;
+    const id = new URLSearchParams(window.location.search).get('project');
+    return projects.some((p) => p.id === id) ? id : null;
+}
+
+/**
+ * Keeps the open project synced with `?project=<id>` so a card can be shared
+ * as a direct link, the back button closes the modal instead of leaving the
+ * page, and each project gets its own title/description for link previews.
+ */
+function useProjectDeepLink() {
+    const [selectedId, setSelectedId] = useState(projectIdFromUrl);
+    const selected = useMemo(() => projects.find((p) => p.id === selectedId) ?? null, [selectedId]);
+
+    // Guards against re-pushing history for changes we didn't originate —
+    // the initial URL-derived state, and state set in response to popstate.
+    const skipNextSyncRef = useRef(true);
+    const fromPopStateRef = useRef(false);
+
+    useEffect(() => {
+        if (skipNextSyncRef.current) { skipNextSyncRef.current = false; return; }
+        if (fromPopStateRef.current) { fromPopStateRef.current = false; return; }
+
+        const params = new URLSearchParams(window.location.search);
+        if (selectedId) params.set('project', selectedId); else params.delete('project');
+        const query = params.toString();
+        const url = `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`;
+
+        // Opening pushes a new entry (so Back closes the modal); closing
+        // replaces in place rather than stacking an extra history entry.
+        if (selectedId) {
+            window.history.pushState({ project: selectedId }, '', url);
+        } else {
+            window.history.replaceState({}, '', url);
+        }
+    }, [selectedId]);
+
+    useEffect(() => {
+        const onPopState = () => {
+            fromPopStateRef.current = true;
+            setSelectedId(projectIdFromUrl());
+        };
+        window.addEventListener('popstate', onPopState);
+        return () => window.removeEventListener('popstate', onPopState);
+    }, []);
+
+    // Swap in the open project's title/description for the link-preview meta
+    // tags while the modal is up, then restore whatever was there before.
+    useEffect(() => {
+        if (!selected) return undefined;
+
+        const ogTitle = document.querySelector('meta[property="og:title"]');
+        const ogDesc = document.querySelector('meta[property="og:description"]');
+        const twTitle = document.querySelector('meta[name="twitter:title"]');
+        const twDesc = document.querySelector('meta[name="twitter:description"]');
+        const metaDesc = document.querySelector('meta[name="description"]');
+        const prev = {
+            title: document.title,
+            ogTitle: ogTitle?.content,
+            ogDesc: ogDesc?.content,
+            twTitle: twTitle?.content,
+            twDesc: twDesc?.content,
+            metaDesc: metaDesc?.content,
+        };
+
+        const newTitle = `${selected.title} | Parthiv Paul`;
+        document.title = newTitle;
+        if (ogTitle) ogTitle.content = newTitle;
+        if (ogDesc) ogDesc.content = selected.tagline;
+        if (twTitle) twTitle.content = newTitle;
+        if (twDesc) twDesc.content = selected.tagline;
+        if (metaDesc) metaDesc.content = selected.tagline;
+
+        return () => {
+            document.title = prev.title;
+            if (ogTitle) ogTitle.content = prev.ogTitle;
+            if (ogDesc) ogDesc.content = prev.ogDesc;
+            if (twTitle) twTitle.content = prev.twTitle;
+            if (twDesc) twDesc.content = prev.twDesc;
+            if (metaDesc) metaDesc.content = prev.metaDesc;
+        };
+    }, [selected]);
+
+    return [selected, setSelectedId];
+}
+
 export default function Projects() {
-    const [selected, setSelected] = useState(null);
+    const [selected, setSelectedId] = useProjectDeepLink();
     const [activeFilter, setActiveFilter] = useState('All');
     const [currentPage, setCurrentPage] = useState(0);
     const isTouch = useIsTouch();
     const dialogRef = useRef(null);
     const titleId = useId();
 
-    const closeModal = useCallback(() => setSelected(null), []);
+    const closeModal = useCallback(() => setSelectedId(null), [setSelectedId]);
 
     const filtered = useMemo(() => {
         if (activeFilter === 'All') return projects;
@@ -425,7 +513,7 @@ export default function Projects() {
                                 index={projects.findIndex((p) => p.id === project.id)}
                                 activeFilter={activeFilter}
                                 isTouch={isTouch}
-                                onClick={() => setSelected(project)}
+                                onClick={() => setSelectedId(project.id)}
                             />
                         ))}
                     </motion.div>
