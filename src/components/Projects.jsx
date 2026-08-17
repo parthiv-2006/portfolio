@@ -120,7 +120,16 @@ const projects = [
     },
 ];
 
-const allTechs = [...new Set(projects.flatMap((p) => p.tech))].sort();
+// A chip that matches exactly one project isn't a filter, it's a link to that
+// card — and there were 18 of them, burying the grid under eleven rows of
+// chips on mobile. Only techs shared by two or more projects earn a chip.
+const techCounts = projects.reduce((acc, p) => {
+    p.tech.forEach((t) => { acc[t] = (acc[t] || 0) + 1; });
+    return acc;
+}, {});
+const allTechs = Object.keys(techCounts)
+    .filter((t) => techCounts[t] >= 2)
+    .sort((a, b) => techCounts[b] - techCounts[a] || a.localeCompare(b));
 
 /**
  * Fixed-ratio thumbnail: reserves its box before the file arrives so the grid
@@ -209,18 +218,18 @@ function ProjectCard({ project, index, activeFilter, isTouch, onClick }) {
                         </span>
                     )}
                     {project.hackathon && (
-                        <span className="font-mono text-[11px] text-violet-300 bg-violet-500/10 border border-violet-500/25 px-2 py-0.5 rounded-full">
+                        <span className="font-mono text-[11px] text-badge-violet bg-violet-500/10 border border-violet-500/25 px-2 py-0.5 rounded-full">
                             {project.hackathon}
                         </span>
                     )}
                     {project.competition && (
-                        <span className="font-mono text-[11px] text-teal-300 bg-teal-500/10 border border-teal-500/25 px-2 py-0.5 rounded-full">
+                        <span className="font-mono text-[11px] text-badge-teal bg-teal-500/10 border border-teal-500/25 px-2 py-0.5 rounded-full">
                             {project.competition}
                         </span>
                     )}
                     {project.underDevelopment && (
                         <span
-                            className="font-mono text-[11px] text-amber-300 bg-amber-500/10 border border-amber-500/25 px-2 py-0.5 rounded-full"
+                            className="font-mono text-[11px] text-badge-amber bg-amber-500/10 border border-amber-500/25 px-2 py-0.5 rounded-full"
                             style={{ animation: 'badge-pulse 2.4s ease-in-out infinite' }}
                         >
                             Under Development
