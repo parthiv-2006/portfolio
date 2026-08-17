@@ -32,6 +32,11 @@ const certifications = [
     { title: 'ChatGPT Prompt Engineering for Developers', issuer: 'DeepLearning.AI' },
 ];
 
+/* Warm corner wash shared by every card in this block. Uses the theme token so
+   it survives the day/night swap. */
+const cornerWash =
+    'radial-gradient(ellipse 70% 60% at 100% 0%, var(--color-accent-glow) 0%, transparent 70%)';
+
 export default function Credentials() {
     return (
         <div className="w-full mt-24">
@@ -55,30 +60,29 @@ export default function Credentials() {
             </motion.div>
 
             {/* ── Awards ── */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-[18px] mb-10">
+            <ul role="list" className="grid grid-cols-1 md:grid-cols-3 gap-[18px] mb-10">
                 {awards.map((award, i) => {
                     const Icon = award.icon;
                     return (
-                        <motion.div
+                        <motion.li
                             key={award.title}
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true, margin: '-50px' }}
                             transition={{ duration: 0.5, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                            className="group relative flex flex-col border border-white/[0.06] rounded-2xl bg-surface p-5 overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-accent/35"
+                            className="group relative flex flex-col border border-border rounded-2xl bg-surface p-5 overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-accent/35"
                         >
-                            {/* Warm corner wash on hover */}
                             <span
                                 className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                                style={{
-                                    background:
-                                        'radial-gradient(ellipse 70% 60% at 100% 0%, rgba(226,160,78,0.10) 0%, transparent 70%)',
-                                }}
+                                style={{ background: cornerWash }}
                                 aria-hidden="true"
                             />
 
                             <div className="relative z-[1] flex items-center justify-between gap-3 mb-4">
-                                <span className="flex items-center justify-center w-9 h-9 rounded-xl bg-accent/10 border border-accent/20">
+                                <span
+                                    className="flex items-center justify-center w-9 h-9 rounded-xl bg-accent/10 border border-accent/20"
+                                    aria-hidden="true"
+                                >
                                     <Icon size={16} className="text-accent" />
                                 </span>
                                 <span className="font-mono text-[11px] text-text-dim text-right">
@@ -93,10 +97,10 @@ export default function Credentials() {
                             <p className="relative z-[1] text-[13px] text-text-muted leading-relaxed mt-auto">
                                 {award.note}
                             </p>
-                        </motion.div>
+                        </motion.li>
                     );
                 })}
-            </div>
+            </ul>
 
             {/* ── Certifications ── */}
             <motion.div
@@ -104,28 +108,43 @@ export default function Credentials() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-50px' }}
                 transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                className="border border-white/[0.06] rounded-2xl bg-surface/60 p-5 sm:p-6"
+                className="border border-border rounded-2xl bg-surface/60 p-5 sm:p-6"
             >
-                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-dim mb-4">
+                <h4 className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-dim mb-4">
                     Certifications
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
-                    {certifications.map((cert) => (
-                        <div
+                </h4>
+                {/* Each row is its own bordered card, so the layout no longer depends on
+                   nth-last-child arithmetic to hide the trailing row's divider. */}
+                <ul role="list" className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {certifications.map((cert, i) => (
+                        <motion.li
                             key={cert.title}
-                            className="group flex items-start gap-3 py-1.5 border-b border-white/[0.04] last:border-b-0 sm:[&:nth-last-child(-n+2)]:border-b-0"
+                            initial={{ opacity: 0, y: 12 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, margin: '-40px' }}
+                            transition={{ duration: 0.45, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                            className="group relative flex items-start gap-3 overflow-hidden rounded-xl border border-border bg-surface px-3.5 py-3 transition-all duration-300 hover:border-accent/35 hover:-translate-y-0.5"
                         >
-                            <BadgeCheck
-                                size={15}
-                                className="text-accent shrink-0 mt-0.5 transition-transform duration-300 group-hover:scale-110"
+                            <span
+                                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                                style={{ background: cornerWash }}
+                                aria-hidden="true"
                             />
-                            <div className="min-w-0">
+
+                            <span
+                                className="relative z-[1] flex items-center justify-center w-7 h-7 rounded-lg bg-accent/10 border border-accent/20 shrink-0"
+                                aria-hidden="true"
+                            >
+                                <BadgeCheck size={14} className="text-accent" />
+                            </span>
+
+                            <div className="relative z-[1] min-w-0">
                                 <p className="text-[13.5px] text-text leading-snug">{cert.title}</p>
                                 <p className="font-mono text-[11px] text-text-dim mt-0.5">{cert.issuer}</p>
                             </div>
-                        </div>
+                        </motion.li>
                     ))}
-                </div>
+                </ul>
             </motion.div>
         </div>
     );
