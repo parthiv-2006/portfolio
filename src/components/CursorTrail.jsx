@@ -1,20 +1,29 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 /**
  * CursorTrail — State-Aware Custom Cursor
  *
  * States: 'default' | 'hover' | 'click'
  *
- * Visibility model:
- *   visibleRef drives whether the cursor is drawn. It starts true and is only
- *   set false by a DEBOUNCED mouseleave (500 ms). Any mouse activity within
- *   that window cancels the hide, preventing spurious disappearances caused by
- *   OS scrollbars, Framer Motion DOM mutations, overlays, and iframes.
+ * SAFETY CONTRACT
+ *   index.css hides the native cursor with `cursor: none !important` inside
+ *   `@media (hover: hover) and (prefers-reduced-motion: no-preference)`. This
+ *   component must therefore be drawing a cursor for EXACTLY that condition,
+ *   or the visitor is left with no pointer at all.
+ *
+ *   Two invariants enforce that:
+ *     1. ENABLE_QUERY is the same media query as the CSS rule, and it is watched
+ *        live. Previously the check ran once at mount, so a visitor who turned
+ *        reduced-motion off (or plugged a mouse into a tablet) after load got
+ *        the CSS rule with no canvas behind it — an invisible cursor.
+ *     2. Whenever the rAF loop is NOT running — tab hidden, pointer outside the
+ *        window, component unmounted — `body[data-cursor-lost]` is set, which
+ *        the CSS escape hatch turns back into a native cursor. "Loop stopped"
+ *        and "native cursor restored" are the same state change.
  *
  * Loop resilience:
- *   requestAnimationFrame is pre-scheduled at the TOP of render(), before any
- *   code that could throw or early-return. This makes the loop self-healing:
- *   no error or early exit can ever permanently kill it.
+ *   requestAnimationFrame is re-scheduled at the TOP of render(), before any
+ *   code that could throw or early-return, so no error can permanently kill it.
  */
 
 const PARTICLE_COUNT    = 15;
@@ -24,14 +33,58 @@ const TRAIL_MAX_RADIUS  = 2;
 const LEAVE_DEBOUNCE_MS = 500;   // long enough to survive rapid-click DOM mutations
 const CLICK_GRACE_MS    = 800;   // recent click forces cursor visible
 
-const ACCENT = { r: 226, g: 160, b: 78 };
+/** Must stay identical to the `cursor: none` media query in index.css. */
+const ENABLE_QUERY = '(hover: hover) and (prefers-reduced-motion: no-preference)';
+
+const FALLBACK_ACCENT = { r: 226, g: 160, b: 78 };
 
 const INTERACTIVE_SELECTOR =
     'a, button, input, textarea, select, [role="button"], [tabindex], label, summary';
 
+/**
+ * Text-entry fields need the native I-beam to show where text will land — a dot
+ * can't convey that. Over these we hand the cursor back to the browser instead
+ * of inventing a caret shape.
+ */
+const TEXT_ENTRY_SELECTOR =
+    'textarea, [contenteditable=""], [contenteditable="true"], ' +
+    'input:not([type="button"]):not([type="submit"]):not([type="reset"])' +
+    ':not([type="checkbox"]):not([type="radio"]):not([type="range"])' +
+    ':not([type="color"]):not([type="file"]):not([type="image"])';
+
 const lerp = (a, b, t) => a + (b - a) * t;
 
+/** Accepts `#rgb`, `#rrggbb` and `rgb()/rgba()`; returns null on anything else. */
+function parseColor(raw) {
+    if (!raw) return null;
+    const value = raw.trim();
+
+    const hex = value.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+    if (hex) {
+        const h = hex[1];
+        const full = h.length === 3 ? h.split('').map((c) => c + c).join('') : h;
+        return {
+            r: parseInt(full.slice(0, 2), 16),
+            g: parseInt(full.slice(2, 4), 16),
+            b: parseInt(full.slice(4, 6), 16),
+        };
+    }
+
+    const rgb = value.match(/^rgba?\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)/i);
+    if (rgb) {
+        return { r: Math.round(+rgb[1]), g: Math.round(+rgb[2]), b: Math.round(+rgb[3]) };
+    }
+
+    return null;
+}
+
 export default function CursorTrail() {
+    // Watched live, not read once — see invariant 1.
+    const [enabled, setEnabled] = useState(() => {
+        if (typeof window === 'undefined') return false;
+        return window.matchMedia(ENABLE_QUERY).matches;
+    });
+
     const canvasRef      = useRef(null);
     const mouseRef       = useRef({ x: -100, y: -100 });
     const particlesRef   = useRef([]);
@@ -42,9 +95,15 @@ export default function CursorTrail() {
     const clickStampRef  = useRef(0);
     const leaveTimerRef  = useRef(null);
     const lastDrawnRef   = useRef(performance.now());
-    const cursorLostRef  = useRef(false);
 
-    const stateRef = useRef('default');
+    // Inputs to the "should the native cursor be showing?" decision.
+    const runningRef     = useRef(false);
+    const textZoneRef    = useRef(false);
+    const lostRef        = useRef(false);
+    const nativeRef      = useRef(false);
+
+    const accentRef      = useRef(FALLBACK_ACCENT);
+    const stateRef       = useRef('default');
 
     const animRef = useRef({
         dotRadius:    4,
@@ -53,6 +112,28 @@ export default function CursorTrail() {
         glowRadius:   18,
         ringRotation: 0,
     });
+
+    /* ── Live media-query gate ── */
+    useEffect(() => {
+        const mq = window.matchMedia(ENABLE_QUERY);
+        const update = () => setEnabled(mq.matches);
+        update();
+        mq.addEventListener('change', update);
+        return () => mq.removeEventListener('change', update);
+    }, []);
+
+    /**
+     * Single source of truth for the CSS escape hatch. `data-cursor-lost`
+     * restores the native cursor, so it must be set whenever this component
+     * isn't painting one.
+     */
+    const syncNativeCursor = useCallback(() => {
+        const wantNative = !runningRef.current || textZoneRef.current || lostRef.current;
+        if (wantNative === nativeRef.current) return;
+        nativeRef.current = wantNative;
+        if (wantNative) document.body.setAttribute('data-cursor-lost', '');
+        else document.body.removeAttribute('data-cursor-lost');
+    }, []);
 
     const getTargets = (state) => {
         switch (state) {
@@ -82,7 +163,8 @@ export default function CursorTrail() {
 
     const render = useCallback((now) => {
         // Pre-schedule FIRST — errors and early returns can never kill the loop.
-        rafRef.current = requestAnimationFrame(render);
+        // Guarded by runningRef so a paused loop doesn't resurrect itself.
+        if (runningRef.current) rafRef.current = requestAnimationFrame(render);
 
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -91,12 +173,16 @@ export default function CursorTrail() {
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Gist demo is open — clear canvas and yield to native cursor
-            if (document.body.hasAttribute('data-demo-open')) {
+            const a = accentRef.current;
+            const rgba = (alpha) => `rgba(${a.r},${a.g},${a.b},${alpha})`;
+
+            // Yield to the native cursor: Gist demo open, or pointer over a
+            // text field where the I-beam carries real information.
+            if (document.body.hasAttribute('data-demo-open') || textZoneRef.current) {
                 lastDrawnRef.current = now;
-                if (cursorLostRef.current) {
-                    cursorLostRef.current = false;
-                    document.body.removeAttribute('data-cursor-lost');
+                if (lostRef.current) {
+                    lostRef.current = false;
+                    syncNativeCursor();
                 }
                 return;
             }
@@ -137,7 +223,7 @@ export default function CursorTrail() {
                 p.y += p.vy;
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, TRAIL_MAX_RADIUS * (1 - progress * 0.7), 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},${(1 - progress) * 0.25})`;
+                ctx.fillStyle = rgba((1 - progress) * 0.25);
                 ctx.fill();
                 alive.push(p);
             }
@@ -150,7 +236,7 @@ export default function CursorTrail() {
                 for (let i = 1; i < alive.length; i++) {
                     const progress = (now - alive[i].born) / PARTICLE_LIFETIME;
                     ctx.lineTo(alive[i].x, alive[i].y);
-                    ctx.strokeStyle = `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},${(1 - progress) * 0.08})`;
+                    ctx.strokeStyle = rgba((1 - progress) * 0.08);
                 }
                 const { x: mx, y: my } = mouseRef.current;
                 ctx.lineTo(mx, my);
@@ -167,7 +253,7 @@ export default function CursorTrail() {
                 const progress = age / dur;
                 ctx.beginPath();
                 ctx.arc(r.x, r.y, r.maxRadius * progress, 0, Math.PI * 2);
-                ctx.strokeStyle = `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},${(1 - progress) * 0.35})`;
+                ctx.strokeStyle = rgba((1 - progress) * 0.35);
                 ctx.lineWidth   = 1.5 * (1 - progress);
                 ctx.stroke();
                 aliveRipples.push(r);
@@ -181,8 +267,8 @@ export default function CursorTrail() {
 
                 // Ambient glow
                 const g = ctx.createRadialGradient(x, y, 0, x, y, anim.glowRadius);
-                g.addColorStop(0, `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},0.08)`);
-                g.addColorStop(1, `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},0)`);
+                g.addColorStop(0, rgba(0.08));
+                g.addColorStop(1, rgba(0));
                 ctx.beginPath();
                 ctx.arc(x, y, anim.glowRadius, 0, Math.PI * 2);
                 ctx.fillStyle = g;
@@ -197,12 +283,12 @@ export default function CursorTrail() {
                     ctx.shadowBlur  = 4;
                     ctx.beginPath();
                     ctx.arc(0, 0, anim.ringRadius, 0, Math.PI * 2);
-                    ctx.strokeStyle = `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},${anim.ringAlpha})`;
+                    ctx.strokeStyle = rgba(anim.ringAlpha);
                     ctx.lineWidth   = 1.5;
                     ctx.setLineDash([4, 6]);
                     ctx.stroke();
                     ctx.setLineDash([]);
-                    ctx.strokeStyle = `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},${anim.ringAlpha * 0.6})`;
+                    ctx.strokeStyle = rgba(anim.ringAlpha * 0.6);
                     ctx.lineWidth   = 1;
                     const tickDist = anim.ringRadius + 3;
                     const tickLen  = 4;
@@ -216,13 +302,14 @@ export default function CursorTrail() {
                     ctx.restore();
                 }
 
-                // Core dot
+                // Core dot. The black outline and white centre are painted ON the
+                // accent dot, not against the page, so they read in both themes.
                 ctx.save();
                 ctx.shadowColor = 'rgba(0,0,0,0.8)';
                 ctx.shadowBlur  = 8;
                 ctx.beginPath();
                 ctx.arc(x, y, anim.dotRadius, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},0.9)`;
+                ctx.fillStyle = rgba(0.9);
                 ctx.fill();
                 ctx.shadowBlur  = 0;
                 ctx.beginPath();
@@ -241,22 +328,22 @@ export default function CursorTrail() {
                 }
             }
 
-            // Cursor-lost detection: if unseen for >1.5 s, restore native cursor as fallback
+            // Cursor-lost detection: if unseen for >1.5 s, restore native cursor
             const lost = !visibleRef.current && (now - lastDrawnRef.current > 1500);
-            if (lost !== cursorLostRef.current) {
-                cursorLostRef.current = lost;
-                if (lost) document.body.setAttribute('data-cursor-lost', '');
-                else document.body.removeAttribute('data-cursor-lost');
+            if (lost !== lostRef.current) {
+                lostRef.current = lost;
+                syncNativeCursor();
             }
         } catch { /* swallow — next frame is already scheduled */ }
-    }, [spawnParticle]);
+    }, [spawnParticle, syncNativeCursor]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
-        if (!canvas) return;
+        if (!enabled || !canvas) return;
 
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-        if (window.matchMedia('(hover: none)').matches) return;
+        // Adopt whatever the DOM already says so the guard in syncNativeCursor
+        // can't get stuck out of step after a remount.
+        nativeRef.current = document.body.hasAttribute('data-cursor-lost');
 
         const resize = () => {
             canvas.width  = window.innerWidth;
@@ -264,6 +351,43 @@ export default function CursorTrail() {
         };
         resize();
         window.addEventListener('resize', resize);
+
+        // ─── Theme-aware accent ─────────────────────────────────────────────────
+        const readAccent = () => {
+            const parsed = parseColor(
+                getComputedStyle(document.documentElement).getPropertyValue('--color-accent')
+            );
+            if (parsed) accentRef.current = parsed;
+        };
+        readAccent();
+        const themeObserver = new MutationObserver(readAccent);
+        themeObserver.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['data-theme', 'class', 'style'],
+        });
+
+        // ─── Loop control ───────────────────────────────────────────────────────
+        const clearCanvas = () => {
+            try {
+                canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+            } catch { /* context unavailable — nothing was drawn anyway */ }
+        };
+
+        const setRunning = (run) => {
+            if (run === runningRef.current) return;
+            runningRef.current = run;
+            if (run) {
+                lostRef.current = false;
+                lastDrawnRef.current = performance.now();
+                syncNativeCursor();
+                rafRef.current = requestAnimationFrame(render);
+            } else {
+                if (rafRef.current) cancelAnimationFrame(rafRef.current);
+                rafRef.current = null;
+                clearCanvas();
+                syncNativeCursor();
+            }
+        };
 
         // ─── Helpers ────────────────────────────────────────────────────────────
         const clearLeaveTimer = () => {
@@ -277,8 +401,16 @@ export default function CursorTrail() {
             mouseRef.current = { x: e.clientX, y: e.clientY };
         };
 
-        const hoverState = (e) => {
+        /** One elementFromPoint hit answers both "is it interactive" and
+         *  "is it a text field" — doing it twice per move is wasteful. */
+        const probe = (e) => {
             const target = document.elementFromPoint(e.clientX, e.clientY);
+            const inTextZone = Boolean(target?.closest(TEXT_ENTRY_SELECTOR));
+            if (inTextZone !== textZoneRef.current) {
+                textZoneRef.current = inTextZone;
+                if (inTextZone) clearCanvas();
+                syncNativeCursor();
+            }
             return target?.closest(INTERACTIVE_SELECTOR) ? 'hover' : 'default';
         };
 
@@ -288,14 +420,16 @@ export default function CursorTrail() {
             clearLeaveTimer();
             setPos(e);
             visibleRef.current = true;
+            setRunning(true);
 
             // Recover from missed mouseup (e.g. click opened new tab)
             if (stateRef.current === 'click' && e.buttons === 0) {
                 stateRef.current = 'default';
             }
 
+            const hover = probe(e);
             if (stateRef.current !== 'click') {
-                stateRef.current = hoverState(e);
+                stateRef.current = hover;
             }
         };
 
@@ -307,6 +441,7 @@ export default function CursorTrail() {
             mouseRef.current = { x: e.clientX, y: e.clientY };
             visibleRef.current = true;
             clearLeaveTimer();
+            setRunning(true);
         };
 
         const onMouseDown = (e) => {
@@ -315,6 +450,7 @@ export default function CursorTrail() {
             visibleRef.current    = true;
             stateRef.current      = 'click';
             clickStampRef.current = performance.now();
+            setRunning(true);
             spawnRipple();
         };
 
@@ -324,7 +460,7 @@ export default function CursorTrail() {
             visibleRef.current    = true;
             // Refresh click stamp so the CLICK_GRACE_MS window stays open through mouseup
             clickStampRef.current = performance.now();
-            stateRef.current      = hoverState(e);
+            stateRef.current      = probe(e);
         };
 
         const onDocumentClick = (e) => {
@@ -332,6 +468,7 @@ export default function CursorTrail() {
             setPos(e);
             visibleRef.current    = true;
             clickStampRef.current = performance.now();
+            setRunning(true);
         };
 
         const onPointerCancel = () => {
@@ -340,27 +477,36 @@ export default function CursorTrail() {
 
         // Debounced hide with a generous 500 ms window so rapid-click DOM mutations
         // (which fire mouseleave on document) don't prematurely hide the cursor.
+        // Once it really has left, the loop stops and the native cursor comes back.
         const onMouseLeave = () => {
             clearLeaveTimer();
             leaveTimerRef.current = setTimeout(() => {
                 visibleRef.current = false;
+                setRunning(false);
             }, LEAVE_DEBOUNCE_MS);
         };
 
         const onMouseEnter = () => {
             clearLeaveTimer();
             visibleRef.current = true;
+            setRunning(true);
         };
 
         const onWindowFocus = () => {
             clearLeaveTimer();
             visibleRef.current = true;
+            if (!document.hidden) setRunning(true);
         };
 
+        // Background tabs still fire rAF in some browsers and always waste work
+        // in none — stop entirely and restore the native cursor while hidden.
         const onVisibilityChange = () => {
-            if (!document.hidden) {
+            if (document.hidden) {
+                setRunning(false);
+            } else {
                 clearLeaveTimer();
                 visibleRef.current = true;
+                setRunning(true);
             }
         };
 
@@ -376,10 +522,11 @@ export default function CursorTrail() {
         document.addEventListener('visibilitychange', onVisibilityChange);
         window.addEventListener('focus',              onWindowFocus);
 
-        rafRef.current = requestAnimationFrame(render);
+        if (!document.hidden) setRunning(true);
 
         return () => {
             clearLeaveTimer();
+            themeObserver.disconnect();
             window.removeEventListener('resize',             resize);
             window.removeEventListener('focus',              onWindowFocus);
             document.removeEventListener('mousemove',        onMouseMove);
@@ -391,10 +538,26 @@ export default function CursorTrail() {
             document.removeEventListener('mouseleave',       onMouseLeave);
             document.removeEventListener('mouseenter',       onMouseEnter);
             document.removeEventListener('visibilitychange', onVisibilityChange);
-            document.body.removeAttribute('data-cursor-lost');
-            if (rafRef.current) cancelAnimationFrame(rafRef.current);
+            // Loop stopped ⇒ native cursor restored. Never leave the page with
+            // `cursor: none` and nothing painting a replacement.
+            setRunning(false);
         };
-    }, [render, spawnRipple]);
+    }, [enabled, render, spawnRipple, syncNativeCursor]);
+
+    /* Disabled (touch, reduced motion): the CSS rule doesn't apply either, so
+       the native cursor is already showing. Drop the overlay entirely. */
+    useEffect(() => {
+        if (enabled) return;
+        textZoneRef.current = false;
+        lostRef.current = false;
+        runningRef.current = false;
+        nativeRef.current = document.body.hasAttribute('data-cursor-lost');
+        // Harmless while the media query doesn't match, and correct the instant
+        // it starts matching again.
+        syncNativeCursor();
+    }, [enabled, syncNativeCursor]);
+
+    if (!enabled) return null;
 
     return (
         <canvas
