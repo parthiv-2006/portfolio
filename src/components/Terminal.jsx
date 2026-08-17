@@ -1,7 +1,8 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback, useId } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { TerminalIcon, Compass } from 'lucide-react';
 import SectionHeading from './SectionHeading';
+import usePrefersReducedMotion from '../hooks/usePrefersReducedMotion';
 import { createGameState, processCommand, getEntryMessage } from '../adventureEngine';
 
 /* ── Resume download helper ── */
@@ -124,11 +125,32 @@ export default function Terminal() {
     const inputRef = useRef(null);
     const scrollRef = useRef(null);
     const terminalRef = useRef(null);
+    // False once the reader scrolls up — new output must not yank them back down.
+    const stickToBottomRef = useRef(true);
     const isInView = useInView(terminalRef, { once: true, margin: '-100px' });
+    const reducedMotion = usePrefersReducedMotion();
+    const baseId = useId();
+    const inputId = `${baseId}-cmd`;
+    const hintId = `${baseId}-hint`;
 
     /* ── Boot-up typing sequence ── */
     useEffect(() => {
         if (!isInView || booted) return;
+
+        const finish = () => {
+            setLines([
+                { type: 'system', text: WELCOME_TEXT },
+                { type: 'dim', text: '—' },
+            ]);
+            setBooted(true);
+        };
+
+        // setInterval isn't covered by <MotionConfig reducedMotion="user">.
+        if (reducedMotion) {
+            setBootText(WELCOME_TEXT);
+            finish();
+            return;
+        }
 
         let charIndex = 0;
         const interval = setInterval(() => {
@@ -137,27 +159,59 @@ export default function Terminal() {
                 charIndex++;
             } else {
                 clearInterval(interval);
-                setLines([
-                    { type: 'system', text: WELCOME_TEXT },
-                    { type: 'dim', text: '—' },
-                ]);
-                setBooted(true);
+                finish();
             }
         }, 25);
 
         return () => clearInterval(interval);
-    }, [isInView, booted]);
+    }, [isInView, booted, reducedMotion]);
 
-    /* ── Auto-scroll on new content ── */
+    /* ── Auto-scroll on new content, unless the reader scrolled up ── */
     useEffect(() => {
-        if (scrollRef.current) {
+        if (stickToBottomRef.current && scrollRef.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
     }, [lines, bootText]);
 
+    const handleScroll = useCallback(() => {
+        const el = scrollRef.current;
+        if (!el) return;
+        stickToBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+    }, []);
+
+    /* Clicking the terminal body focuses the prompt — the expected shell
+       affordance — without stealing clicks on links, buttons or selections. */
+    const focusPrompt = useCallback((e) => {
+        if (e.target.closest('a, button')) return;
+        if (window.getSelection()?.toString()) return;
+        inputRef.current?.focus();
+    }, []);
+
+    const copyTimerRef = useRef(null);
+    const copyValue = useCallback((value, index) => {
+        navigator.clipboard?.writeText(value).catch(() => { /* clipboard blocked — the text is still on screen */ });
+        setCopiedIndex(index);
+        clearTimeout(copyTimerRef.current);
+        copyTimerRef.current = setTimeout(() => setCopiedIndex(null), 2000);
+    }, []);
+
+    useEffect(() => () => clearTimeout(copyTimerRef.current), []);
+
+    /* Any command the visitor runs should scroll its own output into view. */
+    const runCommand = useCallback((cmd) => {
+        if (!booted) return;
+        stickToBottomRef.current = true;
+        setLines((prev) => [
+            ...prev,
+            { type: 'input', text: `$ ${cmd}` },
+            ...COMMANDS[cmd](),
+        ]);
+    }, [booted]);
+
     /* ── Enter adventure mode ── */
     const enterAdventure = () => {
         const state = createGameState();
+        stickToBottomRef.current = true;
         setGameState(state);
         setAdventureMode(true);
 
@@ -175,6 +229,8 @@ export default function Terminal() {
         e.preventDefault();
         const trimmed = input.trim().toLowerCase();
         if (!trimmed) return;
+
+        stickToBottomRef.current = true;
 
         /* ── Adventure Mode ── */
         if (adventureMode && gameState) {
@@ -306,14 +362,24 @@ export default function Terminal() {
                     {/* Terminal content */}
                     <div
                         ref={scrollRef}
+                        onScroll={handleScroll}
                         className="p-5 h-80 overflow-y-auto overflow-x-hidden font-mono text-sm space-y-1"
-                        onClick={() => inputRef.current?.focus()}
+                        onClick={focusPrompt}
                     >
+                        {/* Output region — announced as it grows */}
+                        <div
+                            role="log"
+                            aria-live="polite"
+                            aria-relevant="additions text"
+                            aria-label="Terminal output"
+                            className="space-y-1"
+                        >
                         {/* Boot-up typing animation */}
                         {!booted && bootText && (
                             <div className="text-accent">
                                 {bootText}
                                 <motion.span
+                                    aria-hidden="true"
                                     className="inline-block w-2 h-4 bg-accent ml-0.5 align-middle"
                                     animate={{ opacity: [1, 0] }}
                                     transition={{ duration: 0.5, repeat: Infinity, repeatType: 'reverse' }}
@@ -343,11 +409,8 @@ export default function Terminal() {
                                         </a>
                                     ) : line.action === 'copy' ? (
                                         <button
-                                            onClick={() => {
-                                                navigator.clipboard.writeText(line.value);
-                                                setCopiedIndex(i);
-                                                setTimeout(() => setCopiedIndex(null), 2000);
-                                            }}
+                                            type="button"
+                                            onClick={() => copyValue(line.value, i)}
                                             className="underline underline-offset-2 hover:opacity-80 transition-opacity duration-150 cursor-pointer text-left"
                                         >
                                             {line.text}
@@ -360,14 +423,21 @@ export default function Terminal() {
                                     )}
                                 </motion.div>
                             ))}
+                        </div>
 
                         {/* Input line — only show after boot */}
                         {booted && (
                             <form onSubmit={handleSubmit} className="flex items-center gap-2 mt-2">
-                                <span className={adventureMode ? 'text-emerald-400' : 'text-accent'}>
+                                <span aria-hidden="true" className={adventureMode ? 'text-emerald-400' : 'text-accent'}>
                                     {promptChar}
                                 </span>
+                                <label htmlFor={inputId} className="sr-only">
+                                    {adventureMode
+                                        ? 'Adventure command — try look, go, take, map or help'
+                                        : "Terminal command — type help to list commands"}
+                                </label>
                                 <input
+                                    id={inputId}
                                     ref={inputRef}
                                     type="text"
                                     value={input}
@@ -377,12 +447,14 @@ export default function Terminal() {
                                     placeholder={
                                         adventureMode
                                             ? 'look, go, interact, take, map, help...'
-                                            : 'Type a command...'
+                                            : "Type a command (try 'help')"
                                     }
                                     autoComplete="off"
                                     spellCheck={false}
+                                    aria-describedby={hintId}
                                 />
                                 <motion.span
+                                    aria-hidden="true"
                                     className={`inline-block w-2 h-4 ${adventureMode ? 'bg-emerald-400' : 'bg-accent'
                                         }`}
                                     animate={{ opacity: [1, 1, 0, 0] }}
@@ -398,46 +470,46 @@ export default function Terminal() {
                     </div>
                 </motion.div>
 
+                {/* Discoverability hint — the command list isn't obvious otherwise */}
+                <p id={hintId} className="mt-4 text-center text-[11px] font-mono text-text-dim">
+                    {adventureMode
+                        ? 'Try look, go <direction>, take, map, or help. Type exit to leave.'
+                        : <>Type <span className="text-accent">help</span> for every command, or use a shortcut below.</>}
+                </p>
+
                 {/* Quick actions below terminal */}
                 <motion.div
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.3 }}
-                    className="mt-6 flex flex-wrap justify-center gap-3"
+                    className="mt-4 flex flex-wrap justify-center gap-3"
                 >
                     {!adventureMode && (
                         <>
+                            <button
+                                type="button"
+                                onClick={() => runCommand('help')}
+                                className="px-3 py-1.5 rounded-lg bg-surface-light border border-border text-text-dim text-xs font-mono hover:border-accent/30 hover:text-accent transition-all duration-200 min-h-[44px]"
+                            >
+                                help
+                            </button>
                             {['contact --email', 'contact --github', 'contact --linkedin'].map(
                                 (cmd) => (
                                     <button
                                         key={cmd}
-                                        onClick={() => {
-                                            if (!booted) return;
-                                            const newLines = [
-                                                ...lines,
-                                                { type: 'input', text: `$ ${cmd}` },
-                                                ...COMMANDS[cmd](),
-                                            ];
-                                            setLines(newLines);
-                                        }}
-                                        className="px-3 py-1.5 rounded-lg bg-surface-light border border-border text-text-dim text-xs font-mono hover:border-accent/30 hover:text-accent transition-all duration-200 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+                                        type="button"
+                                        onClick={() => runCommand(cmd)}
+                                        className="px-3 py-1.5 rounded-lg bg-surface-light border border-border text-text-dim text-xs font-mono hover:border-accent/30 hover:text-accent transition-all duration-200 min-h-[44px]"
                                     >
                                         {cmd}
                                     </button>
                                 )
                             )}
                             <button
-                                onClick={() => {
-                                    if (!booted) return;
-                                    const newLines = [
-                                        ...lines,
-                                        { type: 'input', text: '$ resume' },
-                                        ...COMMANDS.resume(),
-                                    ];
-                                    setLines(newLines);
-                                }}
-                                className="px-3 py-1.5 rounded-lg bg-accent/10 border border-accent/25 text-accent text-xs font-mono hover:bg-accent/20 hover:border-accent/40 transition-all duration-200 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+                                type="button"
+                                onClick={() => runCommand('resume')}
+                                className="px-3 py-1.5 rounded-lg bg-accent/10 border border-accent/25 text-accent text-xs font-mono hover:bg-accent/20 hover:border-accent/40 transition-all duration-200 min-h-[44px]"
                             >
                                 resume
                             </button>
@@ -446,11 +518,13 @@ export default function Terminal() {
 
                     {/* Explore / adventure button — always visible */}
                     <button
+                        type="button"
                         onClick={() => {
                             if (!booted) return;
                             if (adventureMode) {
                                 // Already in adventure mode — run 'map'
                                 if (gameState) {
+                                    stickToBottomRef.current = true;
                                     const inputLine = { type: 'input', text: '⚔ map' };
                                     const { newState, output } = processCommand(gameState, 'map');
                                     setGameState(newState);
@@ -460,7 +534,7 @@ export default function Terminal() {
                                 enterAdventure();
                             }
                         }}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all duration-300 flex items-center gap-1.5 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 ${adventureMode
+                        className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all duration-300 flex items-center gap-1.5 min-h-[44px] ${adventureMode
                                 ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25 hover:border-emerald-500/50 shadow-[0_0_12px_rgba(16,185,129,0.15)]'
                                 : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/40'
                             }`}
