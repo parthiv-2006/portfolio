@@ -177,8 +177,13 @@ function ProjectCard({ project, index, activeFilter, isTouch, onClick }) {
             </div>
 
             {/* Title — the button stretches over the whole card via ::after, so the
-                card is one keyboard stop with real heading semantics preserved. */}
-            <h3 className="relative z-[2] font-display italic text-[2rem] font-normal leading-[1.05] tracking-[-0.01em] mb-[10px]">
+                card is one keyboard stop with real heading semantics preserved.
+                The heading must NOT be position:relative — that would make it
+                (not the article) the containing block for the ::after overlay,
+                shrinking the "click anywhere on the card" target down to just
+                the title line. Flex items still get correct paint order from
+                z-index alone (no position needed), so the stacking intent holds. */}
+            <h3 className="z-[2] font-display italic text-[2rem] font-normal leading-[1.05] tracking-[-0.01em] mb-[10px]">
                 <button
                     type="button"
                     onClick={onClick}
