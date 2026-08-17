@@ -22,7 +22,6 @@ const projects = [
         role: 'AI Agent',
         github: 'https://github.com/parthiv-2006/lease-guard',
         live: 'https://leaseguard-sigma.vercel.app/',
-        image: '/projects/leaseguard.png',
     },
     {
         id: 'gist',
@@ -36,7 +35,6 @@ const projects = [
         github: 'https://github.com/parthiv-2006/Gist',
         live: null,
         hasDemo: true,
-        image: '/projects/gist.png',
     },
     {
         id: 'reflecta',
@@ -48,7 +46,6 @@ const projects = [
         year: '2026',
         role: 'Dev Tool',
         github: 'https://github.com/parthiv-2006/Reflecta-Ai-Agent',
-        image: '/projects/Reflecta.png',
     },
     {
         id: 'angler',
@@ -62,7 +59,6 @@ const projects = [
         github: 'https://github.com/parthiv-2006/Angler',
         live: 'https://www.angler.software',
         competition: '$5K Build Challenge',
-        image: '/projects/angler.png',
     },
     {
         id: 'glowi',
@@ -75,7 +71,6 @@ const projects = [
         role: 'AI + Mobile',
         github: 'https://github.com/parthiv-2006/Glowi',
         underDevelopment: true,
-        image: '/projects/glowi.png',
     },
     {
         id: 'palate',
@@ -90,7 +85,6 @@ const projects = [
         live: 'https://palate-self.vercel.app/',
         devpost: 'https://devpost.com/software/palate-3uic5p',
         hackathon: 'UofTHacks 2026',
-        image: '/projects/palate.png',
     },
     {
         id: 'anima',
@@ -103,7 +97,6 @@ const projects = [
         role: 'Full-Stack',
         github: 'https://github.com/parthiv-2006/Anima',
         live: 'https://anima-client.vercel.app/',
-        image: '/projects/animaProject.png',
     },
     {
         id: 'macromatch',
@@ -116,7 +109,6 @@ const projects = [
         role: 'Full-Stack',
         github: 'https://github.com/parthiv-2006/MacroMatch',
         live: 'https://macro-match-cyan.vercel.app/',
-        image: '/projects/macromatch.png',
     },
 ];
 
@@ -130,60 +122,6 @@ const techCounts = projects.reduce((acc, p) => {
 const allTechs = Object.keys(techCounts)
     .filter((t) => techCounts[t] >= 2)
     .sort((a, b) => techCounts[b] - techCounts[a] || a.localeCompare(b));
-
-/**
- * Fixed-ratio thumbnail: reserves its box before the file arrives so the grid
- * never reflows, shimmers while loading, and degrades to a monogram plate
- * instead of a broken-image glyph.
- */
-function ProjectThumb({ project }) {
-    const [status, setStatus] = useState(project.image ? 'loading' : 'fallback');
-    const [fit, setFit] = useState('cover');
-
-    // Screenshots are ~16:10; logo-style art is square. Letterbox the square
-    // ones rather than cropping their subject out of frame.
-    const handleLoad = (e) => {
-        const { naturalWidth: w, naturalHeight: h } = e.currentTarget;
-        if (w && h && w / h < 1.35) setFit('contain');
-        setStatus('ready');
-    };
-
-    return (
-        <div className="relative z-[1] w-full aspect-[16/10] mb-5 rounded-xl overflow-hidden border border-white/[0.06] bg-surface2">
-            {status === 'loading' && (
-                <div className="shimmer absolute inset-0" aria-hidden="true" />
-            )}
-
-            {status === 'fallback' ? (
-                <div
-                    className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-surface2"
-                    aria-hidden="true"
-                >
-                    <span className="font-display italic text-[40px] leading-none text-text-dim">
-                        {project.title.charAt(0)}
-                    </span>
-                    <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-text-dim">
-                        {project.role}
-                    </span>
-                </div>
-            ) : (
-                <img
-                    src={project.image}
-                    alt={`${project.title} preview`}
-                    width="1600"
-                    height="1000"
-                    loading="lazy"
-                    decoding="async"
-                    onLoad={handleLoad}
-                    onError={() => setStatus('fallback')}
-                    className={`absolute inset-0 w-full h-full transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03] ${
-                        fit === 'contain' ? 'object-contain p-4' : 'object-cover object-top'
-                    } ${status === 'ready' ? 'opacity-100' : 'opacity-0'}`}
-                />
-            )}
-        </div>
-    );
-}
 
 function ProjectCard({ project, index, activeFilter, isTouch, onClick }) {
     const displayNum = String(index + 1).padStart(2, '0');
@@ -252,11 +190,9 @@ function ProjectCard({ project, index, activeFilter, isTouch, onClick }) {
             </h3>
 
             {/* Tagline */}
-            <p className="relative z-[1] text-[14px] text-text-muted leading-[1.55] mb-[18px]">
+            <p className="relative z-[1] text-[14px] text-text-muted leading-[1.55] mb-5">
                 {project.tagline}
             </p>
-
-            <ProjectThumb project={project} />
 
             {/* Divider */}
             <div className="h-px bg-white/[0.06] mt-auto mb-4" />
