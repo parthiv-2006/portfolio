@@ -1,7 +1,9 @@
-import { useRef, useMemo, useEffect } from 'react';
+import { useRef, useMemo, useEffect, useCallback } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Download } from 'lucide-react';
 import useLatestRepo from '../hooks/useLatestRepo';
+import usePrefersReducedMotion from '../hooks/usePrefersReducedMotion';
+import useIsTouch from '../hooks/useIsTouch';
 
 function getGreeting() {
     const hour = new Date().getHours();
@@ -11,28 +13,70 @@ function getGreeting() {
     return 'late night coding?';
 }
 
+const FALLBACK_ACCENT = 'rgba(226,160,78,';
+
+/**
+ * Read the live `--color-accent` token and turn it into an `rgba(r,g,b,`
+ * prefix, so canvas strokes follow whichever theme is active.
+ */
+function readAccentPrefix() {
+    const raw = getComputedStyle(document.documentElement)
+        .getPropertyValue('--color-accent')
+        .trim();
+
+    const hex = raw.match(/^#([0-9a-f]{3,8})$/i);
+    if (hex) {
+        let digits = hex[1];
+        if (digits.length < 6) {
+            digits = digits.slice(0, 3).split('').map((c) => c + c).join('');
+        }
+        const int = parseInt(digits.slice(0, 6), 16);
+        return `rgba(${(int >> 16) & 255},${(int >> 8) & 255},${int & 255},`;
+    }
+
+    const rgb = raw.match(/^rgba?\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)/i);
+    if (rgb) return `rgba(${rgb[1]},${rgb[2]},${rgb[3]},`;
+
+    return FALLBACK_ACCENT;
+}
+
 /* ── Canvas particle field ── */
-function useParticleCanvas(canvasRef) {
+function useParticleCanvas(canvasRef, sectionRef, enabled) {
     useEffect(() => {
+        if (!enabled) return undefined;
         const canvas = canvasRef.current;
-        if (!canvas) return;
+        if (!canvas) return undefined;
         const ctx = canvas.getContext('2d');
-        let raf;
-        let particles = [];
 
-        const ACCENT = 'rgba(226,160,78,';
         const COUNT = 55;
+        const LINK = 120;
+        const LINK_SQ = LINK * LINK;
 
-        function resize() {
-            canvas.width = canvas.offsetWidth;
-            canvas.height = canvas.offsetHeight;
+        let raf = 0;
+        let running = false;
+        let onScreen = true;
+        let resizeTimer = 0;
+        let particles = [];
+        // Logical (CSS pixel) size; the backing store is this times the DPR.
+        let width = 0;
+        let height = 0;
+        let accent = readAccentPrefix();
+
+        function measure() {
+            // Cap the DPR: beyond 2x the extra pixels cost more than they show.
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            const w = canvas.offsetWidth;
+            const h = canvas.offsetHeight;
+            canvas.width = Math.round(w * dpr);
+            canvas.height = Math.round(h * dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            return [w, h];
         }
 
-        function init() {
-            resize();
+        function seed() {
             particles = Array.from({ length: COUNT }, () => ({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
+                x: Math.random() * width,
+                y: Math.random() * height,
                 vx: (Math.random() - 0.5) * 0.35,
                 vy: (Math.random() - 0.5) * 0.35,
                 r: Math.random() * 1.8 + 0.6,
@@ -40,49 +84,136 @@ function useParticleCanvas(canvasRef) {
             }));
         }
 
+        function layout() {
+            const prevW = width;
+            const prevH = height;
+            [width, height] = measure();
+
+            if (!particles.length) {
+                seed();
+                return;
+            }
+            // Rescale instead of re-seeding so nothing teleports on resize.
+            if (prevW > 0 && prevH > 0) {
+                const sx = width / prevW;
+                const sy = height / prevH;
+                for (const p of particles) {
+                    p.x *= sx;
+                    p.y *= sy;
+                }
+            }
+        }
+
         function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, width, height);
+
             for (let i = 0; i < particles.length; i++) {
                 const p = particles[i];
                 p.x += p.vx;
                 p.y += p.vy;
-                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
-                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+                if (p.x < 0 || p.x > width) p.vx *= -1;
+                if (p.y < 0 || p.y > height) p.vy *= -1;
 
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-                ctx.fillStyle = ACCENT + p.o + ')';
+                ctx.fillStyle = accent + p.o + ')';
                 ctx.fill();
 
                 for (let j = i + 1; j < particles.length; j++) {
                     const q = particles[j];
-                    const dx = p.x - q.x, dy = p.y - q.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < 120) {
+                    const dx = p.x - q.x;
+                    const dy = p.y - q.y;
+                    // Compare squared distances; only the survivors pay for a sqrt.
+                    const distSq = dx * dx + dy * dy;
+                    if (distSq < LINK_SQ) {
+                        const fade = 0.06 * (1 - Math.sqrt(distSq) / LINK);
                         ctx.beginPath();
                         ctx.moveTo(p.x, p.y);
                         ctx.lineTo(q.x, q.y);
-                        ctx.strokeStyle = ACCENT + (0.06 * (1 - dist / 120)) + ')';
+                        ctx.strokeStyle = accent + fade + ')';
                         ctx.lineWidth = 0.5;
                         ctx.stroke();
                     }
                 }
             }
+
             raf = requestAnimationFrame(draw);
         }
 
-        init();
-        draw();
-        window.addEventListener('resize', init);
-        return () => {
+        function start() {
+            if (running) return;
+            running = true;
+            raf = requestAnimationFrame(draw);
+        }
+
+        function stop() {
+            running = false;
             cancelAnimationFrame(raf);
-            window.removeEventListener('resize', init);
+        }
+
+        // The loop is O(n^2) per frame — never run it for an unseen hero.
+        function sync() {
+            if (onScreen && !document.hidden) start();
+            else stop();
+        }
+
+        function onResize() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(layout, 150);
+        }
+
+        layout();
+        sync();
+
+        const themeObserver = new MutationObserver(() => {
+            accent = readAccentPrefix();
+        });
+        themeObserver.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['data-theme'],
+        });
+
+        let io;
+        const section = sectionRef.current;
+        if (section && typeof IntersectionObserver !== 'undefined') {
+            io = new IntersectionObserver(
+                ([entry]) => {
+                    onScreen = entry.isIntersecting;
+                    sync();
+                },
+                { threshold: 0 },
+            );
+            io.observe(section);
+        }
+
+        // Element-level resizes (scrollbar appearing, layout shifts) plus the
+        // window listener, which is what catches a devicePixelRatio change.
+        let ro;
+        if (typeof ResizeObserver !== 'undefined') {
+            ro = new ResizeObserver(onResize);
+            ro.observe(canvas);
+        }
+        window.addEventListener('resize', onResize);
+        document.addEventListener('visibilitychange', sync);
+
+        return () => {
+            stop();
+            clearTimeout(resizeTimer);
+            themeObserver.disconnect();
+            if (io) io.disconnect();
+            if (ro) ro.disconnect();
+            window.removeEventListener('resize', onResize);
+            document.removeEventListener('visibilitychange', sync);
         };
-    }, [canvasRef]);
+    }, [canvasRef, sectionRef, enabled]);
 }
 
 /* ── Hoverable letter ── */
-function HoverLetter({ char }) {
+function HoverLetter({ char, interactive }) {
+    if (!interactive) {
+        // No hover state on touch, so the lift would only ever half-fire.
+        return <span className="inline-block">{char}</span>;
+    }
     return (
         <motion.span
             className="inline-block cursor-default transition-colors duration-300 hover:text-accent"
@@ -99,8 +230,14 @@ export default function Hero() {
     const canvasRef = useRef(null);
     const greeting = useMemo(() => getGreeting(), []);
     const latestRepo = useLatestRepo('parthiv-2006');
+    const reducedMotion = usePrefersReducedMotion();
+    const isTouch = useIsTouch();
 
-    useParticleCanvas(canvasRef);
+    useParticleCanvas(canvasRef, containerRef, !reducedMotion);
+
+    const scrollToAbout = useCallback(() => {
+        document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+    }, []);
 
     const { scrollYProgress } = useScroll({
         target: containerRef,
@@ -119,19 +256,22 @@ export default function Hero() {
             ref={containerRef}
             className="relative min-h-screen flex items-center justify-center overflow-hidden snap-section"
         >
-            {/* Particle canvas */}
-            <canvas
-                ref={canvasRef}
-                className="absolute inset-0 w-full h-full z-0"
-                style={{ pointerEvents: 'none' }}
-            />
+            {/* Particle canvas — dropped entirely when the user asked for less motion */}
+            {!reducedMotion && (
+                <canvas
+                    ref={canvasRef}
+                    aria-hidden="true"
+                    className="absolute inset-0 w-full h-full z-0"
+                    style={{ pointerEvents: 'none' }}
+                />
+            )}
 
             {/* Ambient warm glow */}
             <div
                 className="absolute inset-0 z-[1] pointer-events-none"
                 style={{
                     background:
-                        'radial-gradient(ellipse 64% 52% at 50% 40%, rgba(226,160,78,0.07) 0%, transparent 66%)',
+                        'radial-gradient(ellipse 64% 52% at 50% 40%, color-mix(in srgb, var(--color-accent) 7%, transparent) 0%, transparent 66%)',
                 }}
             />
 
@@ -144,7 +284,7 @@ export default function Hero() {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                    className="font-mono text-text-dim text-sm tracking-[0.2em] sm:tracking-[0.28em] uppercase mb-6"
+                    className="font-mono text-text-dim text-xs sm:text-sm tracking-[0.2em] sm:tracking-[0.28em] uppercase mb-6"
                 >
                     {greeting}
                 </motion.p>
@@ -155,18 +295,21 @@ export default function Hero() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
                     className="font-display text-text leading-[0.9] tracking-tight mb-6 select-none"
-                    style={{ fontSize: 'clamp(3.25rem, 12vw, 9rem)', fontStyle: 'italic' }}
+                    style={{ fontSize: 'clamp(3rem, 13vw, 9rem)', fontStyle: 'italic' }}
                 >
                     <span className="block">
-                        {firstLine.split('').map((ch, i) => <HoverLetter key={i} char={ch} />)}
+                        {firstLine.split('').map((ch, i) => (
+                            <HoverLetter key={i} char={ch} interactive={!isTouch} />
+                        ))}
                     </span>
                     <span className="block">
-                        {secondLine.split('').map((ch, i) => <HoverLetter key={i} char={ch} />)}
+                        {secondLine.split('').map((ch, i) => (
+                            <HoverLetter key={i} char={ch} interactive={!isTouch} />
+                        ))}
                         <motion.span
-                            className="text-accent cursor-pointer"
-                            whileHover={{ scale: 1.25, rotate: 8 }}
+                            className="text-accent"
+                            whileHover={isTouch ? undefined : { scale: 1.25, rotate: 8 }}
                             transition={{ duration: 0.3 }}
-                            onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}
                         >
                             .
                         </motion.span>
@@ -182,12 +325,13 @@ export default function Hero() {
                     style={{ transformOrigin: 'center' }}
                 />
 
-                {/* Role */}
+                {/* Role — tracking and size ease off on narrow screens so this
+                    stays on a single row down to 375px */}
                 <motion.p
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.6, delay: 0.6 }}
-                    className="font-mono text-accent text-base tracking-[0.04em] mb-4 cursor-blink"
+                    className="font-mono text-accent text-[13px] sm:text-base tracking-normal sm:tracking-[0.04em] mb-4 cursor-blink"
                 >
                     cs @ uoft · full-stack &amp; ai engineer
                 </motion.p>
@@ -198,21 +342,23 @@ export default function Hero() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.6, delay: 0.7 }}
-                        className="font-mono text-text-dim text-xs tracking-wide mb-4 flex items-center justify-center gap-2 flex-wrap"
+                        className="font-mono text-text-dim text-xs tracking-wide mb-4 flex items-center justify-center gap-x-2 gap-y-1 flex-wrap"
                     >
-                        <span className="relative inline-flex w-[7px] h-[7px]">
+                        <span className="relative inline-flex w-[7px] h-[7px] shrink-0">
                             <span className="absolute inset-0 rounded-full bg-accent" />
                             <span className="absolute inset-0 rounded-full bg-accent animate-[glow-pulse_1.8s_ease-in-out_infinite]" />
                         </span>
-                        currently working on{' '}
-                        <a
-                            href={latestRepo.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-accent hover:opacity-75 transition-opacity"
-                        >
-                            {latestRepo.name}
-                        </a>
+                        <span>
+                            currently working on{' '}
+                            <a
+                                href={latestRepo.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-accent hover:opacity-75 transition-opacity"
+                            >
+                                {latestRepo.name}
+                            </a>
+                        </span>
                     </motion.p>
                 )}
 
@@ -239,7 +385,7 @@ export default function Hero() {
                             e.preventDefault();
                             document.getElementById('work')?.scrollIntoView({ behavior: 'smooth' });
                         }}
-                        className="inline-flex items-center gap-2 text-text-muted text-sm hover:text-accent transition-colors duration-300 group min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 rounded px-2 -mx-2"
+                        className="inline-flex items-center gap-2 text-text-muted text-sm hover:text-accent transition-colors duration-300 group min-h-[44px] rounded px-2 -mx-2"
                     >
                         See my work
                         <span className="inline-block transition-transform duration-300 group-hover:translate-y-0.5">↓</span>
@@ -250,7 +396,7 @@ export default function Hero() {
                     <a
                         href="parthiv_paul_swe.pdf"
                         download="parthiv_paul_swe.pdf"
-                        className="group/resume relative inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-medium text-accent border border-accent/25 bg-accent/[0.07] hover:bg-accent/15 hover:border-accent/40 transition-all duration-300 hover:shadow-[0_0_20px_rgba(226,160,78,0.15)] min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+                        className="group/resume relative inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-medium text-accent border border-accent/25 bg-accent/[0.07] hover:bg-accent/15 hover:border-accent/40 transition-all duration-300 hover:shadow-[0_0_20px_var(--color-accent-dim)] min-h-[44px]"
                     >
                         <span className="absolute inset-0 rounded-full border border-accent/10 animate-[pulse_3s_ease-in-out_infinite]" />
                         <Download size={14} className="transition-transform duration-300 group-hover/resume:translate-y-0.5" />
@@ -259,13 +405,20 @@ export default function Hero() {
                 </motion.div>
             </motion.div>
 
-            {/* Scroll dot indicator */}
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[2] w-[22px] h-9 border border-white/[0.12] rounded-xl flex justify-center pt-[7px]">
-                <span
-                    className="w-[3px] h-[7px] rounded-sm bg-accent"
-                    style={{ animation: 'scroll-dot 1.8s ease-in-out infinite' }}
-                />
-            </div>
+            {/* Scroll indicator — a real control, sized to a 44px tap target */}
+            <button
+                type="button"
+                onClick={scrollToAbout}
+                aria-label="Scroll to the about section"
+                className="group absolute bottom-7 left-1/2 -translate-x-1/2 z-[2] flex w-11 h-11 items-center justify-center"
+            >
+                <span className="w-[22px] h-9 border border-border-hover rounded-xl flex justify-center pt-[7px] transition-colors duration-300 group-hover:border-accent/50">
+                    <span
+                        className="w-[3px] h-[7px] rounded-sm bg-accent"
+                        style={{ animation: 'scroll-dot 1.8s ease-in-out infinite' }}
+                    />
+                </span>
+            </button>
         </section>
     );
 }
