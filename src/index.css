@@ -44,7 +44,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
 
   ::-webkit-scrollbar {
@@ -58,6 +58,23 @@
   ::-webkit-scrollbar-thumb {
     background: var(--color-surface-light);
     border-radius: 3px;
+    transition: background 0.2s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-accent-dim);
+  }
+
+  /* One consistent keyboard-focus ring for everything that can take focus. */
+  :where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  /* Never show the ring for plain mouse clicks. */
+  :where(a, button, input, textarea, select, summary, [tabindex]):focus:not(:focus-visible) {
+    outline: none;
   }
 
   ::selection {
@@ -276,4 +293,85 @@
 @keyframes badge-pulse {
   0%, 100% { opacity: 0.7; }
   50%       { opacity: 1; }
+}
+/* ── Skip link ── */
+/* Visually hidden until focused, so keyboard users can jump the nav. */
+.skip-link {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  z-index: 300;
+  transform: translate(-50%, -140%);
+  padding: 10px 20px;
+  border-radius: 0 0 12px 12px;
+  background: var(--color-accent);
+  color: var(--color-bg);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.skip-link:focus-visible {
+  transform: translate(-50%, 0);
+  outline-offset: -4px;
+}
+
+/* ── Shimmer for loading skeletons ── */
+@keyframes shimmer {
+  from { background-position: -180% 0; }
+  to   { background-position: 180% 0; }
+}
+
+.shimmer {
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--color-accent-glow) 45%,
+    transparent 90%
+  );
+  background-size: 180% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+/* ── Reveal-on-scroll fallback for non-motion elements ── */
+@keyframes fade-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Reduced motion ── */
+/*
+  Framer Motion is handled separately via <MotionConfig reducedMotion="user">.
+  This block neutralises the CSS keyframe animations and long transitions
+  declared above, and stops smooth-scroll hijacking.
+*/
+@media (prefers-reduced-motion: reduce) {
+
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Decorative loops carry no information — hide them rather than freeze
+     them mid-frame. */
+  .shimmer {
+    background-image: none;
+  }
+}
+
+/* ── Pause marquee-style loops on hover/focus ── */
+.pause-on-hover:hover [data-marquee-track],
+.pause-on-hover:focus-within [data-marquee-track] {
+  animation-play-state: paused;
 }

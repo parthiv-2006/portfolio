@@ -9,6 +9,10 @@
     content="Parthiv Paul — Software Engineer at Velox Systems and Computer Science Specialist @ University of Toronto. Full-stack and AI engineer portfolio showcasing projects, skills, and experience." />
   <title>Parthiv Paul | Software Engineer Portfolio</title>
 
+  <link rel="canonical" href="https://www.parthivpaul.me/" />
+  <link rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23111110'/%3E%3Ctext x='16' y='23' font-family='Georgia,serif' font-style='italic' font-size='20' fill='%23E2A04E' text-anchor='middle'%3EP%3C/text%3E%3C/svg%3E" />
+
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://www.parthivpaul.me/" />
   <meta property="og:title" content="Parthiv Paul | Software Engineer Portfolio" />
@@ -23,6 +27,21 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap"
     rel="stylesheet" />
+
+  <!--
+    Theme bootstrap. Runs before first paint so a saved "day" theme never
+    flashes the dark palette on load.
+  -->
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('pp-theme') || 'night';
+        document.documentElement.dataset.theme = saved;
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', saved === 'day' ? '#EFE9DD' : '#111110');
+      } catch (e) { }
+    })();
+  </script>
 </head>
 
 <body>

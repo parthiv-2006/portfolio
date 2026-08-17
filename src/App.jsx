@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, MotionConfig } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import About from './components/About';
@@ -16,6 +16,7 @@ import GitHubGraph from './components/GitHubGraph';
 import GitHubStreak from './components/GitHubStreak';
 import SectionHeading from './components/SectionHeading';
 import useActiveSection from './hooks/useActiveSection';
+import usePrefersReducedMotion from './hooks/usePrefersReducedMotion';
 
 function EnteringOverlay({ onDone }) {
     const [curtainsOpen, setCurtainsOpen] = useState(false);
@@ -33,7 +34,7 @@ function EnteringOverlay({ onDone }) {
     }, [onDone]);
 
     return (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 200, overflow: 'hidden' }}>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 200, overflow: 'hidden' }} role="status" aria-label="Loading portfolio">
             {/* Left curtain */}
             <div style={{
                 position: 'absolute', top: 0, bottom: 0, left: 0, width: '50.5%',
@@ -105,11 +106,127 @@ function EnteringOverlay({ onDone }) {
     );
 }
 
+const FOOTER_LINKS = [
+    { label: 'About', href: '#about' },
+    { label: 'Activity', href: '#activity' },
+    { label: 'Work', href: '#work' },
+    { label: 'Journey', href: '#journey' },
+    { label: 'Terminal', href: '#lab' },
+    { label: 'Contact', href: '#contact' },
+];
+
+const FOOTER_ELSEWHERE = [
+    { label: 'GitHub', href: 'https://github.com/parthiv-2006' },
+    { label: 'LinkedIn', href: 'https://www.linkedin.com/in/parthiv-paul' },
+    { label: 'Email', href: 'mailto:parthiv.paul@mail.utoronto.ca' },
+    { label: 'Resume', href: 'parthiv_paul_swe.pdf' },
+];
+
+function Footer() {
+    const scrollTo = (e, href) => {
+        e.preventDefault();
+        document.getElementById(href.replace('#', ''))?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    return (
+        <footer className="border-t border-border mt-8">
+            <div className="max-w-[1120px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-14">
+                <div className="flex flex-col gap-10 md:flex-row md:justify-between md:gap-12">
+                    {/* Identity */}
+                    <div className="max-w-[320px]">
+                        <a
+                            href="#hero"
+                            onClick={(e) => scrollTo(e, '#hero')}
+                            className="font-display italic text-xl text-text hover:text-accent transition-colors duration-300"
+                        >
+                            Parthiv<span className="text-accent">.</span>
+                        </a>
+                        <p className="mt-3 text-sm text-text-muted leading-relaxed">
+                            Full-stack &amp; AI engineer in Toronto. Open to Fall 2026 and Winter 2027
+                            software engineering internships.
+                        </p>
+                        <span className="mt-4 inline-flex items-center gap-2 font-mono text-[11px] text-text-dim">
+                            <span className="relative inline-flex w-[6px] h-[6px]">
+                                <span className="absolute inset-0 rounded-full bg-accent" />
+                                <span className="absolute inset-0 rounded-full bg-accent animate-[glow-pulse_1.8s_ease-in-out_infinite]" />
+                            </span>
+                            Available for internships
+                        </span>
+                    </div>
+
+                    {/* Section links */}
+                    <nav aria-label="Footer navigation">
+                        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-text-dim mb-4">
+                            Explore
+                        </p>
+                        <ul className="grid grid-cols-2 gap-x-8 gap-y-2 md:grid-cols-1">
+                            {FOOTER_LINKS.map((link) => (
+                                <li key={link.href}>
+                                    <a
+                                        href={link.href}
+                                        onClick={(e) => scrollTo(e, link.href)}
+                                        className="text-sm text-text-muted hover:text-accent transition-colors duration-200"
+                                    >
+                                        {link.label}
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                    </nav>
+
+                    {/* External links */}
+                    <div>
+                        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-text-dim mb-4">
+                            Elsewhere
+                        </p>
+                        <ul className="grid grid-cols-2 gap-x-8 gap-y-2 md:grid-cols-1">
+                            {FOOTER_ELSEWHERE.map((link) => {
+                                const isResume = link.label === 'Resume';
+                                const isExternal = link.href.startsWith('http');
+                                return (
+                                    <li key={link.href}>
+                                        <a
+                                            href={link.href}
+                                            {...(isResume ? { download: 'parthiv_paul_swe.pdf' } : {})}
+                                            {...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                                            className="group inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-accent transition-colors duration-200"
+                                        >
+                                            {link.label}
+                                            <span
+                                                aria-hidden="true"
+                                                className="text-accent text-[11px] opacity-0 -translate-x-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0"
+                                            >
+                                                {isResume ? '↓' : '↗'}
+                                            </span>
+                                        </a>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    </div>
+                </div>
+
+                {/* Baseline */}
+                <div className="mt-12 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+                    <span className="text-text-dim text-xs font-mono">
+                        © {new Date().getFullYear()} Parthiv Paul · built with React, Tailwind &amp; Framer Motion
+                    </span>
+                    <span className="text-text-dim text-xs font-mono">
+                        ↑↑↓↓←→←→ B A · open the console
+                    </span>
+                </div>
+            </div>
+        </footer>
+    );
+}
+
 export default function App() {
     const [showFullSite, setShowFullSite] = useState(false);
     const [showEntering, setShowEntering] = useState(false);
     const [theme, setTheme] = useState('night');
     const { activeSection } = useActiveSection(showFullSite);
+    const reducedMotion = usePrefersReducedMotion();
+    const mainRef = useRef(null);
 
     // Konami code — matches the footer hint ("open the console")
     useEffect(() => {
@@ -128,28 +245,39 @@ export default function App() {
         return () => window.removeEventListener('keydown', onKeyDown);
     }, []);
 
+    // The inline script in index.html already applied the saved theme before
+    // first paint — this only mirrors it into React state.
     useEffect(() => {
-        let saved = 'night';
-        try { saved = localStorage.getItem('pp-theme') || 'night'; } catch (e) {}
-        setTheme(saved);
-        document.documentElement.dataset.theme = saved;
+        setTheme(document.documentElement.dataset.theme || 'night');
     }, []);
 
     const toggleTheme = () => {
         const next = theme === 'night' ? 'day' : 'night';
         setTheme(next);
         document.documentElement.dataset.theme = next;
+        document
+            .querySelector('meta[name="theme-color"]')
+            ?.setAttribute('content', next === 'day' ? '#EFE9DD' : '#111110');
         try { localStorage.setItem('pp-theme', next); } catch (e) {}
     };
 
     const handleEnter = () => {
         setShowFullSite(true);
-        setShowEntering(true);
+        // The curtain reveal is decoration only — skip it when motion is reduced.
+        setShowEntering(!reducedMotion);
     };
 
+    // Send focus into the portfolio once it is on screen, so keyboard and
+    // screen-reader users continue from the content rather than the document top.
+    useEffect(() => {
+        if (showFullSite && !showEntering) mainRef.current?.focus({ preventScroll: true });
+    }, [showFullSite, showEntering]);
+
     return (
-        <>
+        <MotionConfig reducedMotion="user">
             <CursorTrail />
+
+            {showFullSite && <a className="skip-link" href="#main">Skip to content</a>}
 
             {/* Entering overlay — sits above everything during transition */}
             {showEntering && <EnteringOverlay onDone={() => setShowEntering(false)} />}
@@ -161,69 +289,60 @@ export default function App() {
 
             {/* Full portfolio site */}
             {showFullSite && (
-                        <div className="min-h-screen bg-bg text-text">
-                            <Navbar activeSection={activeSection} theme={theme} toggleTheme={toggleTheme} />
-                            <ScrollProgress activeSection={activeSection} />
+                <div className="min-h-screen bg-bg text-text">
+                    <Navbar activeSection={activeSection} theme={theme} toggleTheme={toggleTheme} />
+                    <ScrollProgress activeSection={activeSection} />
 
-                            <main>
-                                {/* ── Hero ── */}
-                                <Hero />
+                    <main id="main" ref={mainRef} tabIndex={-1} className="focus:outline-none">
+                        {/* ── Hero ── */}
+                        <Hero />
 
-                                {/* ── Marquee ── */}
-                                <Marquee />
+                        {/* ── Marquee ── */}
+                        <Marquee />
 
-                                {/* ── About ── */}
-                                <div className="max-w-[1120px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-24">
-                                    <About />
-                                </div>
-
-                                {/* ── Skills ── */}
-                                <div className="max-w-[1120px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-20">
-                                    <SkillsGrid />
-                                </div>
-
-                                {/* ── Activity ── */}
-                                <section id="activity" className="max-w-[1120px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-20">
-                                    <SectionHeading label="Activity" title="Always building" subtitle="Live from GitHub. Every cell and bar is a real day of work." />
-                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                        <GitHubStreak />
-                                        <GitHubGraph />
-                                    </div>
-                                </section>
-
-                                {/* ── Work / Projects ── */}
-                                <div className="max-w-[1120px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-20">
-                                    <Projects />
-                                </div>
-
-                                {/* ── Journey / Timeline ── */}
-                                <div className="max-w-[1120px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-20">
-                                    <Timeline />
-                                </div>
-
-                                {/* ── Terminal ── */}
-                                <div className="max-w-[1120px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-20">
-                                    <Terminal />
-                                </div>
-
-                                {/* ── Contact ── */}
-                                <div className="max-w-[1120px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-24">
-                                    <ContactSection />
-                                </div>
-                            </main>
-
-                            <footer className="border-t border-white/[0.06] py-10 px-6">
-                                <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-4 flex-wrap">
-                                    <span className="text-text-dim text-sm font-mono">
-                                        © {new Date().getFullYear()} Parthiv Paul
-                                    </span>
-                                    <span className="text-text-dim text-xs font-mono">
-                                        ↑↑↓↓←→←→ B A · open the console
-                                    </span>
-                                </div>
-                            </footer>
+                        {/* ── About ── */}
+                        <div className="max-w-[1120px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-24">
+                            <About />
                         </div>
+
+                        {/* ── Skills ── */}
+                        <div className="max-w-[1120px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-20">
+                            <SkillsGrid />
+                        </div>
+
+                        {/* ── Activity ── */}
+                        <section id="activity" className="max-w-[1120px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-20">
+                            <SectionHeading label="Activity" title="Always building" subtitle="Live from GitHub. Every cell and bar is a real day of work." />
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <GitHubStreak />
+                                <GitHubGraph />
+                            </div>
+                        </section>
+
+                        {/* ── Work / Projects ── */}
+                        <div className="max-w-[1120px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-20">
+                            <Projects />
+                        </div>
+
+                        {/* ── Journey / Timeline ── */}
+                        <div className="max-w-[1120px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-20">
+                            <Timeline />
+                        </div>
+
+                        {/* ── Terminal ── */}
+                        <div className="max-w-[1120px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-20">
+                            <Terminal />
+                        </div>
+
+                        {/* ── Contact ── */}
+                        <div className="max-w-[1120px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-24">
+                            <ContactSection />
+                        </div>
+                    </main>
+
+                    <Footer />
+                </div>
             )}
-        </>
+        </MotionConfig>
     );
 }
