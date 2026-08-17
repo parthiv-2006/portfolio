@@ -1,9 +1,10 @@
 import { useState, useMemo, useEffect, useRef, useCallback, useId } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useSpring, useMotionTemplate } from 'framer-motion';
 import { ExternalLink, Github, X, Video, ChevronLeft, ChevronRight } from 'lucide-react';
 import SectionHeading from './SectionHeading';
 import GistDemoWrapper from './GistDemo/index';
 import useIsTouch from '../hooks/useIsTouch';
+import usePrefersReducedMotion from '../hooks/usePrefersReducedMotion';
 
 const PROJECTS_PER_PAGE = 6;
 
@@ -123,18 +124,80 @@ const allTechs = Object.keys(techCounts)
     .filter((t) => techCounts[t] >= 2)
     .sort((a, b) => techCounts[b] - techCounts[a] || a.localeCompare(b));
 
+// Card tilt caps out at a few degrees — enough to read as a lean toward the
+// cursor, not a gimmick. Kept as an independent style-bound MotionValue pair
+// (rather than folded into whileHover) so rotateX/rotateY can update on every
+// pointermove without fighting the y value that whileInView/whileHover own.
+const MAX_TILT_DEG = 6;
+const TILT_SPRING = { stiffness: 300, damping: 28, mass: 0.5 };
+const GLOW_SPRING = { stiffness: 300, damping: 32 };
+
+function useCardTilt(disabled) {
+    const ref = useRef(null);
+    const mx = useMotionValue(0);
+    const my = useMotionValue(0);
+    const rawRotateX = useMotionValue(0);
+    const rawRotateY = useMotionValue(0);
+    const rotateX = useSpring(rawRotateX, TILT_SPRING);
+    const rotateY = useSpring(rawRotateY, TILT_SPRING);
+    const glowOpacity = useSpring(0, GLOW_SPRING);
+    const background = useMotionTemplate`radial-gradient(280px circle at ${mx}px ${my}px, var(--color-accent-glow), transparent 70%)`;
+
+    const onPointerMove = useCallback(
+        (e) => {
+            if (disabled || e.pointerType === 'touch' || !ref.current) return;
+            const rect = ref.current.getBoundingClientRect();
+            const px = e.clientX - rect.left;
+            const py = e.clientY - rect.top;
+            mx.set(px);
+            my.set(py);
+            rawRotateY.set(((px / rect.width) - 0.5) * MAX_TILT_DEG * 2);
+            rawRotateX.set(-((py / rect.height) - 0.5) * MAX_TILT_DEG * 2);
+            glowOpacity.set(1);
+        },
+        [disabled, mx, my, rawRotateX, rawRotateY, glowOpacity]
+    );
+
+    const onPointerLeave = useCallback(() => {
+        rawRotateX.set(0);
+        rawRotateY.set(0);
+        glowOpacity.set(0);
+    }, [rawRotateX, rawRotateY, glowOpacity]);
+
+    return { ref, rotateX, rotateY, background, glowOpacity, onPointerMove, onPointerLeave };
+}
+
 function ProjectCard({ project, index, activeFilter, isTouch, onClick }) {
     const displayNum = String(index + 1).padStart(2, '0');
     const cta = project.hasDemo && !isTouch ? 'Demo' : 'View';
+    const reducedMotion = usePrefersReducedMotion();
+    const tiltDisabled = isTouch || reducedMotion;
+    const { ref: tiltRef, rotateX, rotateY, background, glowOpacity, onPointerMove, onPointerLeave } =
+        useCardTilt(tiltDisabled);
 
     return (
         <motion.article
+            ref={tiltRef}
+            onPointerMove={onPointerMove}
+            onPointerLeave={onPointerLeave}
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
+            whileHover={{ y: -7 }}
             viewport={{ once: true, margin: '-60px' }}
             transition={{ duration: 0.5, delay: (index % 3) * 0.08, ease: [0.22, 1, 0.36, 1] }}
-            className="group relative border border-white/[0.06] rounded-[18px] overflow-hidden bg-surface cursor-pointer flex flex-col p-5 sm:p-6 pb-5 transition-all duration-400 hover:-translate-y-[7px] hover:border-accent/40 hover:shadow-[0_24px_50px_-20px_rgba(0,0,0,0.6)] has-[:focus-visible]:-translate-y-[7px] has-[:focus-visible]:border-accent/40 has-[:focus-visible]:[outline:2px_solid_var(--color-accent)] has-[:focus-visible]:[outline-offset:3px]"
+            style={{ rotateX, rotateY, transformPerspective: 900 }}
+            className="group relative border border-white/[0.06] rounded-[18px] overflow-hidden bg-surface cursor-pointer flex flex-col p-5 sm:p-6 pb-5 transition-[border-color,box-shadow] duration-400 hover:border-accent/40 hover:shadow-[0_24px_50px_-20px_rgba(0,0,0,0.6)] has-[:focus-visible]:border-accent/40 has-[:focus-visible]:[outline:2px_solid_var(--color-accent)] has-[:focus-visible]:[outline-offset:3px]"
         >
+            {/* Cursor-following spotlight — only wired up when tilt is enabled,
+                so touch/reduced-motion users never pay for the motion value. */}
+            {!tiltDisabled && (
+                <motion.div
+                    aria-hidden="true"
+                    className="absolute inset-0 z-0 pointer-events-none"
+                    style={{ background, opacity: glowOpacity }}
+                />
+            )}
+
             {/* Ghost number watermark */}
             <span
                 className="absolute top-[-10px] right-[14px] font-display italic text-[100px] leading-none text-surface2 pointer-events-none select-none z-0"
