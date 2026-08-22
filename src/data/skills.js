@@ -15,6 +15,9 @@ import {
     SiFlutter,
     SiPytest,
     SiFastapi,
+    SiOpenai,
+    SiGoogle,
+    SiAnthropic,
 } from 'react-icons/si';
 import { FaJava, FaHtml5, FaCss3Alt } from 'react-icons/fa';
 import { VscDatabase } from 'react-icons/vsc';
@@ -46,6 +49,17 @@ export const skills = [
     { name: 'Framer Motion', icon: SiFramer, category: 'Frameworks', core: false },
     { name: 'Vite', icon: SiVite, category: 'Frameworks', core: false },
     { name: 'pytest', icon: SiPytest, category: 'Frameworks', core: false },
+
+    // ── AI Tools ──
+    { name: 'Claude Code', icon: SiAnthropic, category: 'AI Tools', core: true },
+    { name: 'Claude API', icon: SiAnthropic, category: 'AI Tools', core: true },
+    { name: 'Model Context Protocol', icon: Plug, category: 'AI Tools', core: true },
+    { name: 'RAG', icon: Search, category: 'AI Tools', core: true },
+    { name: 'Google Gemini', icon: SiGoogle, category: 'AI Tools', core: true },
+    { name: 'Cursor', icon: Cpu, category: 'AI Tools', core: true },
+    { name: 'Antigravity', icon: SiGoogle, category: 'AI Tools', core: false },
+    { name: 'OpenAI Codex', icon: SiOpenai, category: 'AI Tools', core: false },
+    { name: 'VS Code', icon: Code2, category: 'AI Tools', core: false },
 ];
 
 export const skillCategories = ['Languages', 'Frameworks', 'AI Tools', 'Dev Tools & Concepts'];
