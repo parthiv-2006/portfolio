@@ -1,4 +1,4 @@
-import { Briefcase, Code2 } from 'lucide-react';
+import { Briefcase, Code2, Terminal as TerminalIcon } from 'lucide-react';
 
 // `skills` entries are canonical names from `./skills.js` — used to cross-link
 // this timeline with the Toolkit grid. `stack` stays free-text for display.
@@ -26,6 +26,18 @@ export const experience = [
             'Built a 7-day trial to paid subscription system with member-count fee tiers, checkout, a reminder job, and server-side route lockout — 4 migrations and 130 automated tests. Worked a Jira ticket and peer-review loop on a 3-developer team, resolving spec gaps with a non-technical client across twice-weekly syncs, restoring blocking flake8 and black CI, and clearing 77 Flutter analyzer warnings.',
         stack: ['FastAPI', 'PostgreSQL', 'Stripe', 'Flutter Web', 'Jira'],
         skills: ['FastAPI', 'PostgreSQL', 'Stripe', 'Flutter', 'Jira'],
+        type: 'experience',
+    },
+    {
+        icon: TerminalIcon,
+        title: 'GenLedge',
+        subtitle: 'Software Developer, Contract',
+        date: 'Mar 2026 – May 2026',
+        location: 'Remote',
+        description:
+            'Built a Stripe MCP server (TypeScript, 12 tools) covering charges, invoices, subscriptions, and disputes, enabling AI accounting agents to query live payment data via the Model Context Protocol. Also built a Stripe webhook handler that verified event authenticity and routed 12 event types to specialized AI employee roles, generating real-time general-ledger entries automatically.',
+        stack: ['TypeScript', 'MCP', 'Stripe', 'Webhooks'],
+        skills: ['TypeScript', 'Model Context Protocol', 'Stripe'],
         type: 'experience',
     },
 ];
