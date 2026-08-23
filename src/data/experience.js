@@ -1,4 +1,4 @@
-import { Briefcase, Code2, Terminal as TerminalIcon, Rocket } from 'lucide-react';
+import { Briefcase, Code2, Terminal as TerminalIcon, Rocket, GraduationCap } from 'lucide-react';
 
 // `skills` entries are canonical names from `./skills.js` — used to cross-link
 // this timeline with the Toolkit grid. `stack` stays free-text for display.
@@ -51,5 +51,16 @@ export const experience = [
         stack: ['Python', 'LlamaIndex', 'RAG', 'OCR'],
         skills: ['Python', 'LlamaIndex', 'RAG'],
         type: 'experience',
+    },
+    {
+        icon: GraduationCap,
+        title: 'University of Toronto, St. George',
+        subtitle: 'Computer Science Specialist, Co-op',
+        date: 'Sept 2024 – Apr 2028',
+        location: 'Toronto, ON · CGPA 3.6/4.0',
+        description:
+            "Pursuing a Bachelor of Computer Science. Dean's List Scholar in 2024-25 and 2025-26. Coursework includes Data Structures & Analysis, Software Design, Systems Programming, Computer Organization, Theory of Computation, and Linear Algebra.",
+        skills: [],
+        type: 'education',
     },
 ];
