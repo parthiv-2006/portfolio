@@ -63,4 +63,16 @@ export const experience = [
         skills: [],
         type: 'education',
     },
+    {
+        icon: Briefcase,
+        title: 'Chester-Hill Solutions',
+        subtitle: 'Software QA Tester, Intern',
+        date: 'June 2024 – Nov 2024',
+        location: 'Remote',
+        description:
+            'Wrote automated test scripts covering 50+ user flows across multiple environments, cutting the repetitive manual regression passes the team ran each release cycle. Investigated and documented defects through API response analysis and root-cause write-ups, giving developers clearer repro steps to turn around fixes faster.',
+        stack: ['Test Automation', 'REST APIs'],
+        skills: ['REST APIs'],
+        type: 'experience',
+    },
 ];
