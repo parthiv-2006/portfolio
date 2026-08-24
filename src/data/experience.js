@@ -1,4 +1,4 @@
-import { Briefcase, Code2, Terminal as TerminalIcon, Rocket, GraduationCap } from 'lucide-react';
+import { GraduationCap, Briefcase, Award, Rocket, Code2, Terminal as TerminalIcon } from 'lucide-react';
 
 // `skills` entries are canonical names from `./skills.js` — used to cross-link
 // this timeline with the Toolkit grid. `stack` stays free-text for display.
@@ -73,6 +73,18 @@ export const experience = [
             'Wrote automated test scripts covering 50+ user flows across multiple environments, cutting the repetitive manual regression passes the team ran each release cycle. Investigated and documented defects through API response analysis and root-cause write-ups, giving developers clearer repro steps to turn around fixes faster.',
         stack: ['Test Automation', 'REST APIs'],
         skills: ['REST APIs'],
+        type: 'experience',
+    },
+    {
+        icon: Award,
+        title: 'Ontario Liberal Party',
+        subtitle: 'Frontend Developer',
+        date: 'May 2023 – Sept 2023',
+        location: 'Toronto, ON',
+        description:
+            'Built React components and optimized Redux state management. Refactored legacy CSS into modular Sass and enforced WCAG 2.1 compliance, improving page performance and accessibility scores.',
+        stack: ['React', 'Redux', 'Sass', 'WCAG 2.1'],
+        skills: ['React', 'Redux'],
         type: 'experience',
     },
 ];
