@@ -34,6 +34,7 @@ import { FaJava, FaHtml5, FaCss3Alt } from 'react-icons/fa';
 import { VscDatabase } from 'react-icons/vsc';
 import { Brain, Cpu, Zap, Shield, Code2, Plug, Search, KeyRound } from 'lucide-react';
 import SectionHeading from './SectionHeading';
+import { skills as sharedSkills, skillCategories as sharedCategories } from '../data/skills';
 
 const skills = [
     // ── Languages ──
@@ -180,7 +181,7 @@ export default function SkillsGrid() {
     const tabRefs = useRef([]);
     const uid = useId();
 
-    const tabSkills = skills.filter((s) => s.category === activeTab);
+    const tabSkills = sharedSkills.filter((s) => s.category === activeTab);
     const coreCount = tabSkills.filter((s) => s.core).length;
 
     const tabId = (cat) => `${uid}-tab-${cat.replace(/\W+/g, '-')}`;
@@ -189,16 +190,16 @@ export default function SkillsGrid() {
     // Arrow/Home/End move between tabs, per the ARIA tabs pattern. Without this
     // the roving tabindex below would leave the other tabs unreachable.
     const handleTabKeyDown = (e) => {
-        const current = categories.indexOf(activeTab);
+        const current = sharedCategories.indexOf(activeTab);
         let next = null;
-        if (e.key === 'ArrowRight') next = (current + 1) % categories.length;
-        else if (e.key === 'ArrowLeft') next = (current - 1 + categories.length) % categories.length;
+        if (e.key === 'ArrowRight') next = (current + 1) % sharedCategories.length;
+        else if (e.key === 'ArrowLeft') next = (current - 1 + sharedCategories.length) % sharedCategories.length;
         else if (e.key === 'Home') next = 0;
-        else if (e.key === 'End') next = categories.length - 1;
+        else if (e.key === 'End') next = sharedCategories.length - 1;
         if (next === null) return;
 
         e.preventDefault();
-        setActiveTab(categories[next]);
+        setActiveTab(sharedCategories[next]);
         tabRefs.current[next]?.focus();
     };
 
@@ -215,9 +216,9 @@ export default function SkillsGrid() {
                     className="flex overflow-x-auto mb-4 border-b border-white/[0.06]"
                     style={{ scrollbarWidth: 'none' }}
                 >
-                    {categories.map((cat, i) => {
+                    {sharedCategories.map((cat, i) => {
                         const isActive = activeTab === cat;
-                        const count = skills.filter((s) => s.category === cat).length;
+                        const count = sharedSkills.filter((s) => s.category === cat).length;
                         return (
                             <button
                                 key={cat}
