@@ -1,90 +1,9 @@
 import { useRef } from 'react';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
-import { GraduationCap, Briefcase, Award, Rocket, Code2, Terminal as TerminalIcon } from 'lucide-react';
 import SectionHeading from './SectionHeading';
 import Credentials from './Credentials';
 import usePrefersReducedMotion from '../hooks/usePrefersReducedMotion';
-import { experience as sharedEntries } from '../data/experience';
-
-const entries = [
-    {
-        icon: Briefcase,
-        title: 'Velox Systems',
-        subtitle: 'Software Engineer',
-        date: 'Jul 2026 – Present',
-        location: 'Toronto, ON',
-        current: true,
-        description:
-            "Sole developer on the rebuild of a landscaping contractor's production workspace — migrating a live safety-compliance app onto a FastAPI/Postgres backend and cutting authentication from Supabase over to Zitadel OIDC, all behind a zero-error type and lint gate. Also shipped a route-planning module that turns a 4,756-tree municipal registry into truck-days in driving order and syncs offline crew completions back to the office, retiring a 95-file legacy planner.",
-        stack: ['FastAPI', 'PostgreSQL', 'Zitadel OIDC', 'TypeScript'],
-        type: 'experience',
-    },
-    {
-        icon: Code2,
-        title: 'Applied Optimal Inc.',
-        subtitle: 'Full-Stack Developer, Contract',
-        date: 'Jul 2026 – Sep 2026',
-        location: 'Remote',
-        description:
-            'Built a 7-day trial to paid subscription system with member-count fee tiers, checkout, a reminder job, and server-side route lockout — 4 migrations and 130 automated tests. Worked a Jira ticket and peer-review loop on a 3-developer team, resolving spec gaps with a non-technical client across twice-weekly syncs, restoring blocking flake8 and black CI, and clearing 77 Flutter analyzer warnings.',
-        stack: ['FastAPI', 'PostgreSQL', 'Stripe', 'Flutter Web', 'Jira'],
-        type: 'experience',
-    },
-    {
-        icon: TerminalIcon,
-        title: 'GenLedge',
-        subtitle: 'Software Developer, Contract',
-        date: 'Mar 2026 – May 2026',
-        location: 'Remote',
-        description:
-            'Built a Stripe MCP server (TypeScript, 12 tools) covering charges, invoices, subscriptions, and disputes, enabling AI accounting agents to query live payment data via the Model Context Protocol. Also built a Stripe webhook handler that verified event authenticity and routed 12 event types to specialized AI employee roles, generating real-time general-ledger entries automatically.',
-        stack: ['TypeScript', 'MCP', 'Stripe', 'Webhooks'],
-        type: 'experience',
-    },
-    {
-        icon: Rocket,
-        title: 'Outamation',
-        subtitle: 'AI and Automation Extern',
-        date: 'May 2025 – Aug 2025',
-        location: 'Remote',
-        description:
-            'Built NLP and Computer Vision (OCR) pipelines to classify and extract fields from mortgage documents, replacing a manual data-entry step on the program’s sample document set. Improved retrieval relevance by ~25% on a benchmark query set by tuning a Retrieval-Augmented Generation (RAG) system in LlamaIndex, iterating on chunking strategy and custom vector embeddings.',
-        stack: ['Python', 'LlamaIndex', 'RAG', 'OCR'],
-        type: 'experience',
-    },
-    {
-        icon: GraduationCap,
-        title: 'University of Toronto, St. George',
-        subtitle: 'Computer Science Specialist, Co-op',
-        date: 'Sept 2024 – Apr 2028',
-        location: 'Toronto, ON · CGPA 3.6/4.0',
-        description:
-            "Pursuing a Bachelor of Computer Science. Dean's List Scholar in 2024-25 and 2025-26. Coursework includes Data Structures & Analysis, Software Design, Systems Programming, Computer Organization, Theory of Computation, and Linear Algebra.",
-        type: 'education',
-    },
-    {
-        icon: Briefcase,
-        title: 'Chester-Hill Solutions',
-        subtitle: 'Software QA Tester, Intern',
-        date: 'June 2024 – Nov 2024',
-        location: 'Remote',
-        description:
-            'Wrote automated test scripts covering 50+ user flows across multiple environments, cutting the repetitive manual regression passes the team ran each release cycle. Investigated and documented defects through API response analysis and root-cause write-ups, giving developers clearer repro steps to turn around fixes faster.',
-        stack: ['Test Automation', 'REST APIs'],
-        type: 'experience',
-    },
-    {
-        icon: Award,
-        title: 'Ontario Liberal Party',
-        subtitle: 'Frontend Developer',
-        date: 'May 2023 – Sept 2023',
-        location: 'Toronto, ON',
-        description:
-            'Built React components and optimized Redux state management. Refactored legacy CSS into modular Sass and enforced WCAG 2.1 compliance, improving page performance and accessibility scores.',
-        stack: ['React', 'Redux', 'Sass', 'WCAG 2.1'],
-        type: 'experience',
-    },
-];
+import { experience as entries } from '../data/experience';
 
 /* Every card has its own in-view trigger, so the stagger only needs to cover
    the first screenful. Past that it is just dead waiting time. */
@@ -226,7 +145,7 @@ export default function Timeline() {
 
                 {/* role="list" restores the semantics browsers drop once markers are removed */}
                 <ol role="list" className="flex flex-col gap-[30px] list-none">
-                    {sharedEntries.map((entry, i) => (
+                    {entries.map((entry, i) => (
                         <TimelineEntry key={entry.title} entry={entry} index={i} />
                     ))}
                 </ol>
