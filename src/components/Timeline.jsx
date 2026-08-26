@@ -4,6 +4,7 @@ import { GraduationCap, Briefcase, Award, Rocket, Code2, Terminal as TerminalIco
 import SectionHeading from './SectionHeading';
 import Credentials from './Credentials';
 import usePrefersReducedMotion from '../hooks/usePrefersReducedMotion';
+import { experience as sharedEntries } from '../data/experience';
 
 const entries = [
     {
@@ -225,7 +226,7 @@ export default function Timeline() {
 
                 {/* role="list" restores the semantics browsers drop once markers are removed */}
                 <ol role="list" className="flex flex-col gap-[30px] list-none">
-                    {entries.map((entry, i) => (
+                    {sharedEntries.map((entry, i) => (
                         <TimelineEntry key={entry.title} entry={entry} index={i} />
                     ))}
                 </ol>
