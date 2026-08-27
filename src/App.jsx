@@ -229,6 +229,7 @@ export default function App() {
     const [showFullSite, setShowFullSite] = useState(hasProjectDeepLink);
     const [showEntering, setShowEntering] = useState(false);
     const [theme, setTheme] = useState('night');
+    const [activeSkill, setActiveSkill] = useState(null);
     const { activeSection } = useActiveSection(showFullSite);
     const reducedMotion = usePrefersReducedMotion();
     const mainRef = useRef(null);
