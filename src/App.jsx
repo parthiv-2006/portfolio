@@ -342,7 +342,7 @@ export default function App() {
 
                         {/* ── Journey / Timeline ── */}
                         <div className="max-w-[1120px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-20">
-                            <Timeline />
+                            <Timeline activeSkill={activeSkill} onClearSkill={() => setActiveSkill(null)} />
                         </div>
 
                         {/* ── Terminal ── */}

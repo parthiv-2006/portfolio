@@ -115,7 +115,7 @@ function TimelineEntry({ entry, index }) {
     );
 }
 
-export default function Timeline() {
+export default function Timeline({ activeSkill = null, onClearSkill = () => {} } = {}) {
     const containerRef = useRef(null);
 
     const { scrollYProgress } = useScroll({
