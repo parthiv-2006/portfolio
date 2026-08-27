@@ -87,7 +87,7 @@ function SkillCard({ skill, index }) {
     );
 }
 
-export default function SkillsGrid() {
+export default function SkillsGrid({ activeSkill = null, onSelectSkill = () => {} } = {}) {
     const [activeTab, setActiveTab] = useState('Languages');
     const tabRefs = useRef([]);
     const uid = useId();

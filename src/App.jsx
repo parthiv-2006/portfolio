@@ -323,7 +323,7 @@ export default function App() {
 
                         {/* ── Skills ── */}
                         <div className="max-w-[1120px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-20">
-                            <SkillsGrid />
+                            <SkillsGrid activeSkill={activeSkill} onSelectSkill={setActiveSkill} />
                         </div>
 
                         {/* ── Activity ── */}
