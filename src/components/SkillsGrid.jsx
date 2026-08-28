@@ -119,7 +119,12 @@ export default function SkillsGrid({ activeSkill = null, onSelectSkill = () => {
     const panelId = (cat) => `${uid}-panel-${cat.replace(/\W+/g, '-')}`;
 
     const handleToggleSkill = (name) => {
-        onSelectSkill(activeSkill === name ? null : name);
+        const turningOn = activeSkill !== name;
+        onSelectSkill(turningOn ? name : null);
+        // Only jump on select — clearing should leave the visitor where they are.
+        if (turningOn && usageCountForSkill(name) > 0) {
+            document.getElementById('journey')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     };
 
     // Arrow/Home/End move between tabs, per the ARIA tabs pattern. Without this
