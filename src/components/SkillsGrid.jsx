@@ -2,10 +2,12 @@ import { useState, useRef, useId } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import SectionHeading from './SectionHeading';
 import { skills, skillCategories as categories } from '../data/skills';
+import { usageCountForSkill } from '../lib/skillLinks';
 
 function SkillCard({ skill, index, isActive, onToggle }) {
     const glowControls = useAnimation();
     const Icon = skill.icon;
+    const usedCount = usageCountForSkill(skill.name);
 
     const handleHoverStart = () => {
         if (!skill.core) return;
@@ -81,14 +83,24 @@ function SkillCard({ skill, index, isActive, onToggle }) {
                     size={20}
                 />
 
-                <span
-                    className={`min-w-0 break-words text-[13px] sm:text-sm font-medium leading-tight transition-colors duration-300 ${
-                        skill.core
-                            ? 'text-text'
-                            : 'text-text-muted group-hover:text-text'
-                    }`}
-                >
-                    {skill.name}
+                <span className="min-w-0 flex-1">
+                    <span
+                        className={`block break-words text-[13px] sm:text-sm font-medium leading-tight transition-colors duration-300 ${
+                            skill.core
+                                ? 'text-text'
+                                : 'text-text-muted group-hover:text-text'
+                        }`}
+                    >
+                        {skill.name}
+                    </span>
+                    {usedCount > 0 && (
+                        <span
+                            aria-hidden="true"
+                            className="mt-0.5 block font-mono text-[10px] tracking-[0.06em] text-text-dim"
+                        >
+                            used in {usedCount} role{usedCount === 1 ? '' : 's'}
+                        </span>
+                    )}
                 </span>
             </motion.button>
         </motion.li>
