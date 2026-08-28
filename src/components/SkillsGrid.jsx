@@ -40,7 +40,7 @@ function SkillCard({ skill, index, isActive, onToggle }) {
                 onHoverStart={handleHoverStart}
                 className={`group relative flex w-full items-center gap-2.5 sm:gap-3 px-3 py-3 sm:px-4 sm:py-3.5 rounded-xl border transition-colors duration-300 overflow-hidden text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent
                     ${isActive
-                        ? 'bg-surface-light border-accent'
+                        ? 'bg-surface-light border-accent shadow-[0_0_0_1px_var(--color-accent)]'
                         : skill.core
                             ? 'bg-surface border-accent/20 hover:border-accent/50 hover:bg-surface-light'
                             : 'bg-surface border-white/[0.06] hover:border-white/[0.15] hover:bg-surface-light'
