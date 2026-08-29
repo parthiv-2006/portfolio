@@ -9,13 +9,14 @@ import { experience as entries } from '../data/experience';
    the first screenful. Past that it is just dead waiting time. */
 const MAX_STAGGER_STEPS = 3;
 
-function TimelineEntry({ entry, index }) {
+function TimelineEntry({ entry, index, activeSkill }) {
     const ref = useRef(null);
     const inView = useInView(ref, { once: true, margin: '-60px' });
     const reducedMotion = usePrefersReducedMotion();
 
     const Icon = entry.icon;
     const isEducation = entry.type === 'education';
+    const isMatch = !activeSkill || entry.skills?.includes(activeSkill);
 
     const markerClass = isEducation ? 'bg-bg border-2 border-accent' : 'bg-accent';
     const iconTileClass = isEducation
@@ -26,7 +27,7 @@ function TimelineEntry({ entry, index }) {
         <motion.li
             ref={ref}
             initial={{ opacity: 0, x: -16 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
+            animate={inView ? { opacity: isMatch ? 1 : 0.35, x: 0 } : {}}
             transition={{
                 duration: 0.5,
                 delay: Math.min(index, MAX_STAGGER_STEPS) * 0.08,
@@ -146,7 +147,7 @@ export default function Timeline({ activeSkill = null, onClearSkill = () => {} }
                 {/* role="list" restores the semantics browsers drop once markers are removed */}
                 <ol role="list" className="flex flex-col gap-[30px] list-none">
                     {entries.map((entry, i) => (
-                        <TimelineEntry key={entry.title} entry={entry} index={i} />
+                        <TimelineEntry key={entry.title} entry={entry} index={i} activeSkill={activeSkill} />
                     ))}
                 </ol>
             </div>
