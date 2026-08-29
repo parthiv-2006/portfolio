@@ -135,6 +135,8 @@ export default function Timeline({ activeSkill = null, onClearSkill = () => {} }
     });
     const lineHeight = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
 
+    const matchCount = activeSkill ? entries.filter((e) => e.skills?.includes(activeSkill)).length : entries.length;
+
     return (
         <section id="journey" className="w-full">
             <SectionHeading
@@ -142,6 +144,22 @@ export default function Timeline({ activeSkill = null, onClearSkill = () => {} }
                 title="Experience & education"
                 subtitle="Where I've shipped, what I studied, and what came of it."
             />
+
+            {activeSkill && (
+                <div className="flex items-center gap-2 mb-6 font-mono text-[11px] tracking-[0.08em] uppercase text-text-dim">
+                    <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+                    <span>
+                        Filtered by <span className="text-accent normal-case">{activeSkill}</span> · {matchCount} of {entries.length}
+                    </span>
+                    <button
+                        type="button"
+                        onClick={onClearSkill}
+                        className="ml-1 text-text-dim hover:text-accent underline underline-offset-2 normal-case tracking-normal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded"
+                    >
+                        clear
+                    </button>
+                </div>
+            )}
 
             <div ref={containerRef} className="relative pl-[38px]">
                 {/* Background line */}
