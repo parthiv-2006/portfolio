@@ -161,24 +161,30 @@ export default function Timeline({ activeSkill = null, onClearSkill = () => {} }
                 </div>
             )}
 
-            <div ref={containerRef} className="relative pl-[38px]">
-                {/* Background line */}
-                <div className="absolute left-[5px] top-[6px] bottom-[6px] w-0.5 bg-border" aria-hidden="true" />
+            {activeSkill && matchCount === 0 ? (
+                <p className="text-sm text-text-muted border border-border rounded-2xl bg-surface p-5">
+                    Nothing shipped with {activeSkill} yet — check back soon.
+                </p>
+            ) : (
+                <div ref={containerRef} className="relative pl-[38px]">
+                    {/* Background line */}
+                    <div className="absolute left-[5px] top-[6px] bottom-[6px] w-0.5 bg-border" aria-hidden="true" />
 
-                {/* Accent fill line */}
-                <motion.div
-                    className="absolute left-[5px] top-[6px] w-0.5 bg-accent origin-top shadow-[0_0_10px_var(--color-accent-glow)]"
-                    style={{ height: lineHeight }}
-                    aria-hidden="true"
-                />
+                    {/* Accent fill line */}
+                    <motion.div
+                        className="absolute left-[5px] top-[6px] w-0.5 bg-accent origin-top shadow-[0_0_10px_var(--color-accent-glow)]"
+                        style={{ height: lineHeight }}
+                        aria-hidden="true"
+                    />
 
-                {/* role="list" restores the semantics browsers drop once markers are removed */}
-                <ol role="list" className="flex flex-col gap-[30px] list-none">
-                    {entries.map((entry, i) => (
-                        <TimelineEntry key={entry.title} entry={entry} index={i} activeSkill={activeSkill} />
-                    ))}
-                </ol>
-            </div>
+                    {/* role="list" restores the semantics browsers drop once markers are removed */}
+                    <ol role="list" className="flex flex-col gap-[30px] list-none">
+                        {entries.map((entry, i) => (
+                            <TimelineEntry key={entry.title} entry={entry} index={i} activeSkill={activeSkill} />
+                        ))}
+                    </ol>
+                </div>
+            )}
 
             <Credentials />
         </section>
