@@ -49,7 +49,13 @@ function TimelineEntry({ entry, index, activeSkill }) {
             )}
 
             {/* Card */}
-            <div className="group relative overflow-hidden border border-border rounded-2xl bg-surface p-5 transition-all duration-300 hover:-translate-y-1 hover:border-accent/35">
+            <div
+                className={`group relative overflow-hidden border rounded-2xl bg-surface p-5 transition-all duration-300 hover:-translate-y-1 ${
+                    isMatch && activeSkill
+                        ? 'border-accent/60 shadow-[0_0_0_1px_var(--color-accent)]'
+                        : 'border-border hover:border-accent/35'
+                }`}
+            >
                 {/* Warm corner wash on hover — matches the Credentials cards */}
                 <span
                     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
