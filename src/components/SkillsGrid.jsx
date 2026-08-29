@@ -32,6 +32,11 @@ function SkillCard({ skill, index, isActive, onToggle }) {
             <motion.button
                 type="button"
                 aria-pressed={isActive}
+                aria-label={
+                    usedCount > 0
+                        ? `${skill.name} — used in ${usedCount} role${usedCount === 1 ? '' : 's'}. ${isActive ? 'Selected — click to clear filter.' : 'Click to filter Journey.'}`
+                        : skill.name
+                }
                 onClick={() => onToggle(skill.name)}
                 whileHover={{
                     scale: 1.04,
