@@ -110,7 +110,11 @@ function TimelineEntry({ entry, index, activeSkill }) {
                         {entry.stack.map((t) => (
                             <span
                                 key={t}
-                                className="font-mono text-[11px] text-text-muted bg-surface2/60 border border-border px-2 py-0.5 rounded-md"
+                                className={`font-mono text-[11px] px-2 py-0.5 rounded-md border transition-colors duration-300 ${
+                                    isMatch && activeSkill
+                                        ? 'text-accent bg-accent/10 border-accent/40'
+                                        : 'text-text-muted bg-surface2/60 border-border'
+                                }`}
                             >
                                 {t}
                             </span>
