@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import SectionHeading from './SectionHeading';
 import Credentials from './Credentials';
@@ -137,6 +137,17 @@ export default function Timeline({ activeSkill = null, onClearSkill = () => {} }
 
     const matchCount = activeSkill ? entries.filter((e) => e.skills?.includes(activeSkill)).length : entries.length;
 
+    // Escape clears the filter from anywhere on the page, not just while
+    // focus happens to sit inside this section.
+    useEffect(() => {
+        if (!activeSkill) return;
+        const onKeyDown = (e) => {
+            if (e.key === 'Escape') onClearSkill();
+        };
+        document.addEventListener('keydown', onKeyDown);
+        return () => document.removeEventListener('keydown', onKeyDown);
+    }, [activeSkill, onClearSkill]);
+
     return (
         <section id="journey" className="w-full">
             <SectionHeading
@@ -144,6 +155,14 @@ export default function Timeline({ activeSkill = null, onClearSkill = () => {} }
                 title="Experience & education"
                 subtitle="Where I've shipped, what I studied, and what came of it."
             />
+
+            {/* Announces filter changes to screen readers — the visible bar below
+                isn't itself live, so this sr-only twin carries the update. */}
+            <p role="status" aria-live="polite" className="sr-only">
+                {activeSkill
+                    ? `Journey filtered by ${activeSkill} — ${matchCount} of ${entries.length} entries match.`
+                    : ''}
+            </p>
 
             {activeSkill && (
                 <div className="flex items-center gap-2 mb-6 font-mono text-[11px] tracking-[0.08em] uppercase text-text-dim">
@@ -156,7 +175,7 @@ export default function Timeline({ activeSkill = null, onClearSkill = () => {} }
                         onClick={onClearSkill}
                         className="ml-1 text-text-dim hover:text-accent underline underline-offset-2 normal-case tracking-normal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded"
                     >
-                        clear
+                        clear <span className="sr-only">skill filter (Escape)</span>
                     </button>
                 </div>
             )}
