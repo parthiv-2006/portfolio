@@ -279,6 +279,19 @@ export default function App() {
         }
     }, []);
 
+    // Keeps `?skill=` in sync with the selected skill so a filtered Journey
+    // view can be shared as a direct link — mirrors the project deep link,
+    // but always replaces (a filter isn't a stack of history entries).
+    const skipNextSkillSyncRef = useRef(true);
+    useEffect(() => {
+        if (skipNextSkillSyncRef.current) { skipNextSkillSyncRef.current = false; return; }
+        const params = new URLSearchParams(window.location.search);
+        if (activeSkill) params.set('skill', activeSkill); else params.delete('skill');
+        const query = params.toString();
+        const url = `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`;
+        window.history.replaceState(window.history.state ?? {}, '', url);
+    }, [activeSkill]);
+
     const toggleTheme = () => {
         const next = theme === 'night' ? 'day' : 'night';
         setTheme(next);
