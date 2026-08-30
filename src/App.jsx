@@ -17,6 +17,7 @@ import GitHubStreak from './components/GitHubStreak';
 import SectionHeading from './components/SectionHeading';
 import useActiveSection from './hooks/useActiveSection';
 import usePrefersReducedMotion from './hooks/usePrefersReducedMotion';
+import { skills } from './data/skills';
 
 function EnteringOverlay({ onDone }) {
     const [curtainsOpen, setCurtainsOpen] = useState(false);
@@ -225,11 +226,20 @@ function Footer() {
 const hasProjectDeepLink = () =>
     typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('project');
 
+/** Reads `?skill=` off the URL, e.g. from a shared `?skill=TypeScript` link. */
+const skillFromUrl = () => {
+    if (typeof window === 'undefined') return null;
+    return new URLSearchParams(window.location.search).get('skill');
+};
+
 export default function App() {
     const [showFullSite, setShowFullSite] = useState(hasProjectDeepLink);
     const [showEntering, setShowEntering] = useState(false);
     const [theme, setTheme] = useState('night');
-    const [activeSkill, setActiveSkill] = useState(null);
+    const [activeSkill, setActiveSkill] = useState(() => {
+        const fromUrl = skillFromUrl();
+        return skills.some((s) => s.name === fromUrl) ? fromUrl : null;
+    });
     const { activeSection } = useActiveSection(showFullSite);
     const reducedMotion = usePrefersReducedMotion();
     const mainRef = useRef(null);
