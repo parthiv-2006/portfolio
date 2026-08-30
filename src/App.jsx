@@ -233,7 +233,7 @@ const skillFromUrl = () => {
 };
 
 export default function App() {
-    const [showFullSite, setShowFullSite] = useState(hasProjectDeepLink);
+    const [showFullSite, setShowFullSite] = useState(() => hasProjectDeepLink() || Boolean(skillFromUrl()));
     const [showEntering, setShowEntering] = useState(false);
     const [theme, setTheme] = useState('night');
     const [activeSkill, setActiveSkill] = useState(() => {
@@ -274,6 +274,8 @@ export default function App() {
     useLayoutEffect(() => {
         if (hasProjectDeepLink()) {
             document.getElementById('work')?.scrollIntoView();
+        } else if (skillFromUrl()) {
+            document.getElementById('journey')?.scrollIntoView();
         }
     }, []);
 
