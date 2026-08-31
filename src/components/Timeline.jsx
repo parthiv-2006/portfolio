@@ -165,7 +165,7 @@ export default function Timeline({ activeSkill = null, onClearSkill = () => {} }
             </p>
 
             {activeSkill && (
-                <div className="flex items-center gap-2 mb-6 font-mono text-[11px] tracking-[0.08em] uppercase text-text-dim">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-6 font-mono text-[11px] tracking-[0.08em] uppercase text-text-dim">
                     <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
                     <span>
                         Filtered by <span className="text-accent normal-case">{activeSkill}</span> · {matchCount} of {entries.length}
