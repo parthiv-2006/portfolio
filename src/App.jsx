@@ -275,7 +275,32 @@ export default function App() {
         if (hasProjectDeepLink()) {
             document.getElementById('work')?.scrollIntoView();
         } else if (skillFromUrl()) {
-            document.getElementById('journey')?.scrollIntoView();
+            const id = 'journey';
+            // Journey sits below the GitHub activity widgets, which fetch and
+            // resize asynchronously — an immediate scrollIntoView lands correctly
+            // for an instant, then gets pushed back up as they settle. Re-assert
+            // the scroll for a beat after mount to land where the layout ends up.
+            document.getElementById(id)?.scrollIntoView();
+            const deadline = Date.now() + 1200;
+            let userInteracted = false;
+            const markInteracted = () => { userInteracted = true; };
+            const opts = { passive: true };
+            window.addEventListener('wheel', markInteracted, opts);
+            window.addEventListener('touchstart', markInteracted, opts);
+            window.addEventListener('keydown', markInteracted, opts);
+            const resettle = () => {
+                if (userInteracted) return;
+                document.getElementById(id)?.scrollIntoView();
+                if (Date.now() < deadline) requestAnimationFrame(resettle);
+            };
+            const frame = requestAnimationFrame(resettle);
+            const cleanup = () => {
+                cancelAnimationFrame(frame);
+                window.removeEventListener('wheel', markInteracted, opts);
+                window.removeEventListener('touchstart', markInteracted, opts);
+                window.removeEventListener('keydown', markInteracted, opts);
+            };
+            setTimeout(cleanup, 1300);
         }
     }, []);
 
