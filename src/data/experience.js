@@ -1,7 +1,9 @@
-import { GraduationCap, Briefcase, Award, Rocket, Code2, Terminal as TerminalIcon } from 'lucide-react';
+import { GraduationCap, Briefcase, Award, Rocket, Code2, Users, Layers, Terminal as TerminalIcon } from 'lucide-react';
 
 // `skills` entries are canonical names from `./skills.js` — used to cross-link
 // this timeline with the Toolkit grid. `stack` stays free-text for display.
+// `section` buckets each entry into one of the three Journey groups:
+// 'work' (paid/industry), 'leadership' (campus involvement), 'education'.
 export const experience = [
     {
         icon: Briefcase,
@@ -14,6 +16,7 @@ export const experience = [
         stack: ['FastAPI', 'PostgreSQL', 'Zitadel OIDC', 'TypeScript'],
         skills: ['FastAPI', 'PostgreSQL', 'Zitadel', 'TypeScript', 'OAuth 2.0 / OIDC', 'Supabase'],
         type: 'experience',
+        section: 'work',
     },
     {
         icon: Code2,
@@ -26,6 +29,7 @@ export const experience = [
         stack: ['FastAPI', 'PostgreSQL', 'Stripe', 'Flutter Web', 'Jira'],
         skills: ['FastAPI', 'PostgreSQL', 'Stripe', 'Flutter', 'Jira'],
         type: 'experience',
+        section: 'work',
     },
     {
         icon: TerminalIcon,
@@ -38,6 +42,7 @@ export const experience = [
         stack: ['TypeScript', 'MCP', 'Stripe', 'Webhooks'],
         skills: ['TypeScript', 'Model Context Protocol', 'Stripe'],
         type: 'experience',
+        section: 'work',
     },
     {
         icon: Rocket,
@@ -50,17 +55,7 @@ export const experience = [
         stack: ['Python', 'LlamaIndex', 'RAG', 'OCR'],
         skills: ['Python', 'LlamaIndex', 'RAG'],
         type: 'experience',
-    },
-    {
-        icon: GraduationCap,
-        title: 'University of Toronto, St. George',
-        subtitle: 'Computer Science Specialist, Co-op',
-        date: 'Sept 2024 – Apr 2028',
-        location: 'Toronto, ON · CGPA 3.6/4.0',
-        description:
-            "Pursuing a Bachelor of Computer Science. Dean's List Scholar in 2024-25 and 2025-26. Coursework includes Data Structures & Analysis, Software Design, Systems Programming, Computer Organization, Theory of Computation, and Linear Algebra.",
-        skills: [],
-        type: 'education',
+        section: 'work',
     },
     {
         icon: Briefcase,
@@ -73,6 +68,7 @@ export const experience = [
         stack: ['Test Automation', 'REST APIs'],
         skills: ['REST APIs'],
         type: 'experience',
+        section: 'work',
     },
     {
         icon: Award,
@@ -85,5 +81,38 @@ export const experience = [
         stack: ['React', 'Redux', 'Sass', 'WCAG 2.1'],
         skills: ['React', 'Redux'],
         type: 'experience',
+        section: 'work',
+    },
+    {
+        icon: Users,
+        title: 'Google Developer Student Clubs',
+        subtitle: 'Technology Executive',
+        date: 'Aug 2026 – Present',
+        location: 'Toronto, ON · UofT St. George Chapter',
+        skills: [],
+        type: 'experience',
+        section: 'leadership',
+    },
+    {
+        icon: Layers,
+        title: 'UofT Blueprint',
+        subtitle: 'Senior Developer',
+        date: 'Aug 2026 – Present',
+        location: 'Toronto, ON · On-site',
+        skills: [],
+        type: 'experience',
+        section: 'leadership',
+    },
+    {
+        icon: GraduationCap,
+        title: 'University of Toronto, St. George',
+        subtitle: 'Computer Science Specialist, Co-op',
+        date: 'Sept 2024 – Apr 2028',
+        location: 'Toronto, ON · CGPA 3.6/4.0',
+        description:
+            "Pursuing a Bachelor of Computer Science. Dean's List Scholar in 2024-25 and 2025-26. Coursework includes Data Structures & Analysis, Software Design, Systems Programming, Computer Organization, Theory of Computation, and Linear Algebra.",
+        skills: [],
+        type: 'education',
+        section: 'education',
     },
 ];

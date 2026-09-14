@@ -9,6 +9,12 @@ import { experience as entries } from '../data/experience';
    the first screenful. Past that it is just dead waiting time. */
 const MAX_STAGGER_STEPS = 3;
 
+const GROUPS = [
+    { key: 'work', label: 'Work & Industry' },
+    { key: 'leadership', label: 'Campus Leadership' },
+    { key: 'education', label: 'Education' },
+];
+
 function TimelineEntry({ entry, index, activeSkill }) {
     const ref = useRef(null);
     const inView = useInView(ref, { once: true, margin: '-60px' });
@@ -48,7 +54,8 @@ function TimelineEntry({ entry, index, activeSkill }) {
                 />
             )}
 
-            {/* Card */}
+            {/* Card — the header block anchors it on its own when there's no
+                description/stack yet, so a bare entry never looks unfinished. */}
             <div
                 className={`group relative overflow-hidden border rounded-2xl bg-surface p-5 transition-all duration-300 hover:-translate-y-1 ${
                     isMatch && activeSkill
@@ -66,7 +73,11 @@ function TimelineEntry({ entry, index, activeSkill }) {
                     aria-hidden="true"
                 />
 
-                <div className="relative z-[1] flex items-start gap-3.5 mb-3">
+                <div
+                    className={`relative z-[1] flex items-start gap-3.5 ${
+                        entry.description || entry.stack ? 'mb-3' : ''
+                    }`}
+                >
                     <span
                         className={'flex items-center justify-center w-9 h-9 rounded-xl shrink-0 ' + iconTileClass}
                         aria-hidden="true"
@@ -103,7 +114,9 @@ function TimelineEntry({ entry, index, activeSkill }) {
                     </div>
                 </div>
 
-                <p className="relative z-[1] text-sm text-text-muted leading-relaxed">{entry.description}</p>
+                {entry.description && (
+                    <p className="relative z-[1] text-sm text-text-muted leading-relaxed">{entry.description}</p>
+                )}
 
                 {entry.stack && (
                     <div className="relative z-[1] flex flex-wrap gap-1.5 mt-4">
@@ -126,7 +139,10 @@ function TimelineEntry({ entry, index, activeSkill }) {
     );
 }
 
-export default function Timeline({ activeSkill = null, onClearSkill = () => {} } = {}) {
+/* One vertical, scroll-linked timeline for a single group of entries —
+   reused for Work, Campus Leadership, and Education so each fills in
+   independently as the reader scrolls through it. */
+function TimelineGroup({ label, groupEntries, activeSkill }) {
     const containerRef = useRef(null);
 
     const { scrollYProgress } = useScroll({
@@ -135,6 +151,34 @@ export default function Timeline({ activeSkill = null, onClearSkill = () => {} }
     });
     const lineHeight = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
 
+    if (groupEntries.length === 0) return null;
+
+    return (
+        <div>
+            <p className="font-mono text-xs tracking-[0.28em] uppercase text-accent mb-5">{label}</p>
+            <div ref={containerRef} className="relative pl-[38px]">
+                {/* Background line */}
+                <div className="absolute left-[5px] top-[6px] bottom-[6px] w-0.5 bg-border" aria-hidden="true" />
+
+                {/* Accent fill line */}
+                <motion.div
+                    className="absolute left-[5px] top-[6px] w-0.5 bg-accent origin-top shadow-[0_0_10px_var(--color-accent-glow)]"
+                    style={{ height: lineHeight }}
+                    aria-hidden="true"
+                />
+
+                {/* role="list" restores the semantics browsers drop once markers are removed */}
+                <ol role="list" className="flex flex-col gap-[30px] list-none">
+                    {groupEntries.map((entry, i) => (
+                        <TimelineEntry key={entry.title} entry={entry} index={i} activeSkill={activeSkill} />
+                    ))}
+                </ol>
+            </div>
+        </div>
+    );
+}
+
+export default function Timeline({ activeSkill = null, onClearSkill = () => {} } = {}) {
     const matchCount = activeSkill ? entries.filter((e) => e.skills?.includes(activeSkill)).length : entries.length;
 
     // Escape clears the filter from anywhere on the page, not just while
@@ -153,7 +197,7 @@ export default function Timeline({ activeSkill = null, onClearSkill = () => {} }
             <SectionHeading
                 label="Journey"
                 title="Experience & education"
-                subtitle="Where I've shipped, what I studied, and what came of it."
+                subtitle="Where I've shipped, what I've led, and what I studied."
             />
 
             {/* Announces filter changes to screen readers — the visible bar below
@@ -185,23 +229,15 @@ export default function Timeline({ activeSkill = null, onClearSkill = () => {} }
                     Nothing shipped with {activeSkill} yet — check back soon.
                 </p>
             ) : (
-                <div ref={containerRef} className="relative pl-[38px]">
-                    {/* Background line */}
-                    <div className="absolute left-[5px] top-[6px] bottom-[6px] w-0.5 bg-border" aria-hidden="true" />
-
-                    {/* Accent fill line */}
-                    <motion.div
-                        className="absolute left-[5px] top-[6px] w-0.5 bg-accent origin-top shadow-[0_0_10px_var(--color-accent-glow)]"
-                        style={{ height: lineHeight }}
-                        aria-hidden="true"
-                    />
-
-                    {/* role="list" restores the semantics browsers drop once markers are removed */}
-                    <ol role="list" className="flex flex-col gap-[30px] list-none">
-                        {entries.map((entry, i) => (
-                            <TimelineEntry key={entry.title} entry={entry} index={i} activeSkill={activeSkill} />
-                        ))}
-                    </ol>
+                <div className="flex flex-col gap-12">
+                    {GROUPS.map(({ key, label }) => (
+                        <TimelineGroup
+                            key={key}
+                            label={label}
+                            groupEntries={entries.filter((e) => e.section === key)}
+                            activeSkill={activeSkill}
+                        />
+                    ))}
                 </div>
             )}
 
