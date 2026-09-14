@@ -209,22 +209,22 @@ export default function LandingSummary({ onEnter }) {
                         <span className="text-accent font-medium">
                             CS Specialist at the University of Toronto
                         </span>{' '}
-                        and a{' '}
+                        , building everything from AI agents to full-stack web products, most recently as a{' '}
                         <span className="text-accent font-medium">
                             software engineer at Velox Systems
                         </span>
-                        , building everything from AI agents to full-stack web products. Looking for{' '}
-                        <span className="text-accent font-medium">Fall 2026</span> and{' '}
-                        <span className="text-accent font-medium">Winter 2027</span> software
+                        . Looking for{' '}
+                        <span className="text-accent font-medium">Winter 2027</span> and{' '}
+                        <span className="text-accent font-medium">Summer 2027</span> software
                         engineering internships. If you're building something worth working on, let's
                         talk.
                     </p>
                 </motion.div>
 
-                {/* ── Core Skills — 2-col grid ── */}
+                {/* ── Skills — 2-col grid ── */}
                 <motion.div variants={fadeUp} className="mb-6">
                     <p className="text-[10px] font-mono text-text-dim uppercase tracking-[0.18em] mb-3">
-                        Core stack
+                        Toolkit
                     </p>
                     <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
                         {TOP_SKILLS.map(({ name, icon: Icon }) => (

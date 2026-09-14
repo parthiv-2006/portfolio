@@ -1,21 +1,12 @@
 import { useState, useRef, useId } from 'react';
-import { motion, AnimatePresence, useAnimation } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import SectionHeading from './SectionHeading';
 import { skills, skillCategories as categories } from '../data/skills';
 import { usageCountForSkill } from '../lib/skillLinks';
 
 function SkillCard({ skill, index, isActive, onToggle }) {
-    const glowControls = useAnimation();
     const Icon = skill.icon;
     const usedCount = usageCountForSkill(skill.name);
-
-    const handleHoverStart = () => {
-        if (!skill.core) return;
-        glowControls.start({
-            opacity: [0, 1, 0],
-            transition: { duration: 0.8, ease: 'easeInOut' },
-        });
-    };
 
     return (
         <motion.li
@@ -42,60 +33,21 @@ function SkillCard({ skill, index, isActive, onToggle }) {
                     scale: 1.04,
                     transition: { type: 'spring', stiffness: 400, damping: 15 },
                 }}
-                onHoverStart={handleHoverStart}
                 className={`group relative flex w-full items-center gap-2.5 sm:gap-3 px-3 py-3 sm:px-4 sm:py-3.5 rounded-xl border transition-colors duration-300 overflow-hidden text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent
                     ${isActive
                         ? 'bg-surface-light border-accent shadow-[0_0_0_1px_var(--color-accent)]'
-                        : skill.core
-                            ? 'bg-surface border-accent/20 hover:border-accent/50 hover:bg-surface-light'
-                            : 'bg-surface border-white/[0.06] hover:border-white/[0.15] hover:bg-surface-light'
+                        : 'bg-surface border-white/[0.06] hover:border-white/[0.15] hover:bg-surface-light'
                     }`}
             >
-                {/* Amber glow pulse overlay — core skills only, triggered on hover via animate prop */}
-                {skill.core && (
-                    <motion.div
-                        animate={glowControls}
-                        initial={{ opacity: 0 }}
-                        aria-hidden="true"
-                        className="absolute inset-0 pointer-events-none rounded-xl"
-                        style={{
-                            background:
-                                'radial-gradient(ellipse at center, var(--color-accent-dim) 0%, transparent 70%)',
-                        }}
-                    />
-                )}
-
-                {/* Core stack indicator dot — the legend above the grid explains it
-                    visually; the sr-only text carries the same meaning non-visually. */}
-                {skill.core && (
-                    <>
-                        <span
-                            aria-hidden="true"
-                            className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-accent"
-                        />
-                        <span className="sr-only">Core stack:</span>
-                    </>
-                )}
-
                 <Icon
                     aria-hidden="true"
                     focusable="false"
-                    className={`shrink-0 transition-colors duration-300 ${
-                        skill.core
-                            ? 'text-accent'
-                            : 'text-text-dim group-hover:text-text-muted'
-                    }`}
+                    className="shrink-0 text-text-dim transition-colors duration-300 group-hover:text-text-muted"
                     size={20}
                 />
 
                 <span className="min-w-0 flex-1">
-                    <span
-                        className={`block break-words text-[13px] sm:text-sm font-medium leading-tight transition-colors duration-300 ${
-                            skill.core
-                                ? 'text-text'
-                                : 'text-text-muted group-hover:text-text'
-                        }`}
-                    >
+                    <span className="block break-words text-[13px] sm:text-sm font-medium leading-tight text-text-muted transition-colors duration-300 group-hover:text-text">
                         {skill.name}
                     </span>
                     {usedCount > 0 && (
@@ -118,7 +70,6 @@ export default function SkillsGrid({ activeSkill = null, onSelectSkill = () => {
     const uid = useId();
 
     const tabSkills = skills.filter((s) => s.category === activeTab);
-    const coreCount = tabSkills.filter((s) => s.core).length;
 
     const tabId = (cat) => `${uid}-tab-${cat.replace(/\W+/g, '-')}`;
     const panelId = (cat) => `${uid}-panel-${cat.replace(/\W+/g, '-')}`;
@@ -201,12 +152,6 @@ export default function SkillsGrid({ activeSkill = null, onSelectSkill = () => {
                         );
                     })}
                 </div>
-
-                {/* Legend for the amber dot — carries the meaning without a hover-only tooltip */}
-                <p className="flex items-center gap-2 mb-6 font-mono text-[11px] tracking-[0.1em] uppercase text-text-dim">
-                    <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
-                    Core stack · {coreCount} of {tabSkills.length} in {activeTab}
-                </p>
 
                 {/* ── Tab content — exit left, enter right ── */}
                 <AnimatePresence mode="wait">
