@@ -201,7 +201,7 @@ const ROOMS = {
             career: [
                 '> A leather-bound ledger lies open, each entry inked in a different hand:',
                 '',
-                '  ⚔ Velox Systems — Software Engineer          Jul 2026 – Present',
+                '  ⚔ Velox Systems — Software Engineer          Jul 2026 – Sep 2026',
                 '     "Sole developer rebuilding a contractor\'s production workspace',
                 '      on FastAPI/Postgres. Moved auth from Supabase to Zitadel OIDC."',
                 '',
@@ -417,7 +417,7 @@ const ROOMS = {
                 '> A resume scroll sits on the desk, ready for download:',
                 '',
                 '  📄 Parthiv_Paul_Resume.pdf',
-                '     "Software engineer @ Velox Systems · CS @ UofT · Dean\'s List"',
+                '     "CS @ UofT · Open to Winter/Summer 2027 internships · Dean\'s List"',
                 '',
                 '  💡 Type "exit" to return to the terminal and run "resume" to download it.',
             ],

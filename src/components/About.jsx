@@ -6,7 +6,7 @@ import usePrefersReducedMotion from '../hooks/usePrefersReducedMotion';
 const bylineFacts = [
     { icon: MapPin, label: 'Toronto, Canada' },
     { icon: GraduationCap, label: 'CS Specialist @ University of Toronto' },
-    { icon: Briefcase, label: 'Software Engineer @ Velox Systems' },
+    { icon: Briefcase, label: 'Open to Winter & Summer 2027 internships' },
 ];
 
 /* Parent/child pair so the paragraphs land one after another instead of as
@@ -85,12 +85,12 @@ export default function About() {
                             I'm a <span className="text-accent">CS Specialist at the University of Toronto</span>. I care more about the problem than the tools, so I end up working on whatever it calls for.
                         </motion.p>
                         <motion.p variants={storyLine} className="text-text-muted text-base leading-relaxed mb-5">
-                            Right now I'm a <span className="text-accent font-medium">software engineer at Velox Systems</span>, rebuilding a contractor's production workspace on FastAPI and Postgres. Before that I shipped a Stripe subscription system at Applied Optimal, a Stripe MCP server at GenLedge, and RAG pipelines at Outamation.
+                            Most recently, I was a <span className="text-accent font-medium">software engineer at Velox Systems</span>, rebuilding a contractor's production workspace on FastAPI and Postgres. Before that I shipped a Stripe subscription system at Applied Optimal, a Stripe MCP server at GenLedge, and RAG pipelines at Outamation.
                         </motion.p>
                         <motion.p variants={storyLine} className="text-text-muted text-base leading-relaxed mb-5">
                             Looking for software engineering internships for{' '}
-                            <span className="text-accent font-medium">Fall 2026</span> and{' '}
-                            <span className="text-accent font-medium">Winter 2027</span>.
+                            <span className="text-accent font-medium">Winter 2027</span> and{' '}
+                            <span className="text-accent font-medium">Summer 2027</span>.
                             If you're building something worth working on, I'm open to a conversation.
                         </motion.p>
                         <motion.p variants={storyLine} className="text-text-muted text-base leading-relaxed">

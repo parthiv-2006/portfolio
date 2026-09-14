@@ -55,7 +55,7 @@ const COMMANDS = {
         },
         {
             type: 'info',
-            text: 'Software Engineer @ Velox Systems. I build full-stack apps and AI agents.',
+            text: 'I build full-stack apps and AI agents. Open to Winter & Summer 2027 internships.',
         },
         {
             type: 'info',
@@ -74,7 +74,7 @@ const COMMANDS = {
         { type: 'info', text: '  Combined squat/bench/deadlift over 1,000 lbs' },
     ],
     skills: () => [
-        { type: 'system', text: '⚡ Core Stack:' },
+        { type: 'system', text: '⚡ Toolkit:' },
         { type: 'info', text: '   TypeScript · Python · React · Next.js' },
         { type: 'info', text: '   FastAPI · Node.js · PostgreSQL · Supabase' },
         { type: 'system', text: '🤖 AI:' },
@@ -97,7 +97,7 @@ const COMMANDS = {
     ],
     experience: () => [
         { type: 'system', text: '💼 Experience:' },
-        { type: 'info', text: '   Velox Systems — Software Engineer          Jul 2026 – Present' },
+        { type: 'info', text: '   Velox Systems — Software Engineer          Jul 2026 – Sep 2026' },
         { type: 'info', text: '   Applied Optimal — Full-Stack Dev, Contract  Jul 2026 – Sep 2026' },
         { type: 'info', text: '   GenLedge — Software Dev, Contract           Mar 2026 – May 2026' },
         { type: 'info', text: '   Outamation — AI & Automation Extern         May 2025 – Aug 2025' },

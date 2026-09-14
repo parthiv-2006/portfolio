@@ -143,7 +143,7 @@ function Footer() {
                             Parthiv<span className="text-accent">.</span>
                         </a>
                         <p className="mt-3 text-sm text-text-muted leading-relaxed">
-                            Full-stack &amp; AI engineer in Toronto. Open to Fall 2026 and Winter 2027
+                            Full-stack &amp; AI engineer in Toronto. Open to Winter 2027 and Summer 2027
                             software engineering internships.
                         </p>
                         <span className="mt-4 inline-flex items-center gap-2 font-mono text-[11px] text-text-dim">
