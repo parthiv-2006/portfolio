@@ -219,6 +219,9 @@ const ROOMS = {
                 '',
                 '  ⚔ Ontario Liberal Party — Frontend Developer  May 2023 – Sep 2023',
                 '     "React components, Redux, and WCAG 2.1 compliance."',
+                '',
+                '  🛡 Google Developer Student Clubs — Tech Exec  Aug 2026 – Present',
+                '  🛡 UofT Blueprint — Senior Developer           Aug 2026 – Present',
             ],
             awards: [
                 '> Gilded certificates on the wall catch your eye:',

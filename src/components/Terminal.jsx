@@ -96,13 +96,16 @@ const COMMANDS = {
         { type: 'info', text: '   ChatGPT Prompt Engineering for Devs (DeepLearning.AI)' },
     ],
     experience: () => [
-        { type: 'system', text: '💼 Experience:' },
+        { type: 'system', text: '💼 Work & Industry:' },
         { type: 'info', text: '   Velox Systems — Software Engineer          Jul 2026 – Sep 2026' },
         { type: 'info', text: '   Applied Optimal — Full-Stack Dev, Contract  Jul 2026 – Sep 2026' },
         { type: 'info', text: '   GenLedge — Software Dev, Contract           Mar 2026 – May 2026' },
         { type: 'info', text: '   Outamation — AI & Automation Extern         May 2025 – Aug 2025' },
         { type: 'info', text: '   Chester-Hill — Software QA Tester, Intern   Jun 2024 – Nov 2024' },
         { type: 'info', text: '   Ontario Liberal Party — Frontend Dev        May 2023 – Sep 2023' },
+        { type: 'system', text: '🎓 Campus Leadership:' },
+        { type: 'info', text: '   Google Developer Student Clubs — Tech Exec  Aug 2026 – Present' },
+        { type: 'info', text: '   UofT Blueprint — Senior Developer           Aug 2026 – Present' },
         { type: 'dim', text: '   (full detail in the journey section ↑)' },
     ],
 };
