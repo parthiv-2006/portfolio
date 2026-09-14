@@ -42,12 +42,12 @@ function SkillCard({ skill, index, isActive, onToggle }) {
                 <Icon
                     aria-hidden="true"
                     focusable="false"
-                    className="shrink-0 text-text-dim transition-colors duration-300 group-hover:text-text-muted"
+                    className="shrink-0 text-accent"
                     size={20}
                 />
 
                 <span className="min-w-0 flex-1">
-                    <span className="block break-words text-[13px] sm:text-sm font-medium leading-tight text-text-muted transition-colors duration-300 group-hover:text-text">
+                    <span className="block break-words text-[13px] sm:text-sm font-medium leading-tight text-text transition-colors duration-300 group-hover:text-accent">
                         {skill.name}
                     </span>
                     {usedCount > 0 && (
