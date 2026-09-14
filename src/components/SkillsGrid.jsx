@@ -6,7 +6,6 @@ import { usageCountForSkill } from '../lib/skillLinks';
 
 function SkillCard({ skill, index, isActive, onToggle }) {
     const Icon = skill.icon;
-    const usedCount = usageCountForSkill(skill.name);
 
     return (
         <motion.li
@@ -23,11 +22,7 @@ function SkillCard({ skill, index, isActive, onToggle }) {
             <motion.button
                 type="button"
                 aria-pressed={isActive}
-                aria-label={
-                    usedCount > 0
-                        ? `${skill.name} — used in ${usedCount} role${usedCount === 1 ? '' : 's'}. ${isActive ? 'Selected — click to clear filter.' : 'Click to filter Journey.'}`
-                        : skill.name
-                }
+                aria-label={`${skill.name}. ${isActive ? 'Selected — click to clear filter.' : 'Click to filter Journey.'}`}
                 onClick={() => onToggle(skill.name)}
                 whileHover={{
                     scale: 1.04,
@@ -50,14 +45,6 @@ function SkillCard({ skill, index, isActive, onToggle }) {
                     <span className="block break-words text-[13px] sm:text-sm font-medium leading-tight text-text transition-colors duration-300 group-hover:text-accent">
                         {skill.name}
                     </span>
-                    {usedCount > 0 && (
-                        <span
-                            aria-hidden="true"
-                            className="mt-0.5 block font-mono text-[10px] tracking-[0.06em] text-text-dim"
-                        >
-                            used in {usedCount} role{usedCount === 1 ? '' : 's'}
-                        </span>
-                    )}
                 </span>
             </motion.button>
         </motion.li>
